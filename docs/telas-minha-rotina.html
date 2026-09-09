@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Rotina — Protótipo de Telas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 20px;
+    color: #eee;
+  }
+  h1 { text-align: center; margin-bottom: 10px; color: #eee; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+  .screens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .phone {
+    width: 320px;
+    height: 680px;
+    background: #0f0f1a;
+    border-radius: 40px;
+    border: 3px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .notch {
+    width: 120px;
+    height: 28px;
+    background: #0f0f1a;
+    border-radius: 0 0 18px 18px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  .screen {
+    padding: 40px 16px 80px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .screen::-webkit-scrollbar { width: 4px; }
+  .screen::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0 16px;
+    border-bottom: 1px solid #222;
+    margin-bottom: 16px;
+  }
+  .header h2 { font-size: 18px; font-weight: 600; }
+  .badge {
+    background: #2d2d4a;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #8888ff;
+  }
+  
+  /* Captura */
+  .capture {
+    background: #1e1e3a;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .capture input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #eee;
+    font-size: 15px;
+    outline: none;
+  }
+  .capture button {
+    background: #4a4aff;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  /* Lista */
+  .list { margin-bottom: 16px; }
+  .list-title { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+  .item {
+    background: #1e1e3a;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+  }
+  .item.moving {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  .item-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #4a4aff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .item-text { flex: 1; font-size: 14px; }
+  .item-actions { display: flex; gap: 6px; }
+  .btn-small {
+    background: #2d2d4a;
+    border: none;
+    color: #8888ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .btn-small:hover { background: #4a4aff; color: white; }
+  
+  /* Barra progresso */
+  .progress-bar {
+    height: 8px;
+    background: #2d2d4a;
+    border-radius: 4px;
+    margin: 12px 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease, background 0.3s;
+  }
+  .progress-red { background: #ff4a4a; }
+  .progress-yellow { background: #ffaa00; }
+  .progress-green { background: #4aff88; }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  
+  /* Checkbox Hoje */
+  .today-item {
+    background: #1e1e3a;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .today-item:hover { background: #252545; }
+  .today-item.done { opacity: 0.5; }
+  .check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #4a4aff;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .today-item.done .check { background: #4aff88; border-color: #4aff88; }
+  .today-text { flex: 1; font-size: 15px; }
+  .today-item.done .today-text { text-decoration: line-through; color: #888; }
+  
+  /* Checklist Saida */
+  .checklist-item {
+    background: #1e1e3a;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .checklist-item:hover { background: #252545; }
+  .checklist-item.checked { opacity: 0.6; }
+  .circle-check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ffaa00;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .checklist-item.checked .circle-check { background: #ffaa00; }
+  
+  /* Timer */
+  .timer-display {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .timer-time {
+    font-size: 64px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    color: #fff;
+  }
+  .timer-label { font-size: 12px; color: #666; margin-top: 8px; }
+  .timer-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .timer-btn {
+    background: #2d2d4a;
+    border: none;
+    color: #eee;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .timer-btn:hover { background: #3a3a5a; }
+  .timer-btn.primary { background: #4a4aff; }
+  .timer-btn.primary:hover { background: #5a5aff; }
+  
+  /* Revisao */
+  .stat-card {
+    background: #1e1e3a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .stat-value { font-size: 32px; font-weight: 300; color: #4a4aff; }
+  .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+  .stat-row { display: flex; gap: 12px; }
+  .stat-row .stat-card { flex: 1; }
+  
+  /* Tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1a1a2e;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 20px;
+  }
+  .tab {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+  }
+  .tab.active { color: #4a4aff; }
+  .tab-icon { font-size: 20px; }
+  
+  /* Labels das telas */
+  .screen-label {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+  }
+  .screen-note {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+  }
+  
+  /* Animations */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .item-new {
+    animation: slideIn 0.3s ease;
+  }
+  
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4a4aff;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+</style>
+<script>
+  // Dados
+  let inboxItems = [
+    { id: 1, text: 'pagar luz amanhã', tag: '#casa' },
+    { id: 2, text: 'levar marmita', tag: '' },
+    { id: 3, text: 'revisar SQL', tag: '#pc' },
+    { id: 4, text: 'ligar para João', tag: '' }
+  ];
+  let todayItems = [
+    { id: 10, text: 'Sair 7h40', done: true, duration: 20, remaining: 0, running: false },
+    { id: 11, text: '1 bloco SQL (6 tarefinhas)', done: false, duration: 25, remaining: 25, running: false },
+    { id: 12, text: 'Dormir 23h30', done: false, duration: 0, remaining: 0, running: false }
+  ];
+  let checklistItems = [
+    { id: 1, text: 'chave', checked: true },
+    { id: 2, text: 'ponto', checked: true },
+    { id: 3, text: 'marmita', checked: false },
+    { id: 4, text: 'fone', checked: false },
+    { id: 5, text: 'portão', checked: false }
+  ];
+  
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+  
+  // Render Inbox
+  function renderInbox() {
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = inboxItems.map(item => `
+      <div class="item" id="item-${item.id}">
+        <div class="item-radio"></div>
+        <span class="item-text">${item.text} ${item.tag}</span>
+        <div class="item-actions">
+          <button class="btn-small" onclick="moveToToday(${item.id})">→ Hoje</button>
+          <button class="btn-small" onclick="deleteItem(${item.id})">🗑</button>
+        </div>
+      </div>
+    `).join('');
+    document.querySelector('.badge').textContent = `📥 Inbox (${inboxItems.length})`;
+  }
+  
+  // Render Hoje
+  function renderToday() {
+    const container = document.getElementById('today-list');
+    const done = todayItems.filter(i => i.done).length;
+    const pct = Math.round((done / todayItems.length) * 100);
+    
+    // Barra progresso
+    const bar = document.getElementById('progress-fill');
+    bar.style.width = pct + '%';
+    bar.className = 'progress-fill ' + (pct < 34 ? 'progress-red' : pct < 67 ? 'progress-yellow' : 'progress-green');
+    
+    document.querySelector('.progress-info span:first-child').textContent = `${done}/${todayItems.length} concluídos`;
+    document.querySelector('.progress-info span:last-child').textContent = pct + '%';
+    
+    container.innerHTML = todayItems.map(item => `
+      <div class="today-item ${item.done ? 'done' : ''}" id="today-${item.id}">
+        <div class="check">${item.done ? '✓' : ''}</div>
+        <span class="today-text">${item.text}</span>
+        ${!item.done && item.duration > 0 ? `<button class="btn-small" onclick="startTaskTimer(${item.id})" style="background:#4a4aff;color:white;">▶ Executar</button>` : ''}
+        ${item.running ? `<span style="font-size:11px;color:#ffaa00;">⏱ ${item.remaining}min</span>` : ''}
+      </div>
+    `).join('');
+  }
+  
+  // Render Checklist
+  function renderChecklist() {
+    const container = document.getElementById('checklist-list');
+    container.innerHTML = checklistItems.map(item => `
+      <div class="checklist-item ${item.checked ? 'checked' : ''}" onclick="toggleCheck(${item.id})">
+        <div class="circle-check">${item.checked ? '✓' : ''}</div>
+        <span class="item-text">${item.text}</span>
+      </div>
+    `).join('');
+  }
+  
+  // Ações
+  function moveToToday(id) {
+    const item = inboxItems.find(i => i.id === id);
+    if (item && todayItems.length < 3) {
+      todayItems.push({ id: id + 100, text: item.text, done: false });
+      inboxItems = inboxItems.filter(i => i.id !== id);
+      renderInbox();
+      renderToday();
+      showToast(`"${item.text}" → Hoje`);
+    } else if (todayItems.length >= 3) {
+      showToast('Hoje está cheio (max 3)');
+    }
+  }
+  
+  function deleteItem(id) {
+    inboxItems = inboxItems.filter(i => i.id !== id);
+    renderInbox();
+  }
+  
+  function toggleToday(id) {
+    const item = todayItems.find(i => i.id === id);
+    if (item) {
+      item.done = !item.done;
+      renderToday();
+      if (item.done) showToast('✓ Concluído!');
+    }
+  }
+  
+  // Timer por tarefa
+  let activeTimers = {};
+  
+  function startTaskTimer(id) {
+    const item = todayItems.find(i => i.id === id);
+    if (!item || item.duration === 0) return;
+    
+    // Se já está rodando, para
+    if (item.running) {
+      clearInterval(activeTimers[id]);
+      delete activeTimers[id];
+      item.running = false;
+      showToast('⏸ Timer pausado');
+      renderToday();
+      return;
+    }
+    
+    // Inicia timer
+    item.running = true;
+    showToast(`▶ Iniciando: ${item.text} (${item.duration}min)`);
+    renderToday();
+    
+    activeTimers[id] = setInterval(() => {
+      item.remaining--;
+      if (item.remaining <= 0) {
+        clearInterval(activeTimers[id]);
+        delete activeTimers[id];
+        item.running = false;
+        item.done = true;
+        item.remaining = 0;
+        showToast(`✅ ${item.text} concluído!`);
+        renderToday();
+      } else {
+        renderToday(); // Atualiza display do tempo restante
+      }
+    }, 1000); // 1 seg real (no PI seria muito rápido, só demo)
+  }
+  
+  function toggleCheck(id) {
+    const item = checklistItems.find(i => i.id === id);
+    if (item) {
+      item.checked = !item.checked;
+      renderChecklist();
+    }
+  }
+  
+  // Captura nova
+  document.getElementById('capture-btn').addEventListener('click', () => {
+    const input = document.getElementById('capture-input');
+    const text = input.value.trim();
+    if (text) {
+      inboxItems.push({ id: Date.now(), text: text, tag: '' });
+      input.value = '';
+      renderInbox();
+      showToast('Capturado!');
+    }
+  });
+  
+  // Init
+  renderInbox();
+  renderToday();
+  renderChecklist();
+</script>
+</head>
+<body>
+
+<h1>Minha Rotina</h1>
+<p class="subtitle">Protótipo interativo de telas</p>
+
+<div class="screens">
+
+  <!-- TELA 1: INBOX -->
+  <div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="header">
+          <h2>Minha Rotina</h2>
+          <span class="badge">📥 Inbox (4)</span>
+        </div>
+        
+        <div class="capture">
+          <input type="text" id="capture-input" placeholder="Despejar ideia...">
+          <button id="capture-btn">✓</button>
+        </div>
+        
+        <div class="list">
+          <div class="list-title">Pendentes</div>
+          <div id="inbox-list"></div>
+        </div>
+      </div>
+      
+      <div class="tab-bar">
+        <button class="tab active"><span class="tab-icon">📥</span>Inbox</button>
+        <button class="tab"><span class="tab-icon">📅</span>Hoje</button>
+        <button class="tab"><span class="tab-icon">🚪</span>Saída</button>
+        <button class="tab"><span class="tab-icon">⏱</span>Timer</button>
+      </div>
+    </div>
+    <div class="screen-label">Tela 1 — Inbox</div>
+    <div class="screen-note">Captura rápida + botões →Hoje / 🗑</div>
+  </div>
+
+  <!-- TELA 2: HOJE -->
+  <div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="header">
+          <h2>Hoje</h2>
+          <span class="badge">07:45</span>
+        </div>
+        
+        <div class="progress-info">
+          <span>1/3 concluídos</span>
+          <span>33%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill progress-red"></div>
+        </div>
+        
+        <div id="today-list"></div>
+        
+        <div style="margin-top: 20px;">
+          <button class="timer-btn primary" style="width: 100%;">+ Despejar no Inbox</button>
+        </div>
+        
+        <div style="margin-top: 12px; text-align: center;">
+          <button class="btn-small" style="font-size: 13px; padding: 10px 20px;">📋 Ir p/ Saída</button>
+        </div>
+      </div>
+      
+      <div class="tab-bar">
+        <button class="tab"><span class="tab-icon">📥</span>Inbox</button>
+        <button class="tab active"><span class="tab-icon">📅</span>Hoje</button>
+        <button class="tab"><span class="tab-icon">🚪</span>Saída</button>
+        <button class="tab"><span class="tab-icon">⏱</span>Timer</button>
+      </div>
+    </div>
+    <div class="screen-label">Tela 2 — Hoje</div>
+    <div class="screen-note">Max 3 itens + barra progresso (🔴→🟡→🟢)</div>
+  </div>
+
+  <!-- TELA 3: SAÍDA -->
+  <div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="header">
+          <h2>🚪 Saída</h2>
+          <span class="badge">⏰ 7h25</span>
+        </div>
+        
+        <div style="background: #2d2d4a; border-radius: 8px; padding: 10px; margin-bottom: 16px; text-align: center; font-size: 13px; color: #ffaa00;">
+          Em 40 min — prepare-se
+        </div>
+        
+        <div class="list-title" style="margin-bottom: 10px;">Checklist (toque p/ marcar)</div>
+        <div id="checklist-list"></div>
+        
+        <div style="margin-top: 20px;">
+          <button class="btn-small" style="width: 100%; margin-bottom: 10px;">✏️ Editar lista</button>
+          
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="time" value="07:48" style="flex: 1; background: #1e1e3a; border: 1px solid #333; color: #eee; padding: 12px; border-radius: 8px; font-size: 16px;">
+            <button class="timer-btn primary" style="padding: 12px 20px;">Confirmar</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-bar">
+        <button class="tab"><span class="tab-icon">📥</span>Inbox</button>
+        <button class="tab"><span class="tab-icon">📅</span>Hoje</button>
+        <button class="tab active"><span class="tab-icon">🚪</span>Saída</button>
+        <button class="tab"><span class="tab-icon">⏱</span>Timer</button>
+      </div>
+    </div>
+    <div class="screen-label">Tela 3 — Saída</div>
+    <div class="screen-note">Checklist ≤5 + horário saída + alarme local</div>
+  </div>
+
+  <!-- TELA 4: TIMER -->
+  <div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="header">
+          <h2>⏱ Foco</h2>
+          <span class="badge">25 min</span>
+        </div>
+        
+        <div class="timer-display">
+          <div class="timer-time">18:42</div>
+          <div class="timer-label">bloco 2 de 6</div>
+        </div>
+        
+        <div class="timer-controls">
+          <button class="timer-btn">⏸ Pausar</button>
+          <button class="timer-btn primary">▶ Iniciar</button>
+        </div>
+        
+        <div style="margin-top: 30px;">
+          <div class="progress-info">
+            <span>Progresso do dia</span>
+            <span>2/3 (67%) 🟢</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill progress-green"></div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; background: #1e1e3a; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 6px;">PRÓXIMO ITEM SUGERIDO</div>
+          <div style="font-size: 15px;">□ Dormir 23h30</div>
+        </div>
+      </div>
+      
+      <div class="tab-bar">
+        <button class="tab"><span class="tab-icon">📥</span>Inbox</button>
+        <button class="tab"><span class="tab-icon">📅</span>Hoje</button>
+        <button class="tab"><span class="tab-icon">🚪</span>Saída</button>
+        <button class="tab active"><span class="tab-icon">⏱</span>Timer</button>
+      </div>
+    </div>
+    <div class="screen-label">Tela 4 — Timer Pomodoro</div>
+    <div class="screen-note">25min + barra dia + notificação transição</div>
+  </div>
+
+  <!-- TELA 5: REVISÃO -->
+  <div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="header">
+          <h2>📊 Revisão</h2>
+          <span class="badge">Semana 36</span>
+        </div>
+        
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-value">4/7</div>
+            <div class="stat-label">Inbox zerado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Saídas registradas</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-value" style="font-size: 24px;">8h07</div>
+          <div class="stat-label">Média de saída</div>
+        </div>
+        
+        <div class="stat-card" style="margin-top: 16px;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">AJUSTE DA SEMANA</div>
+          <input type="text" placeholder="Ex: sair 10min mais cedo" style="width: 100%; background: #0f0f1a; border: 1px solid #333; color: #eee; padding: 12px; border-radius: 8px; font-size: 14px;">
+        </div>
+        
+        <button class="timer-btn primary" style="width: 100%; margin-top: 16px;">✓ Concluir Semana</button>
+      </div>
+      
+      <div class="tab-bar">
+        <button class="tab"><span class="tab-icon">📥</span>Inbox</button>
+        <button class="tab"><span class="tab-icon">📅</span>Hoje</button>
+        <button class="tab"><span class="tab-icon">🚪</span>Saída</button>
+        <button class="tab active"><span class="tab-icon">⏱</span>Timer</button>
+      </div>
+    </div>
+    <div class="screen-label">Tela 5 — Revisão Semanal</div>
+    <div class="screen-note">Inbox zerado/dia + saídas + 1 ajuste</div>
+  </div>
+
+</div>
+
+<p style="text-align: center; margin-top: 40px; color: #555; font-size: 12px;">
+  Protótipo para PI — Minha Rotina<br>
+  Stack: Expo + TypeScript + SQLite | 4 telas core
+</p>
+
+      <div id="toast" class="toast"></div>
+</body>
+</html>
