@@ -370,7 +370,7 @@
         </div>
       </div>
     `).join('');
-    document.querySelector('.badge').textContent = `📥 Inbox (${inboxItems.length})`;
+    document.getElementById('inbox-badge').textContent = `📥 Inbox (${inboxItems.length})`;
   }
   
   // Render Hoje
@@ -388,10 +388,10 @@
     document.querySelector('.progress-info span:last-child').textContent = pct + '%';
     
     container.innerHTML = todayItems.map(item => `
-      <div class="today-item ${item.done ? 'done' : ''}" id="today-${item.id}">
+      <div class="today-item ${item.done ? 'done' : ''}" id="today-${item.id}" onclick="toggleToday(${item.id})" style="cursor:pointer;">
         <div class="check">${item.done ? '✓' : ''}</div>
         <span class="today-text">${item.text}</span>
-        ${!item.done && item.duration > 0 ? `<button class="btn-small" onclick="startTaskTimer(${item.id})" style="background:#4a4aff;color:white;">▶ Executar</button>` : ''}
+        ${!item.done && item.duration > 0 ? `<button class="btn-small" onclick="event.stopPropagation();startTaskTimer(${item.id})" style="background:#4a4aff;color:white;">▶ Executar</button>` : ''}
         ${item.running ? `<span style="font-size:11px;color:#ffaa00;">⏱ ${item.remaining}min</span>` : ''}
       </div>
     `).join('');
@@ -482,22 +482,25 @@
     }
   }
   
-  // Captura nova
-  document.getElementById('capture-btn').addEventListener('click', () => {
+  // Captura nova + init (após o DOM existir)
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('capture-btn');
     const input = document.getElementById('capture-input');
-    const text = input.value.trim();
-    if (text) {
-      inboxItems.push({ id: Date.now(), text: text, tag: '' });
-      input.value = '';
-      renderInbox();
-      showToast('Capturado!');
-    }
+    const capturar = () => {
+      const text = input.value.trim();
+      if (text) {
+        inboxItems.push({ id: Date.now(), text: text, tag: '' });
+        input.value = '';
+        renderInbox();
+        showToast('Capturado!');
+      }
+    };
+    btn.addEventListener('click', capturar);
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') capturar(); });
+    renderInbox();
+    renderToday();
+    renderChecklist();
   });
-  
-  // Init
-  renderInbox();
-  renderToday();
-  renderChecklist();
 </script>
 </head>
 <body>
@@ -514,7 +517,7 @@
       <div class="screen">
         <div class="header">
           <h2>Minha Rotina</h2>
-          <span class="badge">📥 Inbox (4)</span>
+          <span class="badge" id="inbox-badge">📥 Inbox (4)</span>
         </div>
         
         <div class="capture">
