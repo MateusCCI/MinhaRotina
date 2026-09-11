@@ -104,6 +104,6 @@ Sem backend/nuvem, sem IA ou sugestões automáticas, sem gamificação, sem geo
 
 ## Equipe
 
-- Responsável por Saída + Timer + SQLite + DER + arquitetura
-- Responsável por Inbox + Hoje + Revisão + testes
+- Mateus — Saída + Timer + SQLite + DER + arquitetura
+- Helian — Inbox + Hoje + Revisão + testes
 - Orientação: Prof. Sosthenes Carlos Ferreira do Nascimento

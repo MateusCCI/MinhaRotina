@@ -11,7 +11,7 @@ Curso de Análise e Desenvolvimento de Sistemas — Brasília-DF, setembro de 20
 | NOME DO PROJETO | Minha Rotina — app mobile offline de organização de rotina |
 | GRUPO RESPONSÁVEL | [Nome do grupo] |
 | PROFESSOR RESPONSÁVEL | Sosthenes Carlos Ferreira do Nascimento |
-| EQUIPE DO PROJETO | [Aluno 1 — Saída + Timer + SQLite + DER] + [Aluno 2 — Inbox + Hoje + Noite + testes] |
+| EQUIPE DO PROJETO | Mateus (Aluno 1 — Saída + Timer + SQLite + DER) + Helian (Aluno 2 — Inbox + Hoje + Noite + testes) |
 
 ## 2. DISCIPLINAS VINCULADAS
 
@@ -62,8 +62,8 @@ Prazo 6 semanas (3 sprints) até a banca; equipe 2 alunos (sem designer/QA dedic
 
 | PESSOA | ATRIBUIÇÕES |
 |---|---|
-| Aluno 1 (você) | Saída + Timer + SQLite + DER + arquitetura |
-| Aluno 2 (colega) | Inbox + Hoje + Noite + testes + EAP do PI |
+| Mateus (Aluno 1) | Saída + Timer + SQLite + DER + arquitetura |
+| Helian (Aluno 2) | Inbox + Hoje + Noite + testes + EAP do PI |
 | Prof. Sosthenes | Orientação + aceite |
 | Banca (Mob I, Orientação a Objetos, Tópicos, Avaliação) | Avaliação da demo + DER + testes |
 
