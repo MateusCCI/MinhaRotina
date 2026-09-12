@@ -61,6 +61,7 @@ O protótipo interativo das telas roda direto no navegador, sem instalar nada:
 |---|---|
 | `docs/TAP-PI-Minha-Rotina.md` | Termo de Abertura: objetivos SMART, escopo, cronograma, riscos, aceite |
 | `docs/EAP-MinhaRotina.md` | EAP: pacotes, responsáveis, sprints e marcos |
+| `docs/STATUS.md` | Foto da situação: concluído, pendente e como continuar |
 | `docs/trabalho-pi.md` | Trabalho acadêmico em formato ABNT |
 | `docs/telas-minha-rotina.md` | Desenho das telas em texto + interações |
 | `docs/telas-minha-rotina.html` | Protótipo interativo navegável |
