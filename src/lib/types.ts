@@ -11,3 +11,15 @@ export interface HojeItem {
   content?: string;
   checked?: number | boolean;
 }
+
+export interface SaidaItem {
+  id: number;
+  content: string;
+  checked: boolean;
+}
+
+export interface WeeklyStats {
+  inboxZerado: number;
+  totalSaidas: number;
+  mediaSaida: string;
+}

@@ -5,6 +5,9 @@ import { useEffect } from 'react';
 import { Text } from 'react-native';
 import Inbox from './(tabs)/inbox';
 import Hoje from './(tabs)/hoje';
+import Saida from './(tabs)/saida';
+import Timer from './(tabs)/timer';
+import Revisao from './(tabs)/revisao';
 import DatabaseSingleton from '../src/lib/database';
 
 const Tab = createBottomTabNavigator();
@@ -18,6 +21,9 @@ function TabNavigator() {
           const icons: Record<string, string> = {
             Inbox: focused ? '📥' : '📤',
             Hoje: focused ? '🎯' : '📋',
+            Saida: focused ? '🚪' : '📤',
+            Timer: focused ? '⏱️' : '⏲️',
+            Revisao: focused ? '🔄' : '📝',
           };
           return <Text style={{ fontSize: size }}>{icons[route.name] || '•'}</Text>;
         },
@@ -33,6 +39,9 @@ function TabNavigator() {
     >
       <Tab.Screen name="Inbox" component={Inbox} />
       <Tab.Screen name="Hoje" component={Hoje} />
+      <Tab.Screen name="Saida" component={Saida} />
+      <Tab.Screen name="Timer" component={Timer} />
+      <Tab.Screen name="Revisao" component={Revisao} />
     </Tab.Navigator>
   );
 }
