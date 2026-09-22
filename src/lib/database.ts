@@ -20,6 +20,7 @@ class DatabaseSingleton {
     if (!this.db) {
       this.db = await SQLite.openDatabaseAsync('minha_rotina.db');
       await this.createTables();
+      await this.resetHojeForNewDay();
     }
     this.initialized = true;
   }
@@ -52,6 +53,28 @@ class DatabaseSingleton {
 
   private generateTraceId(): string {
     return `s1-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private async resetHojeForNewDay(): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.withTransactionAsync(async () => {
+        await this.db!.runAsync(
+          `INSERT INTO inbox_items (content)
+           SELECT i.content
+           FROM hoje_items h
+           JOIN inbox_items i ON h.inbox_id = i.id
+           WHERE date(h.created_at) < date('now') AND h.checked = 0`
+        );
+        await this.db!.runAsync(
+          `DELETE FROM hoje_items WHERE date(created_at) < date('now')`
+        );
+      });
+      console.log(`[S1][TRACE:${traceId}] Reset diário do Hoje concluído`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro no reset diário:`, error);
+      throw error;
+    }
   }
 
   // Inbox queries
@@ -103,6 +126,7 @@ class DatabaseSingleton {
         `SELECT h.*, i.content
          FROM hoje_items h
          JOIN inbox_items i ON h.inbox_id = i.id
+         WHERE date(h.created_at) = date('now')
          ORDER BY h.created_at ASC`
       );
       const normalized = result.map(row => ({
