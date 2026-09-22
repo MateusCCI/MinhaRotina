@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { HojeItem } from '../lib/types';
+import { dueLabel, CATEGORY_COLORS } from '../lib/date';
 
 interface HojeItemProps {
   item: HojeItem;
@@ -9,8 +10,10 @@ interface HojeItemProps {
 }
 
 export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItemProps) {
+  const due = dueLabel(item.due_date);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, !item.checked && due.urgent ? styles.containerUrgent : undefined]}>
       <TouchableOpacity
         style={[styles.checkbox, item.checked ? styles.checkboxChecked : undefined]}
         onPress={() => onToggle(item.id)}
@@ -19,9 +22,23 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
       >
         {item.checked && <Text style={styles.checkmark}>✓</Text>}
       </TouchableOpacity>
-      <Text style={[styles.content, item.checked ? styles.checked : undefined]}>
-        {item.content}
-      </Text>
+      <View style={styles.body}>
+        <Text style={[styles.content, item.checked ? styles.checked : undefined]}>
+          {item.content}
+        </Text>
+        {(due.label || item.category) && (
+          <View style={styles.badges}>
+            {due.label && (
+              <Text style={[styles.badge, styles.badgeUrgent]}>⏰ {due.label}</Text>
+            )}
+            {item.category && (
+              <Text style={[styles.badge, { color: CATEGORY_COLORS[item.category] ?? '#6B7280' }]}>
+                {item.category}
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
       <TouchableOpacity
         style={styles.deleteBtn}
         onPress={() => onDelete(item.id)}
@@ -48,6 +65,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  containerUrgent: {
+    borderColor: '#FCA5A5',
+    borderWidth: 2,
+    backgroundColor: '#FFF7F7',
+  },
   checkbox: {
     width: 48,
     height: 48,
@@ -73,6 +95,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1F2937',
     lineHeight: 22,
+  },
+  body: {
+    flex: 1,
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  badge: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  badgeUrgent: {
+    color: '#DC2626',
   },
   checked: {
     textDecorationLine: 'line-through',

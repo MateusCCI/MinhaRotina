@@ -5,11 +5,13 @@ import ProgressBar from '../../src/components/ProgressBar';
 import { useHoje } from '../../hooks/useHoje';
 import { useInbox } from '../../hooks/useInbox';
 import { HojeItem, InboxItem } from '../../src/lib/types';
+import { CATEGORIES, CATEGORY_COLORS } from '../../src/lib/date';
 
 export default function HojeScreen() {
   const { items, loading, toggleItem, deleteItem, getProgress, fetchItems } = useHoje();
   const { items: inboxItems, fetchItems: fetchInbox, promoteToHoje } = useInbox();
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
   const handleToggle = async (id: number): Promise<void> => {
     try {
@@ -55,6 +57,8 @@ export default function HojeScreen() {
   };
 
   const progress = getProgress();
+  const visibleItems =
+    filterCategory ? items.filter(i => i.category === filterCategory) : items;
 
   return (
     <View style={styles.container}>
@@ -78,8 +82,32 @@ export default function HojeScreen() {
           </ScrollView>
 
           <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar} contentContainerStyle={styles.filterContent}>
+              <TouchableOpacity
+                style={[styles.filterChip, filterCategory === null && styles.filterChipActive]}
+                onPress={() => setFilterCategory(null)}
+              >
+                <Text style={[styles.filterChipText, filterCategory === null && styles.filterChipTextActive]}>Todos</Text>
+              </TouchableOpacity>
+              {CATEGORIES.map(cat => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[
+                    styles.filterChip,
+                    filterCategory === cat && styles.filterChipActive,
+                    filterCategory === cat && { backgroundColor: CATEGORY_COLORS[cat] },
+                  ]}
+                  onPress={() => setFilterCategory(prev => (prev === cat ? null : cat))}
+                >
+                  <Text style={[styles.filterChipText, filterCategory === cat && styles.filterChipTextActive]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
             <Text style={styles.sectionTitle}>🎯 HOJE</Text>
-            {items.map((item: HojeItem) => (
+            {visibleItems.map((item: HojeItem) => (
               <HojeItemComponent
                 key={item.id}
                 item={item}
@@ -87,7 +115,7 @@ export default function HojeScreen() {
                 onDelete={handleDelete}
               />
             ))}
-            {items.length === 0 && (
+            {visibleItems.length === 0 && (
               <Text style={styles.noItems}>Nenhuma prioridade hoje. Adicione do Inbox!</Text>
             )}
           </ScrollView>
@@ -191,6 +219,31 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
     paddingTop: 8,
+  },
+  filterBar: {
+    marginBottom: 16,
+    flexGrow: 0,
+  },
+  filterContent: {
+    gap: 8,
+    paddingRight: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#E5E7EB',
+  },
+  filterChipActive: {
+    backgroundColor: '#2563EB',
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
   },
   sectionTitle: {
     fontSize: 12,

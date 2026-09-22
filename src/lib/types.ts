@@ -2,6 +2,8 @@ export interface InboxItem {
   id: number;
   content: string;
   created_at: string;
+  due_date?: string | null;
+  category?: string | null;
 }
 
 export interface HojeItem {
@@ -10,6 +12,8 @@ export interface HojeItem {
   created_at: string;
   content?: string;
   checked?: number | boolean;
+  due_date?: string | null;
+  category?: string | null;
 }
 
 export interface SaidaItem {

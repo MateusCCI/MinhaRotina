@@ -25,13 +25,15 @@ export function useInbox() {
     fetchItems();
   }, [fetchItems]);
 
-  const addItem = async (content: string): Promise<void> => {
+  const addItem = async (content: string, dueDate?: string | null, category?: string | null): Promise<void> => {
     try {
       const db = await DatabaseSingleton.getInstance();
-      const id = await db.insertInboxItem(content);
+      const id = await db.insertInboxItem(content, dueDate, category);
       const newItem: InboxItem = {
         id,
         content,
+        due_date: dueDate ?? null,
+        category: category ?? null,
         created_at: new Date().toISOString(),
       };
       setItems(prev => [newItem, ...prev]);

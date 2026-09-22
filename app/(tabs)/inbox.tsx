@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
-import CaptureInput from '../../src/components/CaptureInput';
+import CaptureInput, { CaptureMeta } from '../../src/components/CaptureInput';
 import InboxItemComponent from '../../src/components/InboxItem';
 import { useInbox } from '../../hooks/useInbox';
 import { InboxItem } from '../../src/lib/types';
@@ -27,11 +27,11 @@ export default function InboxScreen() {
     }
   };
 
-  const handleCapture = async (content: string): Promise<void> => {
+const handleCapture = async (content: string, meta: CaptureMeta): Promise<void> => {
     try {
-      await addItem(content);
+      await addItem(content, meta.dueDate, meta.category);
     } catch {
-      Alert.alert('Erro', 'Não foi possível salvar o item.');
+      Alert.alert('Limite atingido', 'Você já tem 3 itens no Hoje. Conclua ou remova antes de adicionar novos.');
     }
   };
 

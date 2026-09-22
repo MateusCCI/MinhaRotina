@@ -32,6 +32,8 @@ class DatabaseSingleton {
         CREATE TABLE IF NOT EXISTS inbox_items (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           content TEXT NOT NULL,
+          due_date TEXT,
+          category TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
       `);
@@ -82,6 +84,8 @@ class DatabaseSingleton {
           started_at INTEGER
         );
       `);
+      await this.ensureColumn('inbox_items', 'due_date', 'TEXT');
+      await this.ensureColumn('inbox_items', 'category', 'TEXT');
       await this.seedSaidaItems();
       console.log(`[S1][TRACE:${traceId}] Tabelas criadas com sucesso`);
     } catch (error) {
@@ -105,6 +109,18 @@ class DatabaseSingleton {
         'INSERT INTO saida_items (content, position) VALUES (?, ?)',
         [defaults[i], i]
       );
+    }
+  }
+
+  private async ensureColumn(table: string, column: string, definition: string): Promise<void> {
+    try {
+      await this.db!.runAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+      console.log(`Coluna adicionada: ${table}.${column}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate column')) {
+        return;
+      }
+      throw error;
     }
   }
 
@@ -291,12 +307,12 @@ class DatabaseSingleton {
     }
   }
 
-  async insertInboxItem(content: string): Promise<number> {
+  async insertInboxItem(content: string, dueDate?: string | null, category?: string | null): Promise<number> {
     const traceId = this.generateTraceId();
     try {
       const result = await this.db!.runAsync(
-        'INSERT INTO inbox_items (content) VALUES (?)',
-        [content]
+        'INSERT INTO inbox_items (content, due_date, category) VALUES (?, ?, ?)',
+        [content, dueDate ?? null, category ?? null]
       );
       console.log(`[S1][TRACE:${traceId}] Item inserido: id=${result.lastInsertRowId}`);
       return result.lastInsertRowId as number;
@@ -322,7 +338,7 @@ class DatabaseSingleton {
     const traceId = this.generateTraceId();
     try {
       const result = await this.db!.getAllAsync<HojeItem>(
-        `SELECT h.*, i.content
+        `SELECT h.*, i.content, i.due_date, i.category
          FROM hoje_items h
          JOIN inbox_items i ON h.inbox_id = i.id
          WHERE date(h.created_at) = date('now')

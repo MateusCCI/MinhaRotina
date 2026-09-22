@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { InboxItem } from '../lib/types';
+import { dueLabel, CATEGORY_COLORS } from '../lib/date';
 
 interface InboxItemProps {
   item: InboxItem;
@@ -9,9 +10,26 @@ interface InboxItemProps {
 }
 
 export default function InboxItemComponent({ item, onPromote, onDelete }: InboxItemProps) {
+  const due = dueLabel(item.due_date);
+  const hasBadges = due.label || item.category;
+
   return (
     <View style={styles.container}>
       <Text style={styles.content} numberOfLines={2}>{item.content}</Text>
+      {hasBadges && (
+        <View style={styles.badges}>
+          {item.category && (
+            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#6B7280' }]}>
+              <Text style={styles.badgeText}>{item.category}</Text>
+            </View>
+          )}
+          {due.label && (
+            <View style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeDue]}>
+              <Text style={[styles.badgeText, due.urgent && styles.badgeTextUrgent]}>{due.label}</Text>
+            </View>
+          )}
+        </View>
+      )}
       <View style={styles.actions}>
         <TouchableOpacity
           style={[styles.btn, styles.btnPromote]}
@@ -47,8 +65,33 @@ const styles = StyleSheet.create({
   content: {
     fontSize: 16,
     color: '#1F2937',
-    marginBottom: 12,
+    marginBottom: 8,
     lineHeight: 22,
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeDue: {
+    backgroundColor: '#E0F2FE',
+  },
+  badgeUrgent: {
+    backgroundColor: '#FEE2E2',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  badgeTextUrgent: {
+    color: '#DC2626',
   },
   actions: {
     flexDirection: 'row',
