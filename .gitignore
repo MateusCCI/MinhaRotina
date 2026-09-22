@@ -34,6 +34,7 @@ yarn-error.*
 tailscale.tgz
 setup-tailscale.sh
 start-tailscale-user.sh
+cleanup-tailscale.sh
 /tailscale_*/
 
 # local env files
