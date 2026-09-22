@@ -48,21 +48,6 @@ export function useHoje() {
     }
   };
 
-  const addItemFromInbox = async (inboxId: number): Promise<{ success: boolean; message?: string }> => {
-    try {
-      const db = await DatabaseSingleton.getInstance();
-      await db.insertHojeItem(inboxId);
-      await fetchItems();
-      return { success: true };
-    } catch (error) {
-      if (error instanceof Error && error.message === 'MAX_ITEMS') {
-        return { success: false, message: 'Máximo 3 prioridades. Complete itens antes de adicionar.' };
-      }
-      console.error('Erro ao adicionar item:', error);
-      return { success: false, message: 'Erro ao adicionar item.' };
-    }
-  };
-
   const getProgress = useCallback((): { percentage: number; color: string } => {
     if (items.length === 0) return { percentage: 0, color: '#EF4444' };
     const checked = items.filter(item => item.checked).length;
@@ -72,5 +57,5 @@ export function useHoje() {
     return { percentage, color: '#22C55E' };
   }, [items]);
 
-  return { items, loading, toggleItem, deleteItem, addItemFromInbox, getProgress, fetchItems };
+  return { items, loading, toggleItem, deleteItem, getProgress, fetchItems };
 }

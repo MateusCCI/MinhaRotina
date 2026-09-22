@@ -1,6 +1,6 @@
 # EAP — Minha Rotina (Estrutura Analítica do Projeto)
 
-Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetivos), §12 (equipe), §13 (cronograma) e §14 (aceite).
+Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetivos), §11 (equipe), §12 (cronograma) e §13 (aceite).
 
 ## Visão hierárquica
 

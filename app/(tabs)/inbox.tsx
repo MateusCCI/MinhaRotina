@@ -10,7 +10,10 @@ export default function InboxScreen() {
 
   const handlePromote = async (id: number): Promise<void> => {
     try {
-      await promoteToHoje(id);
+      const moved = await promoteToHoje(id);
+      if (!moved) {
+        Alert.alert('Limite atingido', 'Máximo 3 prioridades no Hoje. Completa ou remove antes de promover.');
+      }
     } catch {
       Alert.alert('Erro', 'Não foi possível mover para o Hoje.');
     }

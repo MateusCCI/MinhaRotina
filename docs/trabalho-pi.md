@@ -1,6 +1,7 @@
 # Minha Rotina — Projeto Integrador
 
-**Francisco Duó**
+**Mateus**
+**Helian**
 
 Prof. Sosthenes Carlos Ferreira do Nascimento
 
@@ -10,39 +11,39 @@ Brasília-DF, setembro de 2026
 
 ## RESUMO
 
-O presente Projeto Integrador tem como objetivo desenvolver uma aplicação mobile de organização de rotina voltada a adultos com rotina variável e dificuldades de memória prospectiva, utilizando React Native e TypeScript. O trabalho aborda etapas de levantamento de requisitos, modelagem, desenvolvimento e testes, integrando conhecimentos de Programação para Dispositivos Móveis, Programação Orientada a Objetos, Tópicos Avançados em Análises e Desenvolvimento de Sistemas e Avaliação de Software. Para a construção do sistema, foram adotados princípios de projeto centrado no usuário, permitindo maior organização e autonomia no controle de tarefas. Além disso, o projeto evidencia a importância da interdisciplinaridade na formação acadêmica, aproximando teoria e prática. Como resultado, propõe-se um sistema funcional capaz de atender aos objetivos de captura rápida, definição diária e registro de atividades, demonstrando integração entre os saberes do curso.
+Este Projeto Integrador apresenta o desenvolvimento do Minha Rotina, um aplicativo de organização de rotina para adultos com rotina variável que acabam esquecendo itens ao sair de casa e perdendo prazos curtos. O app foi feito com React Native, TypeScript e banco SQLite no próprio aparelho. O trabalho junta o que vimos em quatro disciplinas: Programação para Dispositivos Móveis I, Programação Orientada a Objetos, Tópicos Avançados em ADS e Avaliação de Software. O desenvolvimento foi dividido em três sprints de duas semanas, com protótipo das telas antes do código e testes manuais no celular. O resultado é um app simples, em português e sem conta: Inbox para anotar rápido, Hoje com no máximo 3 tarefas, checklist de saída, timer de 25 minutos e revisão da semana.
 
-Palavras-chave: Projeto Integrador; Desenvolvimento Mobile; React Native; GTD; Memória Prospectiva.
+Palavras-chave: Projeto Integrador; Desenvolvimento Mobile; React Native; GTD; Organização Pessoal.
 
 ## ABSTRACT
 
-This Integrative Project aims to develop a mobile routine organization app designed for adults with variable schedules and prospective memory difficulties, using React Native and TypeScript. The work addresses requirements gathering, modeling, development, and testing stages, integrating knowledge from Mobile Programming, Object-Oriented Programming, Advanced Systems Analysis and Development, and Software Evaluation. For system construction, user-centered design principles were adopted, enabling greater organization and autonomy in task management. Furthermore, the project highlights the importance of interdisciplinary learning, bridging theory and practice. As a result, a functional system is proposed capable of meeting objectives for rapid capture, daily definition, and activity logging, demonstrating integration among the course's knowledge areas.
+This Integrative Project presents Minha Rotina, a routine organization app for adults with variable schedules who often forget items when leaving home and miss short deadlines. The app was built with React Native, TypeScript and SQLite stored on the device. The work brings together four subjects: Mobile Programming I, Object-Oriented Programming, Advanced Topics in Systems Analysis and Development, and Software Evaluation. Development was split into three two-week sprints, with screen prototypes before coding and manual tests on a real phone. The result is a simple app, in Portuguese and with no account needed: Inbox for quick notes, Today limited to 3 tasks, exit checklist, 25-minute timer and weekly review.
 
-Keywords: Integrative Project; Mobile Development; React Native; GTD; Prospective Memory.
+Keywords: Integrative Project; Mobile Development; React Native; GTD; Personal Organization.
 
 ---
 
 ## 1. INTRODUÇÃO
 
-O avanço dos smartphones e a popularização de sistemas operacionais móveis trouxeram novas possibilidades para o controle de atividades cotidianas. No entanto, muitas pessoas — especialmente aquelas com rotina fragmentada, dificuldades de atenção ou deficiência de memória prospectiva — frequentemente acumulam tarefas não processadas e esquecem prazos curtos, o que gera estresse e impacto na produtividade.
+Quase todo mundo hoje tem celular, mas muita gente continua se perdendo na rotina. No nosso caso, o problema era bem concreto: a gente conferia as coisas no quarto e lembrava do que faltou já na escada, montava lista de 20 tarefas que mais travava do que ajudava e perdia prazo curto no meio de anotação espalhada. Os apps que testamos pediam conta, salvavam tudo em servidor ou eram em inglês, e a gente acabava largando.
 
-Nesse cenário, o desenvolvimento de aplicações móveis que ofereçam **captura rápida**, **definição diária estruturada** e **registro de atividades** surge como alternativa para auxiliar o usuário a organizar seu dia de forma acessível.
+A proposta do Minha Rotina foi fazer um app simples para esse dia a dia: anotar rápido no Inbox, escolher só 3 coisas para o Hoje, marcar um checklist na hora de sair e usar um timer de 25 minutos para focar. Tudo em português e com os dados guardados no próprio celular, sem servidor.
 
-O Projeto Integrador busca, portanto, aplicar os conhecimentos das disciplinas de Programação para Dispositivos Móveis I, Programação Orientada a Objetos, Tópicos Avançados em Análises e Desenvolvimento de Sistemas e Avaliação de Software na construção de um aplicativo — denominado **Minha Rotina** — que prioriza simplicidade, acessibilidade e privacidade.
+O projeto também serviu para juntar as matérias do semestre num trabalho só, que é a ideia do Projeto Integrador.
 
 ### 1.1 Objetivo Geral
 
-Desenvolver uma aplicação mobile de organização de rotina, utilizando React Native e TypeScript, com foco em captura rápida, definição diária de prioridades e registro de atividades, integrando conceitos de Programação Orientada a Objetos, Banco de Dados local e Tópicos Avançados.
+Desenvolver um aplicativo de organização de rotina com React Native e TypeScript, com captura rápida, limite de 3 prioridades por dia e registro de atividades, usando banco local e conceitos vistos em sala.
 
 ### 1.2 Objetivos Específicos
 
--   Implementar tela de Inbox para captura rápida de tarefas em texto livre, sem obrigatoriedade de classificação imediata;
--   Desenvolver tela de Hoje (max 3 itens) com seleção manual de prioridades;
--   Construir checklist de saída com até 5 itens editáveis e registro de horário de saída;
--   Implementar timer Pomodoro de 25 minutos com start/pause;
--   Estruturar banco de dados local com SQLite para persistência dos dados;
--   Aplicar princípios de usabilidade e design centrado no usuário;
--   Validar o funcionamento do sistema por meio de critérios de aceite definidos.
+-   Fazer a tela de Inbox para anotar tarefa em texto livre sem precisar classificar na hora;
+-   Fazer a tela de Hoje com no máximo 3 itens escolhidos pelo usuário;
+-   Montar o checklist de saída com até 5 itens que dá para editar e campo da hora que saiu;
+-   Implementar o timer de 25 minutos com iniciar e pausar;
+-   Guardar tudo em SQLite no próprio aparelho;
+-   Cuidar da usabilidade: letra legível, botão grande e telas simples;
+-   Testar no celular seguindo os critérios de aceite que definimos.
 
 ---
 
@@ -50,84 +51,75 @@ Desenvolver uma aplicação mobile de organização de rotina, utilizando React 
 
 ### 2.1 Engenharia de Software
 
-Pressman e Maxim (2021) afirmam que "quando um software é bem-sucedido — ou seja, quando atende às necessidades dos usuários, opera perfeitamente durante um longo período, é fácil de modificar e mais fácil ainda de utilizar —, ele pode mudar, e de fato muda, as coisas para melhor". Para alcançar esse nível, o autor defende a adoção de uma abordagem de engenharia disciplinada, que inclui levantamento de requisitos, análise, projeto, implementação, verificação e manutenção.
+Pressman e Maxim (2021) dizem que um software dá certo quando atende o que o usuário precisa, é fácil de usar e fácil de mudar depois. Para chegar nisso, eles defendem seguir um passo a passo: levantar requisitos, analisar, projetar, programar, testar e manter.
 
-O livro destaca que a Parte I, "O processo de software", apresenta diferentes visões sobre modelos de processo, contemplando o debate entre as filosofias de processos ágeis e prescritivos. A Parte II, "Modelagem", fornece métodos de projeto e análise com técnicas orientadas a objetos. O modelo incremental adotado neste projeto dialoga diretamente com o Capítulo 3 ("Agilidade e processo") e o Capítulo 4 ("Modelo de processo recomendado"), que defendem a adaptação do processo às necessidades do projeto e dos usuários.
+A gente tentou seguir isso mesmo sendo um trabalho pequeno. O modelo incremental tem a ver com o que fizemos: entregar por partes e ir ajustando. Os capítulos sobre processo e modelagem do livro ajudaram a organizar os sprints e a separar componentes, telas e banco.
 
-Sobre segurança, Pressman e Maxim (2021) ressaltam que "um requisito não funcional (NFR) de segurança deve ser considerado desde a fase de Requirements Analysis, e não como camada adicional posterior". Essa diretriz fundamenta a escolha por uma arquitetura que prioriza a privacidade dos dados do usuário.
-
-Quanto ao desenvolvimento mobile, o autor observa que "o software residente em dispositivos móveis" representa uma área em crescimento, com desafios específicos de interface, limitações de hardware e necessidade de funcionamento offline — pontos centrais na decisão tecnológica deste projeto (Expo + SQLite).
-
-Por fim, a Parte III do livro, "Qualidade e Segurança", apresenta conceitos de qualidade de software, garantia da qualidade (SQA) e estratégias de teste nos níveis de componentes e integração. O trabalho aplicou esses princípios por meio dos critérios de aceite (CA-PI01 a CA-PI07), realizados manualmente, alinhando-se à recomendação do autor de que "o engenheiro de software deve avaliar a qualidade do software, revisar produtos gerados e aplicar estratégias e táticas de teste".
+Sobre testes, o livro fala de testar por componente e na integração. Foi o que fizemos com os critérios CA-PI01 a CA-PI07, testando cada tela no celular antes de juntar tudo.
 
 ### 2.2 Gestão de Projetos
 
-Conforme Kerzner (2016), a gestão de projetos eficiente transcende o uso de ferramentas: trata-se de criar uma cultura organizacional na qual projetos sejam o veículo principal para a execução da estratégia. O autor define que as melhores práticas incluem planejamento estruturado, definição clara de escopo, gerenciamento de partes interessadas e acompanhamento contínuo por indicadores de desempenho (KPIs).
+Kerzner (2016) fala que gerenciar projeto não é só usar ferramenta, é definir escopo, dividir em entregas e acompanhar. Como éramos só dois, sem designer nem QA, isso pesou: tivemos que cortar coisa para caber em 6 semanas.
 
-Neste trabalho, os KPIs foram traduzidos em critérios de aceite mensuráveis (CA-PI01 a CA-PI07), e o planejamento seguiu o padrão de divisão por módulos (Inbox, Hoje, Saída, Noite) com cronograma fixo de três sprints.
+Os critérios de aceite viraram nossa forma de medir se estava pronto. O cronograma foi dividido por módulo (Inbox, Hoje, Saída, Timer, Revisão) em três sprints, e a EAP registrou quem fazia o quê.
 
-### 2.3 Requisitos Funcionais e Não Funcionais
+### 2.3 Requisitos
 
-Os requisitos foram levantados a partir de literatura especializada em memória prospectiva e organização pessoal, com destaque para a proposta de GTD (GETTING THINGS DONE), que defende a externalização de compromissos em um sistema confiável único, reduzindo a carga cognitiva.
+A base foi o GTD (ALLEN, 2015), aquela ideia de tirar tudo da cabeça e jogar num lugar confiável só. Pressman e Maxim (2021) avisam que requisito mal escrito é uma das maiores causas de projeto que dá errado, então escrevemos cada requisito com um teste junto.
 
-Pressman e Maxim (2021) alertam que requisitos mal definidos são uma das principais causas de falha em projetos de software, enfatizando a necessidade de especificação clara, negociável e testável. Nesse sentido, os requisitos funcionais e não funcionais deste projeto foram documentados com critérios de aceite mensuráveis (CA-PI01 a CA-PI07), conforme metodologia recomendada pelo autor para garantir rastreabilidade entre intenção do usuário e implementação.
+Requisitos funcionais do MVP:
+-   RF01: Anotar item no Inbox em texto livre (até 500 caracteres);
+-   RF02: Mostrar no máximo 3 tarefas no Hoje, escolhidas pelo usuário;
+-   RF03: Checklist de saída com até 5 itens que dá para editar;
+-   RF04: Timer de 25 minutos com iniciar e pausar;
+-   RF05: Botão [HOJE] no Inbox que leva o item para o Hoje com 1 toque;
+-   RF06: Barra de progresso do dia com % e cor que muda (vermelho, amarelo, verde);
+-   RF07: Aviso quando o bloco termina, perguntando o próximo item, sem apitar no meio do foco;
+-   RF08: Revisão da semana com contagem de dias com inbox zerado.
 
-Foram definidos os seguintes **requisitos funcionais** para o MVP:
--   RF01: Capturar itens no Inbox com texto livre (máx. 500 caracteres);
--   RF02: Exibir max 3 tarefas no Hoje, escolhidas manualmente pelo usuário;
--   RF03: Checklist de saída com até 5 itens editáveis;
--   RF04: Timer Pomodoro de 25 minutos con start/pause;
--   RF05: Seleção rápida "hoje" no Inbox — botão [HOJE] em 1 toque, sem abrir tela de processamento;
--   RF06: Barra visual de progresso do dia — mostra hora atual, % de itens concluídos e cor muda (vermelho → amarelo → verde);
--   RF07: Notificação de transição — dispara ao encerrar um bloco ou task, perguntando "próximo item?"; não notifica por horário fixo de cada tarefa.
--   RF08: Revisão semanal simples (contagem de dias com Inbox zerado).
+Por que decidimos assim:
+-   *Botão [HOJE]:* Gollwitzer e Sheeran (2006) mostram que transformar intenção em ação de 1 toque ("se acontecer X, faço Y") aumenta a chance de cumprir. A ideia foi diminuir a preguiça de começar.
+-   *Barra de progresso:* muita gente perde a noção do tempo no meio do dia. Em vez de só número, colocamos barra colorida que enche, que é mais fácil de entender batendo o olho.
+-   *Aviso só no fim do bloco:* Jones et al. (2021) mostram que lembrete ajuda bastante, mas notificação demais faz a pessoa ignorar tudo. Então o app só chama no fim do bloco.
 
-**Justificativa das decisões (baseada em evidência):**
-
--   *RF05 (seleção rápida):* Gollwitzer & Sheeran (2006) demonstram que implementar intenções ("se X, então Y") aumenta a taxa de cumprimento em d=0.65. O botão [HOJE] transforma "quero fazer depois" em "estou fazendo agora" em 1 toque, reduzindo a barreira de ativação — conceito central em memória prospectiva (CHEN et al., 2015).
-
--   *RF06 (barra de progresso):* A cegueira temporal é um sintoma bem documentado em adultos com TDAH, consistente com a dificuldade de perceber a passagem do tempo (SANTOS et al., 2020). A solução recomendada na literatura é externalizar o tempo visualmente, substituindo relógios numéricos por indicadores visuais como barras regressivas, que tornam o tempo concreto e imediato.
-
--   *RF07 (transição vs. horário):* JONES et al. (2021) mostram que auxílios externos de memória têm efeito g=0.805, mas também advertem contra excesso de notificações, que levam à habituação e ao descarte passivo pelo usuário. Notificar na transição (fim de bloco → "próximo item?") usa o momento de maior consciência do usuário, alinhado ao conceito de "fim de ciclo" do GTD.
-
-Os **requisitos não funcionais** incluem:
--   RNF01: Interface com fonte mínima de 16px e botões de toque de 48dp;
--   RNF02: Tempo de resposta <2s para navegação entre telas;
--   RNF03: Compatibilidade com Android (SDK mínimo 21).
+Requisitos não funcionais:
+-   RNF01: Letra mínima de 16px e botão com pelo menos 48dp;
+-   RNF02: Trocar de tela em menos de 2s;
+-   RNF03: Rodar em Android (SDK mínimo 21).
 
 ---
 
 ## 3. METODOLOGIA
 
-O desenvolvimento foi realizado por meio de metodologia incremental, com três sprints sequenciais, utilizando versionamento Git e divisão de módulos por membro da equipe.
+Fizemos em sprints curtos, um módulo por vez, com Git para versionar e cada um responsável por uma parte.
 
-### 3.1 Ferramentas Utilizadas
+### 3.1 Ferramentas
 
--   **Expo (managed workflow)** — framework para desenvolvimento React Native simplificado;
--   **TypeScript** — tipagem estática para maior robustez do código;
--   **expo-sqlite** — banco de dados local embutido;
--   **expo-notifications** — alarmes locais para janelas de processamento;
--   **React Navigation** — navegação entre telas;
--   **VS Code** — ambiente de desenvolvimento integrado.
+-   **Expo** — jeito mais simples de rodar React Native sem configurar nativo;
+-   **TypeScript** — JavaScript com tipo, que ajuda a pegar erro antes de rodar;
+-   **expo-sqlite** — banco que fica dentro do app;
+-   **expo-notifications** — alarme da saída e aviso de fim do bloco;
+-   **React Navigation** — navegação por abas;
+-   **VS Code** — editor que usamos.
 
-### 3.2 Estrutura do Banco de Dados
+### 3.2 Banco de dados
 
-Foram modeladas quatro entidades principais:
+Modelamos quatro tabelas principais:
 
-| Tabela | Atributos principais |
+| Tabela | O que guarda |
 |---|---|
-| `tasks` | id, título, status (inbox/hoje/backlog/concluído), selecionado_hoje (boolean), hora_solicitada |
-| `today` | task_id, dia_semana, selecionado_pelo_usuário |
-| `checklist_saida` | id, label, ordem, concluído, data_referência |
-| `progresso_dia` | data, total_tarefas, concluidas, cor_atual |
+| `tasks` | id, título, status (inbox/hoje/backlog/concluído), se está no hoje, horário |
+| `today` | task_id, dia da semana |
+| `checklist_saida` | id, texto, ordem, marcado ou não, data |
+| `progresso_dia` | data, total de tarefas, concluídas, cor da barra |
 
-A entidade `tasks` recebe itens capturados no Inbox; `today` armazena as 3 seleções diárias; `checklist_saida` guarda a lista editável de itens de saída; `progresso_dia` armazena o estado da barra visual (cor e percentual) para exibir na tela Hoje.
+A `tasks` recebe o que é anotado no Inbox; a `today` guarda as 3 do dia; a `checklist_saida` guarda os itens da porta; e a `progresso_dia` guarda o estado da barra para mostrar no Hoje.
 
-### 3.3 Fluxo de Desenvolvimento
+### 3.3 Como foi o passo a passo
 
-Cada sprint seguiu o padrão: (1) análise de requisito → (2) protótipo de tela (wireframe textual) → (3) implementação com TypeScript → (4) teste manual → (5) revisão de código. Ao final de cada ciclo, os módulos foram integrados e validados contra os critérios de aceite.
+Cada sprint seguiu: (1) entender o requisito, (2) desenhar a tela em texto e no HTML, (3) programar em TypeScript, (4) testar no celular, (5) revisar o código do outro. No fim de cada ciclo a gente juntava os módulos e passava o checklist de aceite.
 
-A versão final do código foi congelada três dias antes da defesa, garantindo estabilidade para a demonstração viva.
+Congelamos o código três dias antes da apresentação para não quebrar nada na hora da demo.
 
 ---
 
@@ -135,80 +127,84 @@ A versão final do código foi congelada três dias antes da defesa, garantindo 
 
 ### 4.1 Tela Inbox
 
-A captura rápida é realizada por um único campo de texto com 1 linha. Ao pressionar Enter, o item é salvo com status `inbox` e timestamp. Não há pergunta de projeto, categoria ou prioridade na captura — isso evita a fadiga de decisão e mantém o tempo de ingresso abaixo de 10 segundos.
+Um campo de texto de uma linha no topo. Apertou Enter, salva com data e hora. Não pergunta categoria nem prioridade na hora, para não travar e anotar em segundos.
 
-O processamento (movimentar para o Hoje, Backlog ou Lixo) ocorre em tela separada, onde o usuário responde 4 botões: **[Fazer <2min]** / **[→Hoje]** / **[Backlog]** / **[Lixo]**. Cada item leva cerca de 10 segundos para decidir.
+Depois, em outra parte da tela, tem 4 opções por item: **[Fazer <2min]** / **[→Hoje]** / **[Backlog]** / **[Lixo]**. Decidir cada item leva uns 10 segundos.
 
-### 4.2 Tela Hoje (com barra de progresso)
+### 4.2 Tela Hoje
 
-O Hoje permite escolher manualmente até 3 tarefas do Inbox. A restrição a 3 itens visa evitar sobrecarga cognitiva e paralisa por excesso de opções — princípio alinhado ao Essentialismo (MCKEOWN, 2014). No topo da tela, uma barra visual ocupa toda a largura, mostrando: hora atual (marcador vertical), percentual de conclusão (ex: `2/3`), e cor que muda conforme o progresso (vermelho → amarelo → verde).
+Mostra no máximo 3 tarefas escolhidas pelo usuário. O limite de 3 foi de propósito, para não virar aquela lista gigante que ninguém faz — tem a ver com o Essencialismo (MCKEOWN, 2014). No topo tem a barra com hora atual, fração (ex.: `2/3`) e cor que muda com o progresso.
 
-Não há algoritmo de sugestão automática; a seleção é sempre explícita do usuário. Itens não selecionados permanecem no backlog, sem punição visual (nenhuma cor vermelha ou indicador de atraso). O botão [HOJE] na tela Inbox permite mover um item para o Hoje em 1 toque, sem abrir tela de processamento.
+A escolha é sempre da pessoa, o app não sugere nada sozinho. O que não foi para o Hoje fica no backlog sem marcação de atraso. O botão [HOJE] no Inbox leva direto, sem abrir outra tela.
 
 ### 4.3 Tela Saída
 
-A tela Saída exibe um checklist fixo (até 5 itens) na ordem do trajeto. Cada item é marcado com 1 toque. Após concluir, o usuário registra a hora de saída (`saí às __:__`).
+Checklist de até 5 itens na ordem do caminho (ex.: chave, ponto, marmita, fone, portão). Um toque marca cada um. Depois tem o campo `saí às __:__` para registrar a hora.
 
-Um alarme local pode ser configurado para tocar 15 minutos antes do compromisso (exemplo: 7h25 para sair às 7h40). O alarme dispara apenas se houver items pendentes no Inbox ou tarefas com vencimento próximo.
+Dá para programar um alarme uns 15 minutos antes (ex.: 7h25 para sair 7h40). Ele só toca se ainda tem pendência.
 
 ### 4.4 Timer Pomodoro
 
-O timer oferece 25 minutos de foco com botão de start/pause. Ao encerrar, exibe automaticamente a barra de progresso do dia atualizada (ex: "2/3 concluídos — 66%") e dispara notificação de transição perguntando "próximo item?". A barra de progresso é também exibida no topo da tela Hoje, com cor dinâmica: vermelho (0-33%), amarelo (34-66%), verde (67-100%).
+Timer de 25 minutos com iniciar e pausar. Quando acaba, mostra o progresso atualizado (ex.: "2/3 concluídos — 66%") e pergunta o próximo item. A mesma barra do Hoje aparece aqui, com vermelho (0-33%), amarelo (34-66%) e verde (67-100%).
 
 ### 4.5 Revisão Semanal
 
-A cada domingo (ou na sexta, conforme preferência), o usuário consulta um relatório simples que mostra: total de itens no Inbox, dias da semana com Inbox zerado e média de saídas registradas.
+No domingo (ou na sexta, como preferir) dá para ver: total no Inbox, dias com inbox zerado e média de saídas. Também registra humor e sono e um ajuste para a semana seguinte.
 
 ---
 
 ## 5. TESTES E VALIDAÇÃO
 
-Foram elaborados 7 critérios de aceite (CA-PI01 a CA-PI07), testados manualmente em dispositivo Android via APK.
+Definimos 7 critérios de aceite e testamos na mão num Android com o app instalado.
 
 | CA | Critério | Status |
 |---|---|---|
-| CA-PI01 | Inbox add→visível em <10s; del sem travar com 50 itens | Aprovado |
-| CA-PI02 | Hoje limitado a 3 (bloqueia a 4ª com aviso neutro) | Aprovado |
-| CA-PI03 | Botão [HOJE] no Inbox move item em 1 toque | Aprovado |
-| CA-PI04 | Barra de progresso atualiza a cada conclusão (cor + %) | Aprovado |
-| CA-PI05 | Notificação de transição dispara só ao encerrar timer | Aprovado |
-| CA-PI06 | 2 alarmes locais disparam só se Inbox >0 ou há ⏰; tap abre o item | Aprovado |
-| CA-PI07 | Abre via QR em Android sem internet após instalado; zero crash na demo de 10min | Aprovado |
+| CA-PI01 | Anotar aparece na hora; apagar não trava com 50 itens | Aprovado |
+| CA-PI02 | Hoje trava no 3º item e avisa na 4ª tentativa | Aprovado |
+| CA-PI03 | Botão [HOJE] leva em 1 toque | Aprovado |
+| CA-PI04 | Barra muda cor e % a cada conclusão | Aprovado |
+| CA-PI05 | Aviso só dispara no fim do timer | Aprovado |
+| CA-PI06 | Alarmes só tocam se tem pendência; toque abre o item | Aprovado |
+| CA-PI07 | Abre pelo QR no Android depois de instalado; sem travar em 10min de demo | Aprovado |
 
-A demonstração foi conduzida em 10 minutos, com fluxo completo Inbox → Hoje 3 → checklist → timer → humor, usando dispositivo físico sem conexão com a internet.
+A demo foi de 10 minutos seguindo o fluxo Inbox → Hoje → checklist → timer → revisão, num aparelho físico.
 
 ---
 
 ## 6. CONSIDERAÇÕES FINAIS
 
-O Projeto Integrador atingiu os objetivos propostos: uma aplicação mobile de organização de rotina, desenvolvida com React Native, TypeScript e SQLite, integrada às disciplinas de Programação para Dispositivos Móveis I, Programação Orientada a Objetos, Tópicos Avançados em Análises e Desenvolvimento de Sistemas e Avaliação de Software.
+O trabalho cumpriu o que propôs: um app de rotina com React Native, TypeScript e SQLite, juntando as quatro disciplinas do semestre.
 
-O sistema apresentou-se como solução viável para o público-alvo — adultos com rotina variável e dificuldades de memória prospectiva — ao combinar captura rápida, restrição a 3 itens no Hoje e checklist de saída.
+Para o nosso público — gente com rotina picada que esquece coisa na saída — a combinação de anotar rápido, só 3 no Hoje e checklist na porta funcionou bem nos testes.
 
-Ficaram como trabalhos futuros: backend com sincronização segura, IA para sugerir as 3 tarefas do Hoje, gamificação leve (XP não monetizado) e expansão para iOS.
+Ficou para depois (ideia de TCC 2): sincronizar entre aparelhos, sugerir as 3 do dia e fazer versão para iOS. Na hora faltou tempo e gente, então cortamos sem dó para entregar funcionando.
 
-O projeto reforçou a importância da interdisciplinaridade: a Programação Orientada a Objetos trouxe padrões de projeto; o Mobile deu forma ao produto; os Tópicos Avançados orientaram a engenharia de requisitos; e a Avaliação de Software validou com critérios mensuráveis.
+O que a gente mais aprendeu: POO ajudou a organizar o banco com padrões, Mobile deu forma ao app, Tópicos Avançados ensinou a escrever requisito que dá para testar e Avaliação mostrou como provar que funciona com critério claro.
 
 ---
 
 ## REFERÊNCIAS
 
-ABNT. NBR 6022: informação e documentação: artigo em publicação periódica científica impressa: apresentação. Rio de Janeiro, 2003.
+ALLEN, David. **Getting Things Done: a arte de fazer acontecer.** Rio de Janeiro: Sextante, 2015.
 
-ABNT. NBR 6023: informação e documentação: elaboração: referências. Rio de Janeiro, 2002.
+ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. **NBR 14724: informação e documentação – trabalhos acadêmicos – apresentação.** Rio de Janeiro: ABNT, 2011.
 
-ABNT. NBR 14724: informação e documentação: trabalhos acadêmicos: apresentação. Rio de Janeiro, 2002.
+ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. **NBR 6023: informação e documentação – referências – elaboração.** Rio de Janeiro: ABNT, 2018.
 
-CHEN, X. J. et al. The effect of implementation intention on prospective memory: systematic and meta-analytic review. *Psychiatry Research*, v. 226, p. 14-22, 2015. DOI: 10.1016/j.psychres.2015.01.011.
+ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. **NBR 10520: informação e documentação – citações em documentos – apresentação.** Rio de Janeiro: ABNT, 2023.
 
-GOLLWITZER, P. M.; SHEERAN, P. Implementation intentions and goal achievement: a meta-analysis of effects and processes. *Advances in Experimental Social Psychology*, v. 38, p. 69-119, 2006. DOI: 10.1016/S0065-2601(06)38002-1.
+GOLLWITZER, P. M.; SHEERAN, P. Implementation intentions and goal achievement: a meta-analysis of effects and processes. **Advances in Experimental Social Psychology,** v. 38, p. 69-119, 2006.
 
-JONES, W. E.; BENGE, J. F.; SCULLIN, M. K. Preserving prospective memory in daily life: systematic review and meta-analysis. *Neuropsychology*, v. 35, n. 1, p. 123-140, 2021. DOI: 10.1037/neu0000704.
+JONES, W. E.; BENGE, J. F.; SCULLIN, M. K. Preserving prospective memory in daily life: systematic review and meta-analysis. **Neuropsychology,** v. 35, n. 1, p. 123-140, 2021.
 
-KERZNER, Harold. *Gestão de projetos: as melhores práticas*. 3. ed. Porto Alegre: Bookman, 2016.
+KERZNER, Harold. **Gestão de projetos: as melhores práticas.** 3. ed. Porto Alegre: Bookman, 2016.
 
-MCKEOWN, Greg. *Essencialismo: o jeito indispensável de fazer menos e realizar mais*. Rio de Janeiro: Elsevier, 2014.
+MCKEOWN, Greg. **Essencialismo: o jeito indispensável de fazer menos e realizar mais.** Rio de Janeiro: Elsevier, 2014.
 
-PRESSMAN, Roger S.; MAXIM, Bruce R. *Engenharia de software: uma abordagem profissional*. 9. ed. Porto Alegre: AMGH, 2021.
+NIELSEN, Jakob. **Usabilidade na Web.** Rio de Janeiro: Elsevier, 2012.
 
-SHEERAN, P.; LISTROM, O.; GOLLWITZER, P. M. The when and how of planning: meta-analysis of the scope and components of implementation intentions in 642 tests. *European Review of Social Psychology*, v. 36, p. 162-194, 2025. DOI: 10.1080/10463283.2024.2334563.
+PRESSMAN, Roger S.; MAXIM, Bruce R. **Engenharia de software: uma abordagem profissional.** 9. ed. Porto Alegre: AMGH, 2021.
+
+SOMMERVILLE, Ian. **Engenharia de software.** 10. ed. São Paulo: Pearson, 2019.
+
+VARGAS, Ricardo Viana. **Gerenciamento de projetos.** 8. ed. Rio de Janeiro: Brasport, 2016.

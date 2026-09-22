@@ -1,7 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text } from 'react-native';
 import Inbox from './app/(tabs)/inbox';
 import Hoje from './app/(tabs)/hoje';
@@ -37,19 +37,19 @@ function TabNavigator() {
   );
 }
 
-let appReady = false;
-
 export default function App() {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     DatabaseSingleton.getInstance()
       .then(db => db.init())
       .then(() => {
-        appReady = true;
+        setReady(true);
       })
       .catch(console.error);
   }, []);
 
-  if (!appReady) {
+  if (!ready) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" color="#2563EB" />

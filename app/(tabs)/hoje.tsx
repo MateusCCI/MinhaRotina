@@ -1,14 +1,15 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
 import HojeItemComponent from '../../src/components/HojeItem';
 import ProgressBar from '../../src/components/ProgressBar';
 import { useHoje } from '../../hooks/useHoje';
 import { useInbox } from '../../hooks/useInbox';
-import { HojeItem } from '../../src/lib/types';
+import { HojeItem, InboxItem } from '../../src/lib/types';
 
 export default function HojeScreen() {
-  const { items, loading, toggleItem, deleteItem, addItemFromInbox, getProgress, fetchItems } = useHoje();
-  const { items: inboxItems, fetchItems: fetchInbox } = useInbox();
+  const { items, loading, toggleItem, deleteItem, getProgress, fetchItems } = useHoje();
+  const { items: inboxItems, fetchItems: fetchInbox, promoteToHoje } = useInbox();
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   const handleToggle = async (id: number): Promise<void> => {
     try {
@@ -26,19 +27,31 @@ export default function HojeScreen() {
     }
   };
 
-  const handleAddFirst = (): void => {
+  const handlePromote = async (inboxId: number): Promise<void> => {
+    setPickerVisible(false);
+    try {
+      const ok = await promoteToHoje(inboxId);
+      if (!ok) {
+        Alert.alert('Limite atingido', 'Máximo 3 prioridades. Complete ou remova antes de adicionar.');
+        return;
+      }
+      await fetchItems();
+      await fetchInbox();
+    } catch {
+      Alert.alert('Erro', 'Não foi possível mover o item para o Hoje.');
+    }
+  };
+
+  const handleAddPicker = (): void => {
+    if (items.length >= 3) {
+      Alert.alert('Limite atingido', 'Máximo 3 prioridades. Complete ou remova antes de adicionar.');
+      return;
+    }
     if (inboxItems.length === 0) {
       Alert.alert('Inbox vazio', 'Adicione tarefas no Inbox primeiro.');
       return;
     }
-    addItemFromInbox(inboxItems[0].id).then((result: { success: boolean; message?: string }) => {
-      if (!result.success && result.message) {
-        Alert.alert('Limite atingido', result.message);
-      } else {
-        fetchItems();
-        fetchInbox();
-      }
-    });
+    setPickerVisible(true);
   };
 
   const progress = getProgress();
@@ -84,7 +97,7 @@ export default function HojeScreen() {
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.btnAdd, items.length >= 3 && styles.btnDisabled]}
-          onPress={handleAddFirst}
+          onPress={handleAddPicker}
           disabled={items.length >= 3}
           accessibilityLabel="Adicionar item do Inbox"
         >
@@ -97,6 +110,35 @@ export default function HojeScreen() {
           <Text style={styles.btnDisabledText}>[📋 Saída]</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        visible={pickerVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPickerVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Escolha do Inbox</Text>
+            <Text style={styles.modalSubtitle}>Qual tarefa vira prioridade de hoje?</Text>
+            <ScrollView style={styles.modalList}>
+              {inboxItems.map((item: InboxItem) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.modalItem}
+                  onPress={() => handlePromote(item.id)}
+                  accessibilityLabel={`Promover: ${item.content}`}
+                >
+                  <Text style={styles.modalItemText}>{item.content}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.modalCancel} onPress={() => setPickerVisible(false)}>
+              <Text style={styles.modalCancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -190,5 +232,51 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCard: {
+    width: '85%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1F2937',
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  modalList: {
+    maxHeight: 320,
+  },
+  modalItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  modalItemText: {
+    fontSize: 15,
+    color: '#1F2937',
+  },
+  modalCancel: {
+    marginTop: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6B7280',
   },
 });

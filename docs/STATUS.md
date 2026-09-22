@@ -13,7 +13,7 @@ Fase de **documentação e protótipo concluída**. Próximo passo: **S1 (Setup 
 - [x] Trabalho ABNT (`docs/trabalho-pi.md`)
 - [x] Desenho das telas em texto (`docs/telas-minha-rotina.md`)
 - [x] Protótipo interativo navegável (`docs/telas-minha-rotina.html`, testado)
-- [x] Equipe nomeada: Mateus (Saída + Timer + SQLite + DER) e Helian (Inbox + Hoje + Noite + testes)
+- [x] Equipe nomeada: Mateus (Saída + Timer + SQLite + DER) e Helian (Inbox + Hoje + Revisão + testes)
 
 ## Pendente (por marco da EAP)
 
@@ -25,11 +25,11 @@ Fase de **documentação e protótipo concluída**. Próximo passo: **S1 (Setup 
 ## Como continuar
 
 1. Ler este arquivo e o `README.md`
-2. Ler o TAP (§6 objetivos, §13 cronograma, §14 aceite)
+2. Ler o TAP (§6 objetivos, §12 cronograma, §13 aceite)
 3. Abrir a EAP e pegar o próximo pacote do seu nome
 4. Testar o fluxo correspondente no protótipo antes de codar
 
 ## Observações
 
-- A numeração do TAP pula o §9 (vai do §8 ao §10); as referências da EAP (§6, §12, §13, §14) estão corretas.
-- A linha de risco do TAP fala em "repo só com as 4 telas + TAP"; este repo contém também trabalho ABNT, EAP, README e STATUS, por decisão da equipe.
+- Numeração do TAP sequencial (§1 a §14); EAP e STATUS apontam para §6, §11, §12 e §13.
+- TAP, EAP, README e trabalho ABNT com o mesmo texto base e sem anglicismo "offline".
