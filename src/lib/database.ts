@@ -73,6 +73,15 @@ class DatabaseSingleton {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
       `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS timer_state (
+          prefix TEXT PRIMARY KEY,
+          day TEXT NOT NULL,
+          elapsed_ms INTEGER NOT NULL DEFAULT 0,
+          running INTEGER NOT NULL DEFAULT 0,
+          started_at INTEGER
+        );
+      `);
       await this.seedSaidaItems();
       console.log(`[S1][TRACE:${traceId}] Tabelas criadas com sucesso`);
     } catch (error) {
@@ -389,6 +398,77 @@ class DatabaseSingleton {
       return (result?.count ?? 0) === 0;
     } catch (error) {
       console.error(`[S1][TRACE:${traceId}] Erro ao verificar inbox vazio:`, error);
+      throw error;
+    }
+  }
+
+  // Timer queries
+  async getTimerState(prefix: string): Promise<{
+    prefix: string;
+    day: string;
+    elapsedMs: number;
+    running: boolean;
+    startedAt?: number | null;
+  } | null> {
+    const traceId = this.generateTraceId();
+    try {
+      const row = await this.db!.getFirstAsync<{
+        prefix: string;
+        day: string;
+        elapsed_ms: number;
+        running: number;
+        started_at: number | null;
+      }>('SELECT * FROM timer_state WHERE prefix = ? AND day = ?', [
+        prefix,
+        new Date().toISOString().slice(0, 10),
+      ]);
+      if (!row) return null;
+      return {
+        prefix: row.prefix,
+        day: row.day,
+        elapsedMs: row.elapsed_ms,
+        running: row.running === 1,
+        startedAt: row.started_at,
+      };
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao buscar timer:`, error);
+      throw error;
+    }
+  }
+
+  async saveTimerState(
+    prefix: string,
+    elapsedMs: number,
+    running: boolean,
+    startedAt?: number | null
+  ): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      const day = new Date().toISOString().slice(0, 10);
+      await this.db!.runAsync(
+        `INSERT INTO timer_state (prefix, day, elapsed_ms, running, started_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(prefix) DO UPDATE SET
+           day = excluded.day,
+           elapsed_ms = excluded.elapsed_ms,
+           running = excluded.running,
+           started_at = excluded.started_at`,
+        [prefix, day, Math.floor(elapsedMs), running ? 1 : 0, startedAt ?? null]
+      );
+      console.log(`[S1][TRACE:${traceId}] Timer salvo: ${prefix}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao salvar timer:`, error);
+      throw error;
+    }
+  }
+
+  async clearTimerState(prefix: string): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync('DELETE FROM timer_state WHERE prefix = ?', [prefix]);
+      console.log(`[S1][TRACE:${traceId}] Timer zerado: ${prefix}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao zerar timer:`, error);
       throw error;
     }
   }
