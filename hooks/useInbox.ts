@@ -49,6 +49,9 @@ export function useInbox() {
       setItems(prev => prev.filter(item => item.id !== id));
       const empty = await db.isinboxEmpty();
       setIsEmpty(empty);
+      if (empty) {
+        await db.registerEvent('inbox_zerado');
+      }
     } catch (error) {
       console.error('Erro ao deletar item:', error);
       throw error;
@@ -63,6 +66,9 @@ export function useInbox() {
       setItems(prev => prev.filter(item => item.id !== id));
       const empty = await db.isinboxEmpty();
       setIsEmpty(empty);
+      if (empty) {
+        await db.registerEvent('inbox_zerado');
+      }
       return true;
     } catch (error) {
       if (error instanceof Error && error.message === 'MAX_ITEMS') {

@@ -21,23 +21,34 @@ export default function RevisaoScreen() {
   });
   const [loading, setLoading] = useState(true);
   const [ajuste, setAjuste] = useState('');
+  const [ajustesRecentes, setAjustesRecentes] = useState<{ id: number; texto: string; created_at: string }[]>([]);
 
   useEffect(() => {
     loadStats();
+    loadAjustes();
   }, []);
+
+  const loadAjustes = async (): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      setAjustesRecentes(await db.getRecentAjustes());
+    } catch (error) {
+      console.error('Erro ao buscar ajustes:', error);
+    }
+  };
 
   const loadStats = async (): Promise<void> => {
     try {
       const db = await DatabaseSingleton.getInstance();
-      const items = await db.getInboxItems();
-
-      const diasNaSemana = 7;
-      const inboxZerado = items.length === 0 ? diasNaSemana : Math.max(0, diasNaSemana - Math.ceil(items.length / 5));
-
+      const weekly = await db.getWeeklyStats();
+      const hojeItems = await db.getHojeItems();
       setStats(prev => ({
         ...prev,
-        inboxZerado,
-        totalHoje: items.length,
+        inboxZerado: weekly.inboxZerado,
+        totalSaidas: weekly.totalSaidas,
+        mediaSaida: weekly.mediaSaida,
+        totalHoje: hojeItems.length,
+        completosHoje: hojeItems.filter(i => i.checked).length,
       }));
     } catch {
       setStats(prev => ({ ...prev, inboxZerado: 0 }));
@@ -51,14 +62,21 @@ export default function RevisaoScreen() {
     : 0;
   const corProgresso = progresso >= 67 ? '#16A34A' : progresso >= 34 ? '#CA8A04' : '#DC2626';
 
-  const handleSalvar = (): void => {
+  const handleSalvar = async (): Promise<void> => {
     if (!ajuste.trim()) {
       Alert.alert('Ajuste vazio', 'Escreva pelo menos uma linha sobre o que ajustar na próxima semana.');
       return;
     }
-    Alert.alert('Revisão salva', 'Seu ajuste foi registrado. Veja você na próxima semana!', [
-      { text: 'OK', onPress: () => setAjuste('') },
-    ]);
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      await db.saveAjuste(ajuste.trim());
+      await loadAjustes();
+      Alert.alert('Revisão salva', 'Seu ajuste foi registrado. Veja você na próxima semana!', [
+        { text: 'OK', onPress: () => setAjuste('') },
+      ]);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível salvar o ajuste.');
+    }
   };
 
   return (
@@ -114,6 +132,15 @@ export default function RevisaoScreen() {
               <Text style={styles.btnSalvarText}>Salvar Revisão</Text>
             </TouchableOpacity>
           </View>
+
+          {ajustesRecentes.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>🗂 AJUSTES RECENTES</Text>
+              {ajustesRecentes.map(item => (
+                <Text key={item.id} style={styles.ajusteItem}>• {item.texto}</Text>
+              ))}
+            </View>
+          )}
         </ScrollView>
       )}
     </View>
@@ -211,5 +238,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  ajusteItem: {
+    fontSize: 14,
+    color: '#4B5563',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
 });

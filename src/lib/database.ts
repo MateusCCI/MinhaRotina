@@ -59,6 +59,20 @@ class DatabaseSingleton {
           saiu_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
       `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS ajustes_semanais (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          texto TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
       await this.seedSaidaItems();
       console.log(`[S1][TRACE:${traceId}] Tabelas criadas com sucesso`);
     } catch (error) {
@@ -172,6 +186,83 @@ class DatabaseSingleton {
       return result.map(r => r.saiu_at);
     } catch (error) {
       console.error(`[S1][TRACE:${traceId}] Erro ao buscar saídas de hoje:`, error);
+      throw error;
+    }
+  }
+
+  // Events (audit log)
+  async registerEvent(type: string): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync('INSERT INTO events (type) VALUES (?)', [type]);
+      console.log(`[S1][TRACE:${traceId}] Evento registrado: ${type}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao registrar evento:`, error);
+      throw error;
+    }
+  }
+
+  // Ajustes semanais
+  async saveAjuste(texto: string): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync('INSERT INTO ajustes_semanais (texto) VALUES (?)', [texto]);
+      console.log(`[S1][TRACE:${traceId}] Ajuste semanal salvo`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao salvar ajuste:`, error);
+      throw error;
+    }
+  }
+
+  async getRecentAjustes(): Promise<{ id: number; texto: string; created_at: string }[]> {
+    const traceId = this.generateTraceId();
+    try {
+      const result = await this.db!.getAllAsync<{ id: number; texto: string; created_at: string }>(
+        'SELECT * FROM ajustes_semanais ORDER BY created_at DESC LIMIT 3'
+      );
+      console.log(`[S1][TRACE:${traceId}] Ajustes recentes: ${result.length}`);
+      return result;
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao buscar ajustes:`, error);
+      throw error;
+    }
+  }
+
+  // Revisao (dados reais da semana)
+  async getWeeklyStats(): Promise<{ inboxZerado: number; totalSaidas: number; mediaSaida: string }> {
+    const traceId = this.generateTraceId();
+    try {
+      const zerado = await this.db!.getFirstAsync<{ n: number }>(
+        `SELECT COUNT(DISTINCT date(created_at)) as n
+         FROM events
+         WHERE type = 'inbox_zerado' AND date(created_at) >= date('now', '-6 days')`
+      );
+      const saidas = await this.db!.getFirstAsync<{ n: number }>(
+        `SELECT COUNT(*) as n FROM saida_log
+         WHERE date(saiu_at) >= date('now', '-6 days')`
+      );
+      const logs = await this.db!.getAllAsync<{ saiu_at: string }>(
+        `SELECT saiu_at FROM saida_log
+         WHERE date(saiu_at) >= date('now', '-6 days') ORDER BY saiu_at ASC`
+      );
+
+      let mediaSaida = '--:--';
+      if (logs.length > 0) {
+        const totalMin = logs.reduce((acc, log) => {
+          const [h, m] = log.saiu_at.slice(11, 16).split(':').map(Number);
+          return acc + (h * 60 + m);
+        }, 0);
+        const mediaMin = Math.floor(totalMin / logs.length);
+        const mm = String(mediaMin % 60).padStart(2, '0');
+        const hh = String(Math.floor(mediaMin / 60)).padStart(2, '0');
+        mediaSaida = `${hh}:${mm}`;
+      }
+
+      const stats = { inboxZerado: zerado?.n ?? 0, totalSaidas: saidas?.n ?? 0, mediaSaida };
+      console.log(`[S1][TRACE:${traceId}] Estatísticas semanais:`, stats);
+      return stats;
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao calcular estatísticas:`, error);
       throw error;
     }
   }
