@@ -30,6 +30,12 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# misc arquivos locais acidentais
+tailscale.tgz
+setup-tailscale.sh
+start-tailscale-user.sh
+/tailscale_*/
+
 # local env files
 .env*.local
 

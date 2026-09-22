@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,44 +8,23 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-
-const DEFAULT_ITEMS = [
-  { id: 1, content: 'chave', checked: false },
-  { id: 2, content: 'ponto', checked: false },
-  { id: 3, content: 'marmita', checked: false },
-  { id: 4, content: 'fone', checked: false },
-  { id: 5, content: 'portão', checked: false },
-];
+import { useSaida } from '../../../hooks/useSaida';
 
 export default function SaidaScreen() {
-  const [items, setItems] = useState(DEFAULT_ITEMS);
+  const { items, loading, allChecked, saidasHoje, toggleItem, registerSaida } = useSaida();
   const [saiuAs, setSaiuAs] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    setLoading(false);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleToggle = (id: number): void => {
-    setItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+  const handleConfirmar = async (): Promise<void> => {
+    try {
+      const hora = await registerSaida();
+      setSaiuAs(hora);
+      Alert.alert('Saída registrada', `Você saiu às ${hora}`, [
+        { text: 'OK', onPress: () => setSaiuAs(null) },
+      ]);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível registrar a saída.');
+    }
   };
-
-  const handleConfirmar = (): void => {
-    const hora = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    setSaiuAs(hora);
-    Alert.alert('Saída registrada', `Você saiu às ${hora}`, [
-      { text: 'OK', onPress: () => setSaiuAs(null) },
-    ]);
-  };
-
-  const allChecked = items.length > 0 && items.every(i => i.checked);
 
   return (
     <View style={styles.container}>
@@ -71,7 +50,7 @@ export default function SaidaScreen() {
                 styles.item,
                 item.checked && styles.itemChecked,
               ]}
-              onPress={() => handleToggle(item.id)}
+              onPress={() => toggleItem(item.id)}
               accessibilityLabel={`Marcar ${item.content}`}
             >
               <Text style={[styles.itemText, item.checked && styles.itemTextChecked]}>
@@ -83,7 +62,11 @@ export default function SaidaScreen() {
       )}
 
       <View style={styles.footer}>
-        <Text style={styles.horaAtual}>⏰ {now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</Text>
+        <Text style={styles.horaAtual}>
+          {saidasHoje.length > 0
+            ? `Registros hoje: ${saidasHoje.length}`
+            : 'Nenhuma saída registrada hoje'}
+        </Text>
         {saiuAs ? (
           <Text style={styles.saiuMsg}>Saí às: {saiuAs}</Text>
         ) : (

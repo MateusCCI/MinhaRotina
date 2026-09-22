@@ -16,6 +16,12 @@ export interface SaidaItem {
   id: number;
   content: string;
   checked: boolean;
+  checked_at?: string | null;
+}
+
+export interface SaidaLog {
+  id: number;
+  saiu_at: string;
 }
 
 export interface WeeklyStats {

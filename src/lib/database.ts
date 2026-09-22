@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { InboxItem, HojeItem } from './types';
+import { InboxItem, HojeItem, SaidaItem } from './types';
 
 class DatabaseSingleton {
   private static instance: DatabaseSingleton | null = null;
@@ -44,6 +44,22 @@ class DatabaseSingleton {
           FOREIGN KEY (inbox_id) REFERENCES inbox_items(id)
         );
       `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS saida_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          content TEXT NOT NULL,
+          position INTEGER NOT NULL DEFAULT 0,
+          checked INTEGER DEFAULT 0,
+          checked_at DATETIME
+        );
+      `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS saida_log (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          saiu_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      await this.seedSaidaItems();
       console.log(`[S1][TRACE:${traceId}] Tabelas criadas com sucesso`);
     } catch (error) {
       console.error(`[S1][TRACE:${traceId}] Erro ao criar tabelas:`, error);
@@ -53,6 +69,20 @@ class DatabaseSingleton {
 
   private generateTraceId(): string {
     return `s1-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private async seedSaidaItems(): Promise<void> {
+    const row = await this.db!.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM saida_items'
+    );
+    if ((row?.count ?? 0) > 0) return;
+    const defaults = ['chave', 'ponto', 'marmita', 'fone', 'portão'];
+    for (let i = 0; i < defaults.length; i++) {
+      await this.db!.runAsync(
+        'INSERT INTO saida_items (content, position) VALUES (?, ?)',
+        [defaults[i], i]
+      );
+    }
   }
 
   private async resetHojeForNewDay(): Promise<void> {
@@ -69,10 +99,79 @@ class DatabaseSingleton {
         await this.db!.runAsync(
           `DELETE FROM hoje_items WHERE date(created_at) < date('now')`
         );
+        await this.db!.runAsync(
+          `UPDATE saida_items SET checked = 0, checked_at = NULL
+           WHERE checked = 1 AND date(checked_at) < date('now')`
+        );
       });
       console.log(`[S1][TRACE:${traceId}] Reset diário do Hoje concluído`);
     } catch (error) {
       console.error(`[S1][TRACE:${traceId}] Erro no reset diário:`, error);
+      throw error;
+    }
+  }
+
+  // Saida queries
+  async getSaidaItems(): Promise<SaidaItem[]> {
+    const traceId = this.generateTraceId();
+    try {
+      const result = await this.db!.getAllAsync<any>(
+        'SELECT * FROM saida_items ORDER BY position ASC'
+      );
+      const normalized = result.map(row => ({
+        ...row,
+        checked: row.checked === 1 || row.checked === true,
+      }));
+      console.log(`[S1][TRACE:${traceId}] Saída: ${normalized.length} itens`);
+      return normalized;
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao buscar itens de saída:`, error);
+      throw error;
+    }
+  }
+
+  async toggleSaidaItem(id: number): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      const item = await this.db!.getFirstAsync<any>(
+        'SELECT * FROM saida_items WHERE id = ?',
+        [id]
+      );
+      const newChecked = item ? (item.checked ? 0 : 1) : 0;
+      await this.db!.runAsync(
+        `UPDATE saida_items
+         SET checked = ?, checked_at = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE NULL END
+         WHERE id = ?`,
+        [newChecked, newChecked, id]
+      );
+      console.log(`[S1][TRACE:${traceId}] Saída toggled: id=${id}, checked=${newChecked === 1}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao toggle item de saída:`, error);
+      throw error;
+    }
+  }
+
+  async registerSaida(): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync('INSERT INTO saida_log DEFAULT VALUES');
+      console.log(`[S1][TRACE:${traceId}] Saída registrada`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao registrar saída:`, error);
+      throw error;
+    }
+  }
+
+  async getSaidaLogsToday(): Promise<string[]> {
+    const traceId = this.generateTraceId();
+    try {
+      const result = await this.db!.getAllAsync<{ saiu_at: string }>(
+        `SELECT saiu_at FROM saida_log WHERE date(saiu_at) = date('now') ORDER BY saiu_at DESC`
+      );
+      console.log(`[S1][TRACE:${traceId}] Saídas hoje: ${result.length}`);
+      return result.map(r => r.saiu_at);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao buscar saídas de hoje:`, error);
       throw error;
     }
   }
