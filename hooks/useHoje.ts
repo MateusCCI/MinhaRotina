@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import DatabaseSingleton from '../src/lib/database';
 import { HojeItem } from '../src/lib/types';
+import { theme } from '../src/lib/theme';
 
 export function useHoje() {
   const [items, setItems] = useState<HojeItem[]>([]);
@@ -49,12 +50,12 @@ export function useHoje() {
   };
 
   const getProgress = useCallback((): { percentage: number; color: string } => {
-    if (items.length === 0) return { percentage: 0, color: '#EF4444' };
+    if (items.length === 0) return { percentage: 0, color: theme.colors.textMuted };
     const checked = items.filter(item => item.checked).length;
     const percentage = Math.round((checked / items.length) * 100);
-    if (percentage < 34) return { percentage, color: '#EF4444' };
-    if (percentage < 67) return { percentage, color: '#EAB308' };
-    return { percentage, color: '#22C55E' };
+    if (percentage < 34) return { percentage, color: theme.colors.danger };
+    if (percentage < 67) return { percentage, color: theme.colors.warning };
+    return { percentage, color: theme.colors.patina };
   }, [items]);
 
   return { items, loading, toggleItem, deleteItem, getProgress, fetchItems };

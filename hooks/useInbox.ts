@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import DatabaseSingleton from '../src/lib/database';
 import { InboxItem } from '../src/lib/types';
+import { setInboxCount } from '../src/lib/inboxCount';
 
 export function useInbox() {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
+
+  useEffect(() => {
+    setInboxCount(items.length);
+  }, [items]);
 
   const fetchItems = useCallback(async () => {
     try {
@@ -40,6 +45,23 @@ export function useInbox() {
       setIsEmpty(false);
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
+      throw error;
+    }
+  };
+
+  const updateItem = async (id: number, content: string, dueDate?: string | null, category?: string | null): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      await db.updateInboxItem(id, content, dueDate, category);
+      setItems(prev =>
+        prev.map(item =>
+          item.id === id
+            ? { ...item, content, due_date: dueDate ?? null, category: category ?? null }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao editar item:', error);
       throw error;
     }
   };
@@ -81,5 +103,5 @@ export function useInbox() {
     }
   };
 
-  return { items, loading, isEmpty, addItem, deleteItem, promoteToHoje, fetchItems };
+  return { items, loading, isEmpty, addItem, updateItem, deleteItem, promoteToHoje, fetchItems };
 }

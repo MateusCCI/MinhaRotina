@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSaida } from '../../../hooks/useSaida';
+import { theme } from '../../../src/lib/theme';
 
 export default function SaidaScreen() {
   const { items, loading, allChecked, saidasHoje, toggleItem, registerSaida } = useSaida();
@@ -39,7 +40,7 @@ export default function SaidaScreen() {
 
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={theme.colors.gold} />
         </View>
       ) : (
         <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
@@ -75,7 +76,9 @@ export default function SaidaScreen() {
             onPress={handleConfirmar}
             disabled={!allChecked}
           >
-            <Text style={styles.btnConfirmarText}>Confirmar Saída</Text>
+            <Text style={[styles.btnConfirmarText, !allChecked && styles.btnConfirmarTextDisabled]}>
+              Confirmar Saída
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -86,27 +89,24 @@ export default function SaidaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.bg,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.colors.gold,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginTop: 4,
   },
   loader: {
@@ -125,42 +125,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   itemChecked: {
-    backgroundColor: '#DBEAFE',
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.patina,
   },
   itemText: {
     fontSize: 16,
-    color: '#374151',
+    color: theme.colors.textBody,
     fontWeight: '500',
   },
   itemTextChecked: {
-    color: '#2563EB',
+    color: theme.colors.patinaPale,
     textDecorationLine: 'line-through',
   },
   footer: {
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.border,
     alignItems: 'center',
     gap: 8,
   },
   horaAtual: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   saiuMsg: {
     fontSize: 16,
-    color: '#16A34A',
+    color: theme.colors.patina,
     fontWeight: '600',
   },
   btnConfirmar: {
@@ -171,14 +169,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnConfirmarActive: {
-    backgroundColor: '#16A34A',
+    backgroundColor: theme.colors.gold,
   },
   btnConfirmarDisabled: {
-    backgroundColor: '#D1D5DB',
+    backgroundColor: theme.colors.disabled,
   },
   btnConfirmarText: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
     fontSize: 14,
     fontWeight: '600',
+  },
+  btnConfirmarTextDisabled: {
+    color: theme.colors.onDisabled,
   },
 });

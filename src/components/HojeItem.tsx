@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { HojeItem } from '../lib/types';
 import { dueLabel, CATEGORY_COLORS } from '../lib/date';
+import { theme } from '../lib/theme';
 
 interface HojeItemProps {
   item: HojeItem;
@@ -32,7 +33,7 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
               <Text style={[styles.badge, styles.badgeUrgent]}>⏰ {due.label}</Text>
             )}
             {item.category && (
-              <Text style={[styles.badge, { color: CATEGORY_COLORS[item.category] ?? '#6B7280' }]}>
+              <Text style={[styles.badge, { color: CATEGORY_COLORS[item.category] ?? theme.colors.textSecondary }]}>
                 {item.category}
               </Text>
             )}
@@ -56,44 +57,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   containerUrgent: {
-    borderColor: '#FCA5A5',
+    borderColor: theme.colors.danger,
     borderWidth: 2,
-    backgroundColor: '#FFF7F7',
+    backgroundColor: theme.colors.dangerSoft,
   },
   checkbox: {
     width: 48,
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.surfaceAlt,
   },
   checkboxChecked: {
-    backgroundColor: '#22C55E',
-    borderColor: '#22C55E',
+    backgroundColor: theme.colors.patina,
+    borderColor: theme.colors.patina,
   },
   checkmark: {
-    color: '#FFFFFF',
+    color: theme.colors.bg,
     fontSize: 24,
     fontWeight: 'bold',
   },
   content: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
+    color: theme.colors.text,
     lineHeight: 22,
   },
   body: {
@@ -110,11 +108,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   badgeUrgent: {
-    color: '#DC2626',
+    color: theme.colors.danger,
   },
   checked: {
     textDecorationLine: 'line-through',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
   },
   deleteBtn: {
     padding: 8,
@@ -122,6 +120,6 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     fontSize: 18,
-    color: '#EF4444',
+    color: theme.colors.danger,
   },
 });

@@ -6,6 +6,7 @@ import { useHoje } from '../../hooks/useHoje';
 import { useInbox } from '../../hooks/useInbox';
 import { HojeItem, InboxItem } from '../../src/lib/types';
 import { CATEGORIES, CATEGORY_COLORS } from '../../src/lib/date';
+import { theme } from '../../src/lib/theme';
 
 export default function HojeScreen() {
   const { items, loading, toggleItem, deleteItem, getProgress, fetchItems } = useHoje();
@@ -73,7 +74,7 @@ export default function HojeScreen() {
 
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={theme.colors.gold} />
         </View>
       ) : (
         <>
@@ -174,7 +175,7 @@ export default function HojeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -182,17 +183,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.colors.gold,
     letterSpacing: 0.5,
   },
   dots: {
@@ -232,30 +230,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   filterChipActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
+    borderColor: theme.colors.gold,
   },
   filterChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.colors.textSecondary,
   },
   filterChipTextActive: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,
   },
   noItems: {
     textAlign: 'center',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     fontSize: 16,
     marginTop: 40,
   },
@@ -263,50 +264,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.border,
   },
   btnAdd: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   btnDisabled: {
-    backgroundColor: '#D1D5DB',
+    backgroundColor: theme.colors.disabled,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   btnAddText: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
     fontSize: 14,
     fontWeight: '600',
   },
   btnDisabledText: {
-    color: '#9CA3AF',
+    color: theme.colors.onDisabled,
     fontSize: 14,
     fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCard: {
     width: '85%',
     maxWidth: 400,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 16,
     padding: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.borderStrong,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.colors.text,
   },
   modalSubtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginTop: 4,
     marginBottom: 16,
   },
@@ -316,11 +322,11 @@ const styles = StyleSheet.create({
   modalItem: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.border,
   },
   modalItemText: {
     fontSize: 15,
-    color: '#1F2937',
+    color: theme.colors.textBody,
   },
   modalCancel: {
     marginTop: 16,
@@ -330,6 +336,6 @@ const styles = StyleSheet.create({
   modalCancelText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
 });

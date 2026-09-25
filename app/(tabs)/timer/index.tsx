@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useTimer, formatMs } from '../../../hooks/useTimer';
 import ProgressBar from '../../../src/components/ProgressBar';
+import { theme, statusColor } from '../../../src/lib/theme';
 
 const TOTAL_MS = 25 * 60 * 1000;
 
@@ -19,7 +20,7 @@ export default function TimerScreen() {
   });
 
   const progress = TOTAL_MS > 0 ? ((TOTAL_MS - timer.remaining) / TOTAL_MS) * 100 : 0;
-  const progressColor = progress >= 67 ? '#16A34A' : progress >= 34 ? '#CA8A04' : '#DC2626';
+  const progressColor = statusColor(progress);
 
   return (
     <View style={styles.container}>
@@ -59,7 +60,7 @@ export default function TimerScreen() {
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.btnReset} onPress={timer.reset}>
-            <Text style={styles.btnText}>↺ Zerar</Text>
+            <Text style={styles.btnResetText}>↺ Zerar</Text>
           </TouchableOpacity>
         </View>
 
@@ -78,26 +79,23 @@ export default function TimerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.bg,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.colors.gold,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginTop: 4,
   },
   scroll: {
@@ -110,18 +108,15 @@ const styles = StyleSheet.create({
   timerCard: {
     alignItems: 'center',
     padding: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   timeDisplay: {
     fontSize: 56,
     fontWeight: '700',
-    color: '#1F2937',
+    color: theme.colors.text,
     fontFamily: 'monospace',
   },
   dots: {
@@ -131,7 +126,7 @@ const styles = StyleSheet.create({
   },
   dot: {
     fontSize: 24,
-    color: '#2563EB',
+    color: theme.colors.gold,
   },
   buttons: {
     flexDirection: 'row',
@@ -139,45 +134,54 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnStart: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 8,
   },
   btnPause: {
-    backgroundColor: '#CA8A04',
+    backgroundColor: theme.colors.warning,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 8,
   },
   btnReset: {
-    backgroundColor: '#6B7280',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.borderStrong,
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 8,
   },
   btnText: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  btnResetText: {
+    color: theme.colors.textSecondary,
     fontSize: 14,
     fontWeight: '600',
   },
   progressSection: {
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   progressTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,
   },
   progressLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginTop: 8,
   },
 });

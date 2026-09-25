@@ -2,14 +2,16 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { InboxItem } from '../lib/types';
 import { dueLabel, CATEGORY_COLORS } from '../lib/date';
+import { theme } from '../lib/theme';
 
 interface InboxItemProps {
   item: InboxItem;
   onPromote: (id: number) => void;
+  onEdit: (item: InboxItem) => void;
   onDelete: (id: number) => void;
 }
 
-export default function InboxItemComponent({ item, onPromote, onDelete }: InboxItemProps) {
+export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }: InboxItemProps) {
   const due = dueLabel(item.due_date);
   const hasBadges = due.label || item.category;
 
@@ -19,18 +21,25 @@ export default function InboxItemComponent({ item, onPromote, onDelete }: InboxI
       {hasBadges && (
         <View style={styles.badges}>
           {item.category && (
-            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#6B7280' }]}>
+            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#A8A29E' }]}>
               <Text style={styles.badgeText}>{item.category}</Text>
             </View>
           )}
           {due.label && (
             <View style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeDue]}>
-              <Text style={[styles.badgeText, due.urgent && styles.badgeTextUrgent]}>{due.label}</Text>
+              <Text style={styles.badgeDueText}>{due.label}</Text>
             </View>
           )}
         </View>
       )}
       <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.btn, styles.btnEdit]}
+          onPress={() => onEdit(item)}
+          accessibilityLabel={`Editar ${item.content}`}
+        >
+          <Text style={[styles.btnText, styles.btnEditText]}>✎ Editar</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btn, styles.btnPromote]}
           onPress={() => onPromote(item.id)}
@@ -43,7 +52,7 @@ export default function InboxItemComponent({ item, onPromote, onDelete }: InboxI
           onPress={() => onDelete(item.id)}
           accessibilityLabel={`Excluir ${item.content}`}
         >
-          <Text style={styles.btnText}>🗑</Text>
+          <Text style={[styles.btnText, styles.btnDeleteText]}>🗑</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -52,19 +61,16 @@ export default function InboxItemComponent({ item, onPromote, onDelete }: InboxI
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   content: {
     fontSize: 16,
-    color: '#1F2937',
+    color: theme.colors.text,
     marginBottom: 8,
     lineHeight: 22,
   },
@@ -80,18 +86,24 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   badgeDue: {
-    backgroundColor: '#E0F2FE',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.borderStrong,
   },
   badgeUrgent: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: theme.colors.dangerSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.danger,
   },
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
   },
-  badgeTextUrgent: {
-    color: '#DC2626',
+  badgeDueText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.gold,
   },
   actions: {
     flexDirection: 'row',
@@ -99,21 +111,35 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   btn: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
     minWidth: 80,
     alignItems: 'center',
   },
+  btnEdit: {
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  btnEditText: {
+    color: theme.colors.textSecondary,
+  },
   btnPromote: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
   },
   btnDelete: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: 'rgba(255,95,86,0.4)',
+    minWidth: 48,
+  },
+  btnDeleteText: {
+    color: theme.colors.danger,
   },
   btnText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
   },
 });

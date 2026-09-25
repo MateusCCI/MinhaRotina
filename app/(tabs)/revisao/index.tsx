@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import DatabaseSingleton from '../../../src/lib/database';
+import { theme, statusColor } from '../../../src/lib/theme';
 
 export default function RevisaoScreen() {
   const [stats, setStats] = useState({
@@ -60,7 +61,7 @@ export default function RevisaoScreen() {
   const progresso = stats.totalHoje > 0
     ? Math.round((stats.completosHoje / Math.max(stats.totalHoje, 1)) * 100)
     : 0;
-  const corProgresso = progresso >= 67 ? '#16A34A' : progresso >= 34 ? '#CA8A04' : '#DC2626';
+  const corProgresso = statusColor(progresso);
 
   const handleSalvar = async (): Promise<void> => {
     if (!ajuste.trim()) {
@@ -88,7 +89,7 @@ export default function RevisaoScreen() {
 
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={theme.colors.gold} />
         </View>
       ) : (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
@@ -121,7 +122,7 @@ export default function RevisaoScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="O que ajustar na próxima semana?"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={theme.colors.textMuted}
               value={ajuste}
               onChangeText={setAjuste}
               multiline
@@ -150,26 +151,23 @@ export default function RevisaoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.bg,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.colors.gold,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginTop: 4,
   },
   loader: {
@@ -185,19 +183,16 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 16,
@@ -207,43 +202,44 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.border,
   },
   statLabel: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   statValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.text,
   },
   textArea: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceAlt,
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: '#374151',
+    color: theme.colors.textBody,
     minHeight: 80,
     marginBottom: 12,
   },
   btnSalvar: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   btnSalvarText: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
     fontSize: 14,
     fontWeight: '600',
   },
   ajusteItem: {
     fontSize: 14,
-    color: '#4B5563',
+    color: theme.colors.textBody,
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.border,
   },
 });

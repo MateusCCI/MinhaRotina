@@ -22,12 +22,12 @@ export function dueLabel(dueDate?: string | null): { label: string | null; urgen
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  Trabalho: '#2563EB',
-  Estudo: '#7C3AED',
-  'Família': '#16A34A',
-  Casa: '#EA580C',
-  Mercado: '#DB2777',
-  Outros: '#6B7280',
+  Trabalho: '#7AA2FF',
+  Estudo: '#C084FC',
+  'Família': '#4ADE80',
+  Casa: '#FB923C',
+  Mercado: '#F472B6',
+  Outros: '#A8A29E',
 };
 
 export const CATEGORIES = ['Trabalho', 'Estudo', 'Família', 'Casa', 'Mercado', 'Outros'];

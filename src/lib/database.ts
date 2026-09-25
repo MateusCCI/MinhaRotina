@@ -333,6 +333,20 @@ class DatabaseSingleton {
     }
   }
 
+  async updateInboxItem(id: number, content: string, dueDate?: string | null, category?: string | null): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync(
+        'UPDATE inbox_items SET content = ?, due_date = ?, category = ? WHERE id = ?',
+        [content, dueDate ?? null, category ?? null, id]
+      );
+      console.log(`[S1][TRACE:${traceId}] Item editado: id=${id}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao editar item:`, error);
+      throw error;
+    }
+  }
+
   // Hoje queries
   async getHojeItems(): Promise<HojeItem[]> {
     const traceId = this.generateTraceId();

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { CATEGORIES, CATEGORY_COLORS, DUE_OPTIONS } from '../lib/date';
+import { theme } from '../lib/theme';
 
 export interface CaptureMeta {
   dueDate?: string | null;
@@ -35,7 +36,7 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
           onChangeText={setText}
           onSubmitEditing={handleSubmit}
           placeholder="Despejar ideia aqui..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.colors.textMuted}
           returnKeyType="done"
           accessibilityLabel="Campo de captura rápida"
         />
@@ -101,19 +102,16 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
+    color: theme.colors.text,
     paddingVertical: 12,
     paddingHorizontal: 12,
   },
@@ -121,17 +119,17 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 4,
   },
   btnDisabled: {
-    backgroundColor: '#D1D5DB',
+    backgroundColor: theme.colors.disabled,
   },
   btnText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
     fontWeight: 'bold',
     lineHeight: 20,
   },
@@ -141,7 +139,7 @@ const styles = StyleSheet.create({
   optionsLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     marginBottom: 6,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -155,17 +153,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   chipActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: theme.colors.gold,
+    borderColor: theme.colors.gold,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.colors.textSecondary,
   },
   chipTextActive: {
-    color: '#FFFFFF',
+    color: theme.colors.onGold,
   },
 });

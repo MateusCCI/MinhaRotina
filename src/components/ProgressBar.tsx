@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../lib/theme';
 
 interface ProgressBarProps {
   percentage: number;
@@ -22,15 +23,12 @@ export default function ProgressBar({ percentage, color }: ProgressBarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: 'row',
@@ -41,7 +39,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   percentage: {
     fontSize: 16,
@@ -49,7 +47,7 @@ const styles = StyleSheet.create({
   },
   track: {
     height: 12,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: theme.colors.surfaceAlt,
     borderRadius: 6,
     overflow: 'hidden',
   },
