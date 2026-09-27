@@ -8,81 +8,103 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useSaida } from '../../../hooks/useSaida';
-import { theme } from '../../../src/lib/theme';
+import { theme, cardShadow } from '../../../src/lib/theme';
 
 export default function SaidaScreen() {
   const { items, loading, allChecked, saidasHoje, toggleItem, registerSaida } = useSaida();
   const [saiuAs, setSaiuAs] = useState<string | null>(null);
+  const checked = items.filter(i => i.checked).length;
+
+  const handleToggle = (id: number): void => {
+    void Haptics.selectionAsync();
+    void toggleItem(id);
+  };
 
   const handleConfirmar = async (): Promise<void> => {
     try {
       const hora = await registerSaida();
       setSaiuAs(hora);
-      Alert.alert('Saída registrada', `Você saiu às ${hora}`, [
+      Alert.alert('Boa saída!', `Registrei ${hora}. Até logo.`, [
         { text: 'OK', onPress: () => setSaiuAs(null) },
       ]);
     } catch {
-      Alert.alert('Erro', 'Não foi possível registrar a saída.');
+      Alert.alert('Ops', 'Não consegui registrar a saída. Tente de novo.');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>SAÍDA</Text>
+        <Text style={styles.title}>Saída</Text>
         <Text style={styles.subtitle}>
-          {allChecked
-            ? 'Tudo pronto! ✓'
-            : `${items.filter(i => i.checked).length}/${items.length} itens`}
+          {items.length === 0
+            ? 'Nada para conferir'
+            : allChecked
+              ? 'Tudo pronto — pode ir tranquilo'
+              : `${checked} de ${items.length} conferidos`}
         </Text>
       </View>
 
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color={theme.colors.gold} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-          {items.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.item,
-                item.checked && styles.itemChecked,
-              ]}
-              onPress={() => toggleItem(item.id)}
-              accessibilityLabel={`Marcar ${item.content}`}
-            >
-              <Text style={[styles.itemText, item.checked && styles.itemTextChecked]}>
-                {item.checked ? '✓' : '○'} {item.content}
+          {items.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="bag-check-outline" size={44} color={theme.colors.textMuted} />
+              <Text style={styles.emptyTitle}>Nenhum item de saída</Text>
+              <Text style={styles.emptyText}>
+                Seu checklist de saída (chaves, carteira, celular…) aparece aqui quando for cadastrado.
               </Text>
-            </TouchableOpacity>
-          ))}
+            </View>
+          ) : (
+            items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.item, item.checked && styles.itemChecked]}
+                onPress={() => handleToggle(item.id)}
+                accessibilityLabel={`Marcar ${item.content}`}
+                accessibilityRole="checkbox"
+              >
+                <View style={[styles.check, item.checked && styles.checkOn]}>
+                  {item.checked && <Ionicons name="checkmark" size={18} color={theme.colors.onPrimary} />}
+                </View>
+                <Text style={[styles.itemText, item.checked && styles.itemTextChecked]}>
+                  {item.content}
+                </Text>
+              </TouchableOpacity>
+            ))
+          )}
         </ScrollView>
       )}
 
       <View style={styles.footer}>
         <Text style={styles.horaAtual}>
           {saidasHoje.length > 0
-            ? `Registros hoje: ${saidasHoje.length}`
+            ? `${saidasHoje.length} ${saidasHoje.length === 1 ? 'saída hoje' : 'saídas hoje'} — última rotina cumprida`
             : 'Nenhuma saída registrada hoje'}
         </Text>
         {saiuAs ? (
-          <Text style={styles.saiuMsg}>Saí às: {saiuAs}</Text>
+          <Text style={styles.saiuMsg}>Saída das {saiuAs} registrada</Text>
         ) : (
           <TouchableOpacity
-            style={[styles.btnConfirmar, allChecked ? styles.btnConfirmarActive : styles.btnConfirmarDisabled]}
+            style={[styles.btnConfirmar, !allChecked && styles.btnConfirmarDisabled]}
             onPress={handleConfirmar}
             disabled={!allChecked}
           >
             <Text style={[styles.btnConfirmarText, !allChecked && styles.btnConfirmarTextDisabled]}>
-              Confirmar Saída
+              {allChecked ? 'Confirmar saída' : `Confira ${items.length - checked} ${items.length - checked === 1 ? 'item' : 'itens'} para sair`}
             </Text>
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -92,22 +114,19 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.bg,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: theme.colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.sm,
+    paddingBottom: theme.spacing.md,
   },
   title: {
-    fontSize: 20,
+    fontSize: theme.type.largeTitle,
     fontWeight: '800',
-    color: theme.colors.gold,
-    letterSpacing: 0.5,
+    color: theme.colors.text,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: theme.type.callout,
     color: theme.colors.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
   },
   loader: {
     flex: 1,
@@ -118,66 +137,103 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    padding: 20,
-    paddingTop: 16,
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: 24,
+  },
+  emptyState: {
+    padding: theme.spacing.xl,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    alignItems: 'center',
+    ...cardShadow(),
+  },
+  emptyTitle: {
+    fontSize: theme.type.title,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  emptyText: {
+    fontSize: theme.type.callout,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    gap: 12,
+    minHeight: 60,
+    padding: theme.spacing.md,
     backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    marginBottom: theme.spacing.sm,
+    ...cardShadow(1),
   },
   itemChecked: {
     backgroundColor: theme.colors.successSoft,
-    borderColor: theme.colors.patina,
+  },
+  check: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: theme.colors.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surface,
+  },
+  checkOn: {
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
   },
   itemText: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: theme.type.body,
     color: theme.colors.textBody,
     fontWeight: '500',
   },
   itemTextChecked: {
-    color: theme.colors.patinaPale,
+    color: theme.colors.success,
     textDecorationLine: 'line-through',
   },
   footer: {
-    padding: 16,
+    padding: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.spacing.lg,
     backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   horaAtual: {
-    fontSize: 14,
+    fontSize: theme.type.footnote,
     color: theme.colors.textSecondary,
   },
   saiuMsg: {
-    fontSize: 16,
-    color: theme.colors.patina,
-    fontWeight: '600',
+    fontSize: theme.type.body,
+    color: theme.colors.success,
+    fontWeight: '700',
   },
   btnConfirmar: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    minWidth: 160,
+    minHeight: 52,
+    width: '100%',
     alignItems: 'center',
-  },
-  btnConfirmarActive: {
-    backgroundColor: theme.colors.gold,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.primary,
   },
   btnConfirmarDisabled: {
     backgroundColor: theme.colors.disabled,
   },
   btnConfirmarText: {
-    color: theme.colors.onGold,
-    fontSize: 14,
-    fontWeight: '600',
+    color: theme.colors.onPrimary,
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   btnConfirmarTextDisabled: {
     color: theme.colors.onDisabled,

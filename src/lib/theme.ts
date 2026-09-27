@@ -1,32 +1,86 @@
+import { Platform } from 'react-native';
+
+/**
+ * Mundo visual "Papel & Âmbar" — tema claro, amigável, gramática iOS.
+ *
+ * Cena física: pessoa com TDAH confere a rotina no celular durante o dia,
+ * com uma mão, sob luz ambiente clara — por isso fundo claro quente
+ * (grouped) com cards brancos, e não o inverso.
+ *
+ * Estratégia de cor: Restrained (modo Operate) — neutros quentes + UMA
+ * tinta (âmbar queimado) só para ação primária, seleção e estado.
+ * Contrastes miram ≥4.5:1 em texto e placeholder (craft floor).
+ */
 export const theme = {
   colors: {
-    bg: '#080706',
-    surface: '#141210',
-    surfaceAlt: '#1D1A15',
-    border: 'rgba(255,186,0,0.16)',
-    borderStrong: 'rgba(255,186,0,0.45)',
-    text: '#E1E1E1',
-    textBody: '#D7D7D7',
-    textSecondary: '#A3A09A',
-    textMuted: '#73706A',
-    gold: '#FFBA00',
-    goldPress: '#E0A300',
-    goldSoft: 'rgba(255,186,0,0.14)',
-    onGold: '#0B0A08',
-    patina: '#0FB6AC',
-    patinaPale: '#8ED3CC',
-    danger: '#FF5F56',
-    warning: '#FFBD2E',
-    dangerSoft: 'rgba(255,95,86,0.16)',
-    successSoft: 'rgba(15,182,172,0.16)',
-    warningSoft: 'rgba(255,189,46,0.16)',
-    disabled: '#3A3630',
-    onDisabled: '#8A857C',
+    // Superfícies (iOS grouped, versão quente)
+    bg: '#F4F2EC',
+    surface: '#FFFFFF',
+    surfaceAlt: '#ECE9E1',
+    border: 'rgba(28,25,23,0.10)',
+    borderStrong: 'rgba(180,83,9,0.40)',
+
+    // Texto sobre fundo claro
+    text: '#1C1917',
+    textBody: '#44403C',
+    textSecondary: '#57534E',
+    textMuted: '#6E6A61',
+
+    // Tinta única: âmbar queimado (ação primária, seleção, foco)
+    primary: '#B45309',
+    primaryPress: '#92400E',
+    primarySoft: 'rgba(180,83,9,0.10)',
+    onPrimary: '#FFFFFF',
+
+    // Semânticas
+    success: '#0F766E',
+    successSoft: 'rgba(15,118,110,0.10)',
+    danger: '#DC2626',
+    dangerSoft: 'rgba(220,38,38,0.08)',
+    warning: '#B45309',
+    warningSoft: 'rgba(180,83,9,0.10)',
+
+    disabled: '#E7E5E4',
+    onDisabled: '#6E6A61',
+  },
+  radius: {
+    sm: 10,
+    md: 14,
+    lg: 20,
+    pill: 999,
+  },
+  spacing: {
+    xs: 8,
+    sm: 12,
+    md: 16,
+    lg: 20,
+    xl: 24,
+  },
+  type: {
+    largeTitle: 30,
+    title: 20,
+    body: 17,
+    callout: 15,
+    footnote: 13,
+    caption: 12,
   },
 } as const;
 
+/** Sombra suave de card claro: sempre com offset + blur (nunca halo). */
+export function cardShadow(elev = 2) {
+  if (Platform.OS === 'android') {
+    return { elevation: elev } as const;
+  }
+  return {
+    shadowColor: '#1C1917',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+  } as const;
+}
+
 export function statusColor(pct: number): string {
-  if (pct >= 67) return theme.colors.patina;
+  if (pct >= 67) return theme.colors.success;
   if (pct >= 34) return theme.colors.warning;
   return theme.colors.danger;
 }

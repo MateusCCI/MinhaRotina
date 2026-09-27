@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { CATEGORIES, CATEGORY_COLORS, DUE_OPTIONS } from '../lib/date';
-import { theme } from '../lib/theme';
+import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../lib/date';
+import { theme, cardShadow } from '../lib/theme';
 
 export interface CaptureMeta {
   dueDate?: string | null;
@@ -28,14 +28,15 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
   };
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.container}>
+    <View style={styles.card}>
+      <Text style={styles.prompt}>O que está na sua cabeça?</Text>
+      <View style={styles.row}>
         <TextInput
           style={styles.input}
           value={text}
           onChangeText={setText}
           onSubmitEditing={handleSubmit}
-          placeholder="Despejar ideia aqui..."
+          placeholder="Despeje aqui, sem filtro…"
           placeholderTextColor={theme.colors.textMuted}
           returnKeyType="done"
           accessibilityLabel="Campo de captura rápida"
@@ -46,127 +47,140 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
           disabled={!text.trim()}
           accessibilityLabel="Salvar item"
         >
-          <Text style={styles.btnText}>✓</Text>
+          <Text style={[styles.btnText, !text.trim() && styles.btnTextDisabled]}>Guardar</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.options}>
-        <Text style={styles.optionsLabel}>Prazo:</Text>
-        <View style={styles.chips}>
-          {DUE_OPTIONS.map(opt => (
-            <TouchableOpacity
-              key={opt.key}
-              style={[styles.chip, dueKey === opt.key && styles.chipActive]}
-              onPress={() => setDueKey(opt.key)}
-            >
-              <Text style={[styles.chipText, dueKey === opt.key && styles.chipTextActive]}>
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      <Text style={styles.optionsLabel}>Quando lembrar?</Text>
+      <View style={styles.chips}>
+        {DUE_OPTIONS.map(opt => (
+          <TouchableOpacity
+            key={opt.key}
+            style={[styles.chip, dueKey === opt.key && styles.chipActive]}
+            onPress={() => setDueKey(opt.key)}
+          >
+            <Text style={[styles.chipText, dueKey === opt.key && styles.chipTextActive]}>
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <View style={styles.options}>
-        <Text style={styles.optionsLabel}>Categoria:</Text>
-        <View style={styles.chips}>
-          {CATEGORIES.map(cat => (
+      <Text style={styles.optionsLabel}>É sobre o quê?</Text>
+      <View style={styles.chips}>
+        {CATEGORIES.map(cat => {
+          const active = category === cat;
+          return (
             <TouchableOpacity
               key={cat}
               style={[
                 styles.chip,
-                category === cat && { backgroundColor: CATEGORY_COLORS[cat] },
+                active && { backgroundColor: CATEGORY_COLORS[cat], borderColor: CATEGORY_COLORS[cat] },
               ]}
               onPress={() => setCategory(prev => (prev === cat ? null : cat))}
             >
               <Text
                 style={[
                   styles.chipText,
-                  category === cat && styles.chipTextActive,
+                  active && { color: CATEGORY_TEXT[cat] ?? theme.colors.text },
                 ]}
               >
                 {cat}
               </Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          );
+        })}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: 20,
+  card: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...cardShadow(),
   },
-  container: {
+  prompt: {
+    fontSize: theme.type.title,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 4,
+    backgroundColor: theme.colors.bg,
+    borderRadius: theme.radius.md,
+    padding: 6,
+    paddingLeft: 14,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    marginBottom: theme.spacing.md,
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: theme.type.body,
     color: theme.colors.text,
     paddingVertical: 12,
-    paddingHorizontal: 12,
+    minHeight: 48,
   },
   btn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: theme.colors.gold,
+    minHeight: 48,
+    paddingHorizontal: 18,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 4,
   },
   btnDisabled: {
     backgroundColor: theme.colors.disabled,
   },
   btnText: {
-    fontSize: 24,
-    color: theme.colors.onGold,
-    fontWeight: 'bold',
-    lineHeight: 20,
+    fontSize: theme.type.callout,
+    color: theme.colors.onPrimary,
+    fontWeight: '700',
   },
-  options: {
-    marginTop: 8,
+  btnTextDisabled: {
+    color: theme.colors.onDisabled,
   },
   optionsLabel: {
-    fontSize: 11,
+    fontSize: theme.type.caption,
     fontWeight: '700',
     color: theme.colors.textMuted,
-    marginBottom: 6,
+    marginBottom: 8,
+    marginTop: 4,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: theme.spacing.sm,
   },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surfaceAlt,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
   chipActive: {
-    backgroundColor: theme.colors.gold,
-    borderColor: theme.colors.gold,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   chipText: {
-    fontSize: 13,
+    fontSize: theme.type.footnote,
     fontWeight: '600',
     color: theme.colors.textSecondary,
   },
   chipTextActive: {
-    color: theme.colors.onGold,
+    color: theme.colors.onPrimary,
   },
 });

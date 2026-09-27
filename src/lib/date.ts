@@ -21,13 +21,24 @@ export function dueLabel(dueDate?: string | null): { label: string | null; urgen
   return { label: `vence ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`, urgent: false };
 }
 
+/** Fundo pastel do pill de categoria (fundo claro → tinta escura da mesma matiz). */
 export const CATEGORY_COLORS: Record<string, string> = {
-  Trabalho: '#7AA2FF',
-  Estudo: '#C084FC',
-  'Família': '#4ADE80',
-  Casa: '#FB923C',
-  Mercado: '#F472B6',
-  Outros: '#A8A29E',
+  Trabalho: '#DBEAFE',
+  Estudo: '#F3E8FF',
+  'Família': '#DCFCE7',
+  Casa: '#FFEDD5',
+  Mercado: '#FCE7F3',
+  Outros: '#E7E5E4',
+};
+
+/** Texto do pill: sempre a versão escura da matiz (contraste ≥4.5:1). */
+export const CATEGORY_TEXT: Record<string, string> = {
+  Trabalho: '#1D4ED8',
+  Estudo: '#7E22CE',
+  'Família': '#15803D',
+  Casa: '#C2410C',
+  Mercado: '#BE185D',
+  Outros: '#57534E',
 };
 
 export const CATEGORIES = ['Trabalho', 'Estudo', 'Família', 'Casa', 'Mercado', 'Outros'];

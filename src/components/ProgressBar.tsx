@@ -8,14 +8,15 @@ interface ProgressBarProps {
 }
 
 export default function ProgressBar({ percentage, color }: ProgressBarProps) {
+  const pct = Math.max(0, Math.min(100, Math.round(percentage)));
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="progressbar">
       <View style={styles.header}>
-        <Text style={styles.label}>Progresso</Text>
-        <Text style={[styles.percentage, { color }]}>{percentage}%</Text>
+        <Text style={styles.label}>Progresso de hoje</Text>
+        <Text style={[styles.percentage, { color }]}>{pct}%</Text>
       </View>
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${percentage}%`, backgroundColor: color }]} />
+        <View style={[styles.fill, { width: `${pct}%`, backgroundColor: color }]} />
       </View>
     </View>
   );
@@ -24,26 +25,24 @@ export default function ProgressBar({ percentage, color }: ProgressBarProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   label: {
-    fontSize: 14,
+    fontSize: theme.type.callout,
     fontWeight: '600',
     color: theme.colors.textSecondary,
   },
   percentage: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: theme.type.title,
+    fontWeight: '800',
   },
   track: {
     height: 12,

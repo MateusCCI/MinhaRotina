@@ -55,7 +55,7 @@ export function useHoje() {
     const percentage = Math.round((checked / items.length) * 100);
     if (percentage < 34) return { percentage, color: theme.colors.danger };
     if (percentage < 67) return { percentage, color: theme.colors.warning };
-    return { percentage, color: theme.colors.patina };
+    return { percentage, color: theme.colors.success };
   }, [items]);
 
   return { items, loading, toggleItem, deleteItem, getProgress, fetchItems };

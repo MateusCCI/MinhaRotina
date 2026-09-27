@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { HojeItem } from '../lib/types';
-import { dueLabel, CATEGORY_COLORS } from '../lib/date';
-import { theme } from '../lib/theme';
+import { dueLabel, CATEGORY_TEXT } from '../lib/date';
+import { theme, cardShadow } from '../lib/theme';
 
 interface HojeItemProps {
   item: HojeItem;
@@ -13,15 +15,21 @@ interface HojeItemProps {
 export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItemProps) {
   const due = dueLabel(item.due_date);
 
+  const handleToggle = (): void => {
+    void Haptics.selectionAsync();
+    onToggle(item.id);
+  };
+
   return (
     <View style={[styles.container, !item.checked && due.urgent ? styles.containerUrgent : undefined]}>
       <TouchableOpacity
         style={[styles.checkbox, item.checked ? styles.checkboxChecked : undefined]}
-        onPress={() => onToggle(item.id)}
-        accessibilityLabel={item.checked ? 'Desmarcar' : 'Marcar'}
+        onPress={handleToggle}
+        accessibilityLabel={item.checked ? 'Desmarcar' : 'Concluir'}
+        accessibilityRole="checkbox"
         accessible
       >
-        {item.checked && <Text style={styles.checkmark}>✓</Text>}
+        {item.checked && <Ionicons name="checkmark" size={22} color={theme.colors.onPrimary} />}
       </TouchableOpacity>
       <View style={styles.body}>
         <Text style={[styles.content, item.checked ? styles.checked : undefined]}>
@@ -30,10 +38,12 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
         {(due.label || item.category) && (
           <View style={styles.badges}>
             {due.label && (
-              <Text style={[styles.badge, styles.badgeUrgent]}>⏰ {due.label}</Text>
+              <Text style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeCalm]}>
+                {due.label}
+              </Text>
             )}
             {item.category && (
-              <Text style={[styles.badge, { color: CATEGORY_COLORS[item.category] ?? theme.colors.textSecondary }]}>
+              <Text style={[styles.badge, { color: CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary }]}>
                 {item.category}
               </Text>
             )}
@@ -44,8 +54,9 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
         style={styles.deleteBtn}
         onPress={() => onDelete(item.id)}
         accessibilityLabel="Remover do hoje"
+        accessibilityRole="button"
       >
-        <Text style={styles.deleteText}>✕</Text>
+        <Ionicons name="close-circle-outline" size={24} color={theme.colors.textMuted} />
       </TouchableOpacity>
     </View>
   );
@@ -55,44 +66,37 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    marginBottom: theme.spacing.sm,
+    ...cardShadow(),
   },
   containerUrgent: {
+    borderWidth: 1.5,
     borderColor: theme.colors.danger,
-    borderWidth: 2,
-    backgroundColor: theme.colors.dangerSoft,
   },
   checkbox: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: theme.colors.borderStrong,
+    borderColor: theme.colors.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
-    backgroundColor: theme.colors.surfaceAlt,
+    backgroundColor: theme.colors.surface,
   },
   checkboxChecked: {
-    backgroundColor: theme.colors.patina,
-    borderColor: theme.colors.patina,
-  },
-  checkmark: {
-    color: theme.colors.bg,
-    fontSize: 24,
-    fontWeight: 'bold',
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
   },
   content: {
     flex: 1,
-    fontSize: 16,
+    fontSize: theme.type.body,
     color: theme.colors.text,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   body: {
     flex: 1,
@@ -104,22 +108,24 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   badge: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: theme.type.caption,
+    fontWeight: '700',
   },
   badgeUrgent: {
     color: theme.colors.danger,
+  },
+  badgeCalm: {
+    color: theme.colors.textSecondary,
   },
   checked: {
     textDecorationLine: 'line-through',
     color: theme.colors.textMuted,
   },
   deleteBtn: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  deleteText: {
-    fontSize: 18,
-    color: theme.colors.danger,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
   },
 });

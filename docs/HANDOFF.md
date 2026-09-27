@@ -1,5 +1,23 @@
 # HANDOFF — Minha Rotina
 
+Sessão (26/09/2026, continuação): redesign claro iOS "Papel & Âmbar". Ver seção nova no topo; abaixo, o handoff da sessão anterior (25/09).
+
+## Sessão 26/09 — redesign claro iOS (não commitado ainda)
+
+Decisão do usuário: **"Redesign claro iOS"** (trocar o dark Neo Kinpaku por tema claro estilo Lovable/iOS).
+Contrato do mundo novo em `docs/DESIGN.md` (ler antes de mexer em UI).
+
+- `src/lib/theme.ts` — reescrito: bg `#F4F2EC`, surface `#FFFFFF`, tinta única `primary #B45309`, sucesso `#0F766E`, perigo `#DC2626`; + `radius`, `spacing`, `type`, `cardShadow()`. Nomes antigos (`gold`, `patina`…) removidos.
+- `src/lib/date.ts` — `CATEGORY_COLORS` virou pastel (fundo) + novo `CATEGORY_TEXT` (texto escuro da matiz).
+- `App.tsx` — tab bar branca iOS com Ionicons (outline/cheio), `SafeAreaProvider`, `StatusBar style="dark"`.
+- 5 telas + 4 componentes reescritos no mundo novo: large titles, bottom-sheets, empty states que ensinam, haptic (`expo-haptics`) em concluir/promover/marcar saída, zero emoji como ícone.
+- Nova dep: `@expo/vector-icons` (oficial Expo). **Armadilha registrada no DESIGN.md:** não usar `ComponentProps<typeof Ionicons>['name']` (trava o tsc); usar union local `IconName`. Nomes válidos: `file-tray-*` (não `tray`), `checkmark` (não `check`).
+- Validação: `tsc --noEmit` limpo, `eslint` limpo, `expo export --platform web` compila.
+- Detector impeccable: pulado (plataforma nativa — o detector lê HTML/CSS; vale o craft-floor + revisão manual).
+- Falta: validação humana no aparelho (5 telas), revisar contraste/copys com um olhar fresco.
+
+---
+
 Sessão encerrada em: 25/09/2026. Este documento é o ponto de partida da próxima sessão — quem continuar lê **só isto** para retomar sem contexto externo.
 
 ## Objetivo da sessão

@@ -1,12 +1,12 @@
 # STATUS — Minha Rotina (foto da situação)
 
-Atualizado em: 25/09/2026. Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
+Atualizado em: 26/09/2026. Redesign claro iOS "Papel & Âmbar" aplicado (ver `docs/DESIGN.md` + `docs/HANDOFF.md` sessão 26/09). Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
 
 > **Sessão a sessão:** o detalhamento técnico da última sessão (commits, tokens do tema, comandos de validação) está no **`docs/HANDOFF.md`** — leia-o antes de codar.
 
 ## Onde estamos
 
-Fase de **implementação S1-S4 concluída no código** (Inbox, Hoje, Saída, Timer, Revisão, tudo navegável com tema escuro Neo Kinpaku). Próximo passo: **validação humana + marcos M2/M3 da EAP**.
+Fase de **redesign claro iOS concluída no código** (contrato em `docs/DESIGN.md`). Próximo passo: **validação humana + marcos M2/M3 da EAP**.
 
 ## Concluído
 

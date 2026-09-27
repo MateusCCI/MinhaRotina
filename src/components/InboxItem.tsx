@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { InboxItem } from '../lib/types';
-import { dueLabel, CATEGORY_COLORS } from '../lib/date';
-import { theme } from '../lib/theme';
+import { dueLabel, CATEGORY_COLORS, CATEGORY_TEXT } from '../lib/date';
+import { theme, cardShadow } from '../lib/theme';
 
 interface InboxItemProps {
   item: InboxItem;
@@ -15,44 +17,58 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
   const due = dueLabel(item.due_date);
   const hasBadges = due.label || item.category;
 
+  const handlePromote = (): void => {
+    void Haptics.selectionAsync();
+    onPromote(item.id);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.content} numberOfLines={2}>{item.content}</Text>
+    <View style={[styles.container, due.urgent && styles.containerUrgent]}>
+      <Text style={styles.content} numberOfLines={3}>{item.content}</Text>
       {hasBadges && (
         <View style={styles.badges}>
           {item.category && (
-            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#A8A29E' }]}>
-              <Text style={styles.badgeText}>{item.category}</Text>
+            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#E7E5E4' }]}>
+              <Text style={[styles.badgeText, { color: CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary }]}>
+                {item.category}
+              </Text>
             </View>
           )}
           {due.label && (
             <View style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeDue]}>
-              <Text style={styles.badgeDueText}>{due.label}</Text>
+              <Text style={[styles.badgeText, due.urgent ? styles.badgeUrgentText : styles.badgeDueText]}>
+                {due.label}
+              </Text>
             </View>
           )}
         </View>
       )}
       <View style={styles.actions}>
         <TouchableOpacity
-          style={[styles.btn, styles.btnEdit]}
+          style={styles.iconBtn}
           onPress={() => onEdit(item)}
           accessibilityLabel={`Editar ${item.content}`}
+          accessibilityRole="button"
         >
-          <Text style={[styles.btnText, styles.btnEditText]}>✎ Editar</Text>
+          <Ionicons name="pencil-outline" size={20} color={theme.colors.textSecondary} />
+          <Text style={styles.iconBtnText}>Editar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.btn, styles.btnPromote]}
-          onPress={() => onPromote(item.id)}
+          style={styles.primaryBtn}
+          onPress={handlePromote}
           accessibilityLabel={`Mover ${item.content} para hoje`}
+          accessibilityRole="button"
         >
-          <Text style={styles.btnText}>→ Hoje</Text>
+          <Text style={styles.primaryBtnText}>Virar prioridade</Text>
+          <Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.btn, styles.btnDelete]}
+          style={styles.iconBtnDanger}
           onPress={() => onDelete(item.id)}
           accessibilityLabel={`Excluir ${item.content}`}
+          accessibilityRole="button"
         >
-          <Text style={[styles.btnText, styles.btnDeleteText]}>🗑</Text>
+          <Ionicons name="trash-outline" size={20} color={theme.colors.danger} />
         </TouchableOpacity>
       </View>
     </View>
@@ -62,17 +78,20 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    ...cardShadow(),
+  },
+  containerUrgent: {
+    borderWidth: 1.5,
+    borderColor: theme.colors.danger,
   },
   content: {
-    fontSize: 16,
+    fontSize: theme.type.body,
     color: theme.colors.text,
-    marginBottom: 8,
-    lineHeight: 22,
+    marginBottom: 10,
+    lineHeight: 24,
   },
   badges: {
     flexDirection: 'row',
@@ -81,65 +100,67 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: theme.radius.pill,
   },
   badgeDue: {
-    backgroundColor: theme.colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    backgroundColor: theme.colors.primarySoft,
   },
   badgeUrgent: {
     backgroundColor: theme.colors.dangerSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.danger,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: theme.colors.onGold,
+    fontSize: theme.type.caption,
+    fontWeight: '700',
   },
   badgeDueText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: theme.colors.gold,
+    color: theme.colors.primary,
+  },
+  badgeUrgentText: {
+    color: theme.colors.danger,
   },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    alignItems: 'center',
     gap: 8,
   },
-  btn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    minWidth: 80,
+  iconBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  btnEdit: {
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
   },
-  btnEditText: {
+  iconBtnText: {
+    fontSize: theme.type.footnote,
+    fontWeight: '600',
     color: theme.colors.textSecondary,
   },
-  btnPromote: {
-    backgroundColor: theme.colors.gold,
+  primaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.primary,
   },
-  btnDelete: {
-    backgroundColor: theme.colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: 'rgba(255,95,86,0.4)',
-    minWidth: 48,
+  primaryBtnText: {
+    fontSize: theme.type.footnote,
+    fontWeight: '700',
+    color: theme.colors.onPrimary,
   },
-  btnDeleteText: {
-    color: theme.colors.danger,
-  },
-  btnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.onGold,
+  iconBtnDanger: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 44,
+    minHeight: 44,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.dangerSoft,
   },
 });
