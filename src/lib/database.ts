@@ -90,6 +90,9 @@ class DatabaseSingleton {
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
+          email TEXT,
+          salt TEXT,
+          password_hash TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
       `);
@@ -106,6 +109,10 @@ class DatabaseSingleton {
       await this.ensureColumn('hoje_items', 'content', "TEXT NOT NULL DEFAULT ''");
       await this.ensureColumn('hoje_items', 'due_date', 'TEXT');
       await this.ensureColumn('hoje_items', 'category', 'TEXT');
+      // Migração do login completo (sessão 28/09): credenciais no perfil.
+      await this.ensureColumn('users', 'email', 'TEXT');
+      await this.ensureColumn('users', 'salt', 'TEXT');
+      await this.ensureColumn('users', 'password_hash', 'TEXT');
       // Remove órfãos do bug antigo (promovidos cuja linha do inbox foi deletada).
       await this.db!.runAsync(
         `DELETE FROM hoje_items
@@ -541,6 +548,36 @@ class DatabaseSingleton {
       [name.trim()]
     );
     return result.lastInsertRowId as number;
+  }
+
+  async createUserWithCredentials(
+    name: string,
+    email: string,
+    salt: string,
+    passwordHash: string
+  ): Promise<number> {
+    const existing = await this.findUserByEmail(email);
+    if (existing) {
+      throw new Error('EMAIL_TAKEN');
+    }
+    const result = await this.db!.runAsync(
+      'INSERT INTO users (name, email, salt, password_hash) VALUES (?, ?, ?, ?)',
+      [name.trim(), email, salt, passwordHash]
+    );
+    return result.lastInsertRowId as number;
+  }
+
+  async findUserByEmail(email: string): Promise<{
+    id: number;
+    name: string;
+    email: string;
+    salt: string | null;
+    password_hash: string | null;
+  } | null> {
+    return this.db!.getFirstAsync(
+      'SELECT * FROM users WHERE email = ? LIMIT 1',
+      [email]
+    );
   }
 
   async getUsers(): Promise<{ id: number; name: string; created_at: string }[]> {

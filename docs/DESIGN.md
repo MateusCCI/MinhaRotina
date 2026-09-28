@@ -94,9 +94,17 @@ Pill pastel + texto escuro da matiz (nunca cinza sobre cor):
   título, `fontFamily: 'monospace'` como fantasia (Timer usa
   `fontVariant: tabular-nums`).
 
-## Notas de implementação
+## Auth local (`app/auth.tsx`, `src/lib/password.ts`, tabelas `users` + `meta`)
 
-- `@expo/vector-icons` (Ionicons) é dependência oficial; **não** usar
+Login completo com e-mail + senha, sem backend: senha guardada como
+SHA-256 com salt de 16 bytes (`expo-crypto`), e-mail normalizado em minúsculas,
+unicidade garantida em código (`EMAIL_TAKEN`). Sessão = `active_user_id` na
+tabela `meta` + pub/sub em `src/lib/session.ts`. Erros inline no formulário
+(nunca só Alert), olho mostra/esconde senha, CTA com loading. Troca de perfil
+na Revisão. Limite honesto: sem comparação em tempo constante nem bloqueio
+contra força bruta — fora do escopo do MVP local.
+
+## Notas de implementação- `@expo/vector-icons` (Ionicons) é dependência oficial; **não** usar
   `React.ComponentProps<typeof Ionicons>['name']` — instanciar esse genérico
   sobre o union de 1300 glifos trava o `tsc` (TS 6). Usar union local com os
   nomes usados (ver `App.tsx`, `IconName`).

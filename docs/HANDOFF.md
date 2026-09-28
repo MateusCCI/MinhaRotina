@@ -1,6 +1,20 @@
 # HANDOFF — Minha Rotina
 
-Sessão (28/09/2026): bug do promote corrigido, paleta alegre em teste, logo, primeira tela enriquecida, login/cadastro. Tudo commitado em passos (`ab6a14a`, `ebd21ea`, `7558472`, `accf27d`).
+Sessão (28/09/2026, parte 2): login completo com e-mail + senha (`d00bd47`,
+a commitar). Antes: bug promote, paleta alegre, logo, primeira tela, perfis
+(`ab6a14a`→`accf27d`).
+
+## Login completo (e-mail + senha)
+
+- Nova dep `expo-crypto`; `src/lib/password.ts` (funções puras: `hashPassword`,
+  `verifyPassword`, `isValidEmail`, `normalizeEmail`).
+- `users` ganha `email/salt/password_hash` (migration via `ensureColumn`);
+  `createUserWithCredentials` recusa duplicado (`EMAIL_TAKEN`).
+- `app/auth.tsx` reescrito: modos entrar/criar, validação inline por campo,
+  mostrar/esconder senha, CTA com loading. Sessão e troca de perfil inalterados.
+- Validação: `tsc` + `eslint` limpos, `expo export --platform web` compila.
+- Perfis antigos (só nome, sem e-mail) não entram pelo login novo — dado de
+  dev; limpar com Clear site data (web) ou reinstalar (celular).
 
 ## Sessão 28/09 — o que foi feito
 
