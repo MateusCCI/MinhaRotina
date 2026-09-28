@@ -86,6 +86,19 @@ class DatabaseSingleton {
           started_at INTEGER
         );
       `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      await this.db!.execAsync(`
+        CREATE TABLE IF NOT EXISTS meta (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        );
+      `);
       await this.ensureColumn('inbox_items', 'due_date', 'TEXT');
       await this.ensureColumn('inbox_items', 'category', 'TEXT');
       // Migração do bug do promote (sessão 28/09): hoje_items agora carrega o
@@ -519,6 +532,48 @@ class DatabaseSingleton {
       console.error(`[S1][TRACE:${traceId}] Erro ao zerar timer:`, error);
       throw error;
     }
+  }
+
+  // Auth local (perfis + sessão)
+  async createUser(name: string): Promise<number> {
+    const result = await this.db!.runAsync(
+      'INSERT INTO users (name) VALUES (?)',
+      [name.trim()]
+    );
+    return result.lastInsertRowId as number;
+  }
+
+  async getUsers(): Promise<{ id: number; name: string; created_at: string }[]> {
+    return this.db!.getAllAsync<{ id: number; name: string; created_at: string }>(
+      'SELECT * FROM users ORDER BY created_at ASC'
+    );
+  }
+
+  async getUserById(id: number): Promise<{ id: number; name: string } | null> {
+    return this.db!.getFirstAsync<{ id: number; name: string }>(
+      'SELECT id, name FROM users WHERE id = ?',
+      [id]
+    );
+  }
+
+  async getActiveUserId(): Promise<number | null> {
+    const row = await this.db!.getFirstAsync<{ value: string }>(
+      "SELECT value FROM meta WHERE key = 'active_user_id'"
+    );
+    const id = row ? Number(row.value) : NaN;
+    return Number.isFinite(id) ? id : null;
+  }
+
+  async setActiveUserId(id: number | null): Promise<void> {
+    if (id === null) {
+      await this.db!.runAsync("DELETE FROM meta WHERE key = 'active_user_id'");
+      return;
+    }
+    await this.db!.runAsync(
+      `INSERT INTO meta (key, value) VALUES ('active_user_id', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      [String(id)]
+    );
   }
 }
 

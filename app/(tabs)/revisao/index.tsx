@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import DatabaseSingleton from '../../../src/lib/database';
+import { setSessionUser } from '../../../src/lib/session';
 import { theme, statusColor, cardShadow } from '../../../src/lib/theme';
 
 export default function RevisaoScreen() {
@@ -24,11 +25,13 @@ export default function RevisaoScreen() {
   });
   const [loading, setLoading] = useState(true);
   const [ajuste, setAjuste] = useState('');
+  const [userName, setUserName] = useState<string | null>(null);
   const [ajustesRecentes, setAjustesRecentes] = useState<{ id: number; texto: string; created_at: string }[]>([]);
 
   useEffect(() => {
     loadStats();
     loadAjustes();
+    loadUser();
   }, []);
 
   const loadAjustes = async (): Promise<void> => {
@@ -64,6 +67,29 @@ export default function RevisaoScreen() {
     ? Math.round((stats.completosHoje / Math.max(stats.totalHoje, 1)) * 100)
     : 0;
   const corProgresso = statusColor(progresso);
+
+  const loadUser = async (): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      const id = await db.getActiveUserId();
+      if (id !== null) {
+        const user = await db.getUserById(id);
+        setUserName(user?.name ?? null);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error);
+    }
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      await db.setActiveUserId(null);
+      setSessionUser(null);
+    } catch {
+      Alert.alert('Ops', 'Não consegui trocar de perfil. Tente de novo.');
+    }
+  };
 
   const handleSalvar = async (): Promise<void> => {
     if (!ajuste.trim()) {
@@ -166,6 +192,18 @@ export default function RevisaoScreen() {
               ))}
             </View>
           )}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Perfil</Text>
+            <View style={styles.profileRow}>
+              <View style={styles.statIcon}>
+                <Ionicons name="person-outline" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.statLabel}>{userName ?? 'Sem nome'}</Text>
+              <TouchableOpacity onPress={handleLogout} accessibilityLabel="Trocar de perfil">
+                <Text style={styles.logoutText}>Trocar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -303,5 +341,16 @@ const styles = StyleSheet.create({
     fontSize: theme.type.callout,
     color: theme.colors.textBody,
     lineHeight: 22,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  logoutText: {
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    color: theme.colors.primary,
   },
 });

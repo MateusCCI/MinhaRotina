@@ -11,9 +11,11 @@ import Hoje from './app/(tabs)/hoje';
 import Saida from './app/(tabs)/saida';
 import Timer from './app/(tabs)/timer';
 import Revisao from './app/(tabs)/revisao';
+import AuthScreen from './app/auth';
 import DatabaseSingleton from './src/lib/database';
 import { theme } from './src/lib/theme';
 import { subscribeInboxCount } from './src/lib/inboxCount';
+import { getSessionUser, setSessionUser, subscribeSession } from './src/lib/session';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -109,18 +111,25 @@ const navTheme = {
 export default function App() {
   const [ready, setReady] = useState(false);
   const [dbError, setDbError] = useState(false);
+  const [userId, setUserId] = useState<number | null>(getSessionUser());
+  const [authChecked, setAuthChecked] = useState(false);
 
   const initDb = (): void => {
     setDbError(false);
     DatabaseSingleton.getInstance()
       .then(db => db.init())
-      .then(() => {
+      .then(() => DatabaseSingleton.getInstance())
+      .then(db => db.getActiveUserId())
+      .then(id => {
+        setSessionUser(id);
+        setAuthChecked(true);
         setReady(true);
       })
       .catch(() => setDbError(true));
   };
 
   useEffect(initDb, []);
+  useEffect(() => subscribeSession(setUserId), []);
 
   const handleRetry = (): void => {
     // Na web o lock do OPFS só libera recarregando a página (1 aba por vez).
@@ -149,7 +158,7 @@ export default function App() {
     );
   }
 
-  if (!ready) {
+  if (!ready || !authChecked) {
     return (
       <SafeAreaProvider>
         <View style={styles.loader}>
@@ -164,7 +173,11 @@ export default function App() {
       <StatusBar style="dark" />
       <NavigationContainer theme={navTheme}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={TabNavigator} />
+          {userId === null ? (
+            <Stack.Screen name="Auth" component={AuthScreen} />
+          ) : (
+            <Stack.Screen name="Main" component={TabNavigator} />
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
