@@ -1,6 +1,6 @@
 # STATUS — Minha Rotina (foto da situação)
 
-Atualizado em: 26/09/2026. Redesign claro iOS "Papel & Âmbar" aplicado (ver `docs/DESIGN.md` + `docs/HANDOFF.md` sessão 26/09). Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
+Atualizado em: 28/09/2026. Bug do promote corrigido, paleta alegre em teste, logo criada, primeira tela enriquecida, login/cadastro prontos (commits `ab6a14a`→`accf27d`; detalhes no `docs/HANDOFF.md` sessão 28/09). Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
 
 > **Sessão a sessão:** o detalhamento técnico da última sessão (commits, tokens do tema, comandos de validação) está no **`docs/HANDOFF.md`** — leia-o antes de codar.
 

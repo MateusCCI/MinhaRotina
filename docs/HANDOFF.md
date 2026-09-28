@@ -1,5 +1,24 @@
 # HANDOFF — Minha Rotina
 
+Sessão (28/09/2026): bug do promote corrigido, paleta alegre em teste, logo, primeira tela enriquecida, login/cadastro. Tudo commitado em passos (`ab6a14a`, `ebd21ea`, `7558472`, `accf27d`).
+
+## Sessão 28/09 — o que foi feito
+
+1. **Bug crítico do "Virar prioridade":** `promoteToHoje` inseria em `hoje_items` e deletava a linha do inbox — mas `getHojeItems` fazia `JOIN` com o inbox. Resultado: item sumia das duas telas (perda de dado). Fix: `hoje_items` agora tem `content/due_date/category` próprios (migration via `ensureColumn` + limpeza de órfãos); `insertHojeItem` copia os campos; `getHojeItems` e `resetHojeForNewDay` sem JOIN.
+2. **Paleta alegre em teste:** `primary #15803D` (Verde Folha), `text #44403C` (Marrom Café); Âmbar vira acento (warning/prazos); Família em lima; token novo `overlay`. Detalhes em `docs/DESIGN.md`.
+3. **Logo "Sol Nascente"** (`src/components/Logo.tsx`, layouts `stack`/`row` + slogan).
+4. **Primeira tela (Inbox) enriquecida p/ professor:** Logo + saudação por horário + data pt-BR + card "Resumo do dia" (inbox/hoje x/3/% com `ProgressBar` reutilizada, `DaySummary` tipado, `useMemo`, helpers puros `greetingFor`/`todayLabel`).
+5. **Login/cadastro local:** tabelas `users` + `meta(active_user_id)`; `src/lib/session.ts` (pub/sub); `app/auth.tsx` (entrar por perfil / cadastrar nome); `App.tsx` condiciona `Auth` × `Main`; Revisão tem seção Perfil + Trocar.
+6. Validação: `tsc` limpo, `eslint` limpo, `expo export --platform web` compila.
+
+## Pendente p/ próxima
+
+- Validação humana: testar promote (Inbox→Hoje), cadastro/login/trocar perfil, paleta alegre no aparelho.
+- Celular pulado (rede institucional com isolamento; usar hotspot invertido ou `--tunnel`).
+- Quota: Hoje mostra dia em UTC (SQLite `CURRENT_TIMESTAMP`); perto da meia-noite local pode virar o dia às 21h. Aceito por ora.
+
+---
+
 Sessão (26/09/2026, continuação): redesign claro iOS "Papel & Âmbar". Ver seção nova no topo; abaixo, o handoff da sessão anterior (25/09).
 
 ## Sessão 26/09 — redesign claro iOS (não commitado ainda)

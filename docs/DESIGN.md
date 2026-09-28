@@ -3,6 +3,19 @@
 Mundo visual: **Papel & Âmbar**. Tema claro, amigável, gramática iOS para um app
 Operate (o visitante completa tarefas; a ferramenta some na tarefa).
 
+**Teste de paleta alegre (28/09):** tinta primária Verde Folha `#15803D`, texto
+Marrom Café `#44403C`; Âmbar `#B45309` segue como acento quente (avisos,
+prazos). Família virou lima (`#ECFCCB`/`#3F6212`) para não colidir com a tinta.
+Tokens `overlay` e `border` em marrom. Se o teste não agradar, reverter é só
+trocar `primary`/`text` em `theme.ts`.
+
+## Logo "Sol Nascente" (`src/components/Logo.tsx`)
+
+Quadrado arredondado Verde Folha com sol branco (o dia que começa organizado)
++ wordmark **Minha Rotina** no meio da composição (`layout="stack"`, com slogan
+"um dia de cada vez") ou ao lado (`layout="row"` para headers). Slogan e nome
+em Marrom Café; "Rotina" em Folha para dar o acento.
+
 ## Cena física (decide claro vs. escuro)
 
 Pessoa com TDAH confere a rotina no celular durante o dia, com uma mão, sob luz
@@ -39,8 +52,8 @@ ambiente clara. Por isso: fundo claro quente + cards brancos — nunca o inverso
 | `surfaceAlt` (inputs, inativo) | `#ECE9E1` |
 | `border` / `borderStrong` | `rgba(28,25,23,0.10)` / `rgba(180,83,9,0.40)` |
 | `text` / `textBody` / `textSecondary` / `textMuted` | `#1C1917` / `#44403C` / `#57534E` / `#6E6A61` |
-| `primary` / `primaryPress` / `primarySoft` / `onPrimary` | `#B45309` / `#92400E` / `rgba(180,83,9,0.10)` / `#FFFFFF` |
-| `success` / `successSoft` | `#0F766E` / `rgba(15,118,110,0.10)` |
+| `primary` / `primaryPress` / `primarySoft` / `onPrimary` | `#15803D` / `#166534` / `rgba(21,128,61,0.10)` / `#FFFFFF` |
+| `success` / `successSoft` | `#15803D` / `rgba(21,128,61,0.12)` |
 | `danger` / `dangerSoft` | `#DC2626` / `rgba(220,38,38,0.08)` |
 | `warning` / `warningSoft` | `#B45309` / `rgba(180,83,9,0.10)` |
 | `disabled` / `onDisabled` | `#E7E5E4` / `#6E6A61` |
