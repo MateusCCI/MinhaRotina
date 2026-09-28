@@ -3,6 +3,9 @@ import { Platform } from 'react-native';
 /**
  * Mundo visual "Papel & Âmbar" — tema claro, amigável, gramática iOS.
  *
+ * Teste de paleta alegre (sessão 28/09): tinta primária Verde Folha e texto
+ * Marrom Café; o Âmbar segue como acento quente (avisos, prazos).
+ *
  * Cena física: pessoa com TDAH confere a rotina no celular durante o dia,
  * com uma mão, sob luz ambiente clara — por isso fundo claro quente
  * (grouped) com cards brancos, e não o inverso.
@@ -17,24 +20,25 @@ export const theme = {
     bg: '#F4F2EC',
     surface: '#FFFFFF',
     surfaceAlt: '#ECE9E1',
-    border: 'rgba(28,25,23,0.10)',
-    borderStrong: 'rgba(180,83,9,0.40)',
+    border: 'rgba(68,64,60,0.10)',
+    borderStrong: 'rgba(21,128,61,0.40)',
+    overlay: 'rgba(68,64,60,0.45)',
 
-    // Texto sobre fundo claro
-    text: '#1C1917',
-    textBody: '#44403C',
-    textSecondary: '#57534E',
+    // Texto sobre fundo claro (Marrom Café e derivados)
+    text: '#44403C',
+    textBody: '#57534E',
+    textSecondary: '#6E6A61',
     textMuted: '#6E6A61',
 
-    // Tinta única: âmbar queimado (ação primária, seleção, foco)
-    primary: '#B45309',
-    primaryPress: '#92400E',
-    primarySoft: 'rgba(180,83,9,0.10)',
+    // Tinta única: Verde Folha (ação primária, seleção, foco)
+    primary: '#15803D',
+    primaryPress: '#166534',
+    primarySoft: 'rgba(21,128,61,0.10)',
     onPrimary: '#FFFFFF',
 
     // Semânticas
-    success: '#0F766E',
-    successSoft: 'rgba(15,118,110,0.10)',
+    success: '#15803D',
+    successSoft: 'rgba(21,128,61,0.12)',
     danger: '#DC2626',
     dangerSoft: 'rgba(220,38,38,0.08)',
     warning: '#B45309',
@@ -73,10 +77,10 @@ export function cardShadow(elev = 2) {
   }
   if (Platform.OS === 'web') {
     // RN Web depreciou shadow* em favor do CSS boxShadow.
-    return { boxShadow: '0 2px 8px rgba(28,25,23,0.08)' } as const;
+    return { boxShadow: '0 2px 8px rgba(68,64,60,0.08)' } as const;
   }
   return {
-    shadowColor: '#1C1917',
+    shadowColor: '#44403C',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,

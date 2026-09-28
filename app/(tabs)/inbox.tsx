@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import CaptureInput, { CaptureMeta } from '../../src/components/CaptureInput';
 import InboxItemComponent from '../../src/components/InboxItem';
+import Logo from '../../src/components/Logo';
+import ProgressBar from '../../src/components/ProgressBar';
 import { useInbox } from '../../hooks/useInbox';
+import { useHoje } from '../../hooks/useHoje';
 import { InboxItem } from '../../src/lib/types';
 import { theme, cardShadow } from '../../src/lib/theme';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../../src/lib/date';
 
 const CLEANUP_LIMIT = 5;
+
+/** Resumo do dia derivado de dois hooks — tipo explícito, função pura. */
+interface DaySummary {
+  inbox: number;
+  hojeTotal: number;
+  hojeDone: number;
+  pct: number;
+}
+
+function greetingFor(date: Date): string {
+  const h = date.getHours();
+  if (h >= 5 && h < 12) return 'Bom dia';
+  if (h >= 12 && h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function todayLabel(date: Date): string {
+  const s = date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 interface EditState {
   id: number;
@@ -20,7 +43,15 @@ interface EditState {
 
 export default function InboxScreen() {
   const { items, loading, isEmpty, addItem, updateItem, deleteItem, promoteToHoje } = useInbox();
+  const { items: hojeItems, loading: hojeLoading } = useHoje();
   const [editing, setEditing] = useState<EditState | null>(null);
+
+  const now = useMemo(() => new Date(), []);
+  const summary: DaySummary = useMemo(() => {
+    const hojeDone = hojeItems.filter(i => i.checked).length;
+    const pct = hojeItems.length > 0 ? Math.round((hojeDone / hojeItems.length) * 100) : 0;
+    return { inbox: items.length, hojeTotal: hojeItems.length, hojeDone, pct };
+  }, [items.length, hojeItems]);
 
   const handlePromote = async (id: number): Promise<void> => {
     try {
@@ -75,7 +106,10 @@ export default function InboxScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Inbox</Text>
+        <Logo layout="row" />
+        <Text style={styles.greeting}>
+          {greetingFor(now)} · {todayLabel(now)}
+        </Text>
         <Text style={styles.subtitle}>
           {items.length === 0
             ? 'Tudo despejado, mente leve'
@@ -84,6 +118,31 @@ export default function InboxScreen() {
       </View>
 
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} keyboardShouldPersistTaps="handled">
+        {!loading && !hojeLoading && (summary.inbox > 0 || summary.hojeTotal > 0) && (
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>Resumo do dia</Text>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryStat}>
+                <Text style={styles.summaryValue}>{summary.inbox}</Text>
+                <Text style={styles.summaryLabel}>no inbox</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryStat}>
+                <Text style={styles.summaryValue}>{summary.hojeDone}/{summary.hojeTotal}</Text>
+                <Text style={styles.summaryLabel}>prioridades</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryStat}>
+                <Text style={styles.summaryValue}>{summary.pct}%</Text>
+                <Text style={styles.summaryLabel}>concluído</Text>
+              </View>
+            </View>
+            {summary.hojeTotal > 0 && (
+              <ProgressBar percentage={summary.pct} color={theme.colors.primary} />
+            )}
+          </View>
+        )}
+
         <CaptureInput onCapture={handleCapture} />
 
         {needsCleanup && (
@@ -219,10 +278,55 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: theme.colors.text,
   },
+  greeting: {
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    color: theme.colors.primary,
+    marginTop: 10,
+  },
   subtitle: {
     fontSize: theme.type.callout,
     color: theme.colors.textSecondary,
     marginTop: 2,
+  },
+  summaryCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    ...cardShadow(),
+  },
+  summaryTitle: {
+    fontSize: theme.type.caption,
+    fontWeight: '700',
+    color: theme.colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  summaryStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  summaryValue: {
+    fontSize: theme.type.title,
+    fontWeight: '800',
+    color: theme.colors.text,
+  },
+  summaryLabel: {
+    fontSize: theme.type.caption,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
+  },
+  summaryDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: theme.colors.border,
   },
   body: {
     flex: 1,
@@ -285,7 +389,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(28,25,23,0.45)',
+    backgroundColor: theme.colors.overlay,
     justifyContent: 'flex-end',
   },
   modalCard: {

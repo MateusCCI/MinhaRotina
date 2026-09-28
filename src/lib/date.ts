@@ -25,7 +25,7 @@ export function dueLabel(dueDate?: string | null): { label: string | null; urgen
 export const CATEGORY_COLORS: Record<string, string> = {
   Trabalho: '#DBEAFE',
   Estudo: '#F3E8FF',
-  'Família': '#DCFCE7',
+  'Família': '#ECFCCB',
   Casa: '#FFEDD5',
   Mercado: '#FCE7F3',
   Outros: '#E7E5E4',
@@ -35,7 +35,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
 export const CATEGORY_TEXT: Record<string, string> = {
   Trabalho: '#1D4ED8',
   Estudo: '#7E22CE',
-  'Família': '#15803D',
+  'Família': '#3F6212',
   Casa: '#C2410C',
   Mercado: '#BE185D',
   Outros: '#57534E',
