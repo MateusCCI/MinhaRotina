@@ -41,9 +41,11 @@ class DatabaseSingleton {
         CREATE TABLE IF NOT EXISTS hoje_items (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           inbox_id INTEGER NOT NULL,
+          content TEXT NOT NULL DEFAULT '',
+          due_date TEXT,
+          category TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          checked INTEGER DEFAULT 0,
-          FOREIGN KEY (inbox_id) REFERENCES inbox_items(id)
+          checked INTEGER DEFAULT 0
         );
       `);
       await this.db!.execAsync(`
@@ -86,6 +88,17 @@ class DatabaseSingleton {
       `);
       await this.ensureColumn('inbox_items', 'due_date', 'TEXT');
       await this.ensureColumn('inbox_items', 'category', 'TEXT');
+      // Migração do bug do promote (sessão 28/09): hoje_items agora carrega o
+      // próprio conteúdo em vez de depender do JOIN com inbox_items.
+      await this.ensureColumn('hoje_items', 'content', "TEXT NOT NULL DEFAULT ''");
+      await this.ensureColumn('hoje_items', 'due_date', 'TEXT');
+      await this.ensureColumn('hoje_items', 'category', 'TEXT');
+      // Remove órfãos do bug antigo (promovidos cuja linha do inbox foi deletada).
+      await this.db!.runAsync(
+        `DELETE FROM hoje_items
+         WHERE (content IS NULL OR content = '')
+           AND inbox_id NOT IN (SELECT id FROM inbox_items)`
+      );
       await this.seedSaidaItems();
       console.log(`[S1][TRACE:${traceId}] Tabelas criadas com sucesso`);
     } catch (error) {
@@ -129,10 +142,9 @@ class DatabaseSingleton {
     try {
       await this.db!.withTransactionAsync(async () => {
         await this.db!.runAsync(
-          `INSERT INTO inbox_items (content)
-           SELECT i.content
+          `INSERT INTO inbox_items (content, due_date, category)
+           SELECT h.content, h.due_date, h.category
            FROM hoje_items h
-           JOIN inbox_items i ON h.inbox_id = i.id
            WHERE date(h.created_at) < date('now') AND h.checked = 0`
         );
         await this.db!.runAsync(
@@ -352,11 +364,10 @@ class DatabaseSingleton {
     const traceId = this.generateTraceId();
     try {
       const result = await this.db!.getAllAsync<HojeItem>(
-        `SELECT h.*, i.content, i.due_date, i.category
-         FROM hoje_items h
-         JOIN inbox_items i ON h.inbox_id = i.id
-         WHERE date(h.created_at) = date('now')
-         ORDER BY h.created_at ASC`
+        `SELECT id, inbox_id, content, due_date, category, created_at, checked
+         FROM hoje_items
+         WHERE date(created_at) = date('now')
+         ORDER BY created_at ASC`
       );
       const normalized = result.map(row => ({
         ...row,
@@ -377,9 +388,16 @@ class DatabaseSingleton {
       if (current.length >= 3) {
         throw new Error('MAX_ITEMS');
       }
-      const result = await this.db!.runAsync(
-        'INSERT INTO hoje_items (inbox_id) VALUES (?)',
+      const source = await this.db!.getFirstAsync<InboxItem>(
+        'SELECT * FROM inbox_items WHERE id = ?',
         [inboxId]
+      );
+      if (!source) {
+        throw new Error('NOT_FOUND');
+      }
+      const result = await this.db!.runAsync(
+        'INSERT INTO hoje_items (inbox_id, content, due_date, category) VALUES (?, ?, ?, ?)',
+        [inboxId, source.content, source.due_date ?? null, source.category ?? null]
       );
       console.log(`[S1][TRACE:${traceId}] Item promovido: id=${result.lastInsertRowId}`);
       return result.lastInsertRowId as number;
