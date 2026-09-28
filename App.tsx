@@ -2,7 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Text, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -108,15 +108,46 @@ const navTheme = {
 
 export default function App() {
   const [ready, setReady] = useState(false);
+  const [dbError, setDbError] = useState(false);
 
-  useEffect(() => {
+  const initDb = (): void => {
+    setDbError(false);
     DatabaseSingleton.getInstance()
       .then(db => db.init())
       .then(() => {
         setReady(true);
       })
-      .catch(console.error);
-  }, []);
+      .catch(() => setDbError(true));
+  };
+
+  useEffect(initDb, []);
+
+  const handleRetry = (): void => {
+    // Na web o lock do OPFS só libera recarregando a página (1 aba por vez).
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.location.reload();
+      return;
+    }
+    setReady(false);
+    initDb();
+  };
+
+  if (dbError) {
+    return (
+      <SafeAreaProvider>
+        <View style={styles.loader}>
+          <Text style={styles.errorTitle}>Banco preso em outra aba</Text>
+          <Text style={styles.errorText}>
+            O navegador só deixa uma aba usar o banco por vez. Feche as outras abas
+            deste endereço e toque em recarregar.
+          </Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={handleRetry}>
+            <Text style={styles.retryText}>Recarregar</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   if (!ready) {
     return (
@@ -146,5 +177,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.colors.bg,
+    padding: 32,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: theme.colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  retryBtn: {
+    minHeight: 52,
+    paddingHorizontal: 32,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  retryText: {
+    color: theme.colors.onPrimary,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
