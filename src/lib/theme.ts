@@ -71,6 +71,10 @@ export function cardShadow(elev = 2) {
   if (Platform.OS === 'android') {
     return { elevation: elev } as const;
   }
+  if (Platform.OS === 'web') {
+    // RN Web depreciou shadow* em favor do CSS boxShadow.
+    return { boxShadow: '0 2px 8px rgba(28,25,23,0.08)' } as const;
+  }
   return {
     shadowColor: '#1C1917',
     shadowOffset: { width: 0, height: 2 },
