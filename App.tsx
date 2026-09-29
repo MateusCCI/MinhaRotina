@@ -13,7 +13,7 @@ import Timer from './app/(tabs)/timer';
 import Revisao from './app/(tabs)/revisao';
 import AuthScreen from './app/auth';
 import DatabaseSingleton from './src/lib/database';
-import { theme } from './src/lib/theme';
+import { accents, theme } from './src/lib/theme';
 import { subscribeInboxCount } from './src/lib/inboxCount';
 import { getSessionUser, setSessionUser, subscribeSession } from './src/lib/session';
 
@@ -24,8 +24,8 @@ const Stack = createStackNavigator();
 type IconName =
   | 'file-tray'
   | 'file-tray-outline'
-  | 'sunny'
-  | 'sunny-outline'
+  | 'flag'
+  | 'flag-outline'
   | 'exit'
   | 'exit-outline'
   | 'timer'
@@ -36,7 +36,7 @@ type IconName =
 
 const TAB_ICONS: Record<string, IconName> = {
   Inbox: 'file-tray-outline',
-  Hoje: 'sunny-outline',
+  Hoje: 'flag-outline',
   Saida: 'exit-outline',
   Timer: 'timer-outline',
   Revisao: 'bar-chart-outline',
@@ -44,10 +44,23 @@ const TAB_ICONS: Record<string, IconName> = {
 
 const TAB_ICONS_FOCUSED: Record<string, IconName> = {
   Inbox: 'file-tray',
-  Hoje: 'sunny',
+  Hoje: 'flag',
   Saida: 'exit',
   Timer: 'timer',
   Revisao: 'bar-chart',
+};
+
+/**
+ * Cada aba acende na tinta da sua família de cor (ver `accents`). É a
+ * mesma informação que a faixa repete no topo — aqui ela responde "onde
+ * eu estou" num relance, sem precisar ler o rótulo.
+ */
+const TAB_ACCENT: Record<string, keyof typeof accents> = {
+  Inbox: 'inbox',
+  Hoje: 'hoje',
+  Saida: 'saida',
+  Timer: 'timer',
+  Revisao: 'revisao',
 };
 
 function TabNavigator() {
@@ -57,35 +70,38 @@ function TabNavigator() {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, size, color }) => (
-          <Ionicons
-            name={focused ? TAB_ICONS_FOCUSED[route.name] : TAB_ICONS[route.name] ?? 'ellipse-outline'}
-            size={size}
-            color={color}
-          />
-        ),
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textMuted,
-        headerShown: false,
-        tabBarBadge: route.name === 'Inbox' && inboxCount > 0 ? inboxCount : undefined,
-        tabBarBadgeStyle: {
-          backgroundColor: theme.colors.primary,
-          color: theme.colors.onPrimary,
-          fontWeight: '700',
-        },
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          paddingBottom: 6,
-          paddingTop: 6,
-          height: 64,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
-      })}
+      screenOptions={({ route }) => {
+        const accent = accents[TAB_ACCENT[route.name] ?? 'inbox'];
+        return {
+          tabBarIcon: ({ focused, size, color }) => (
+            <Ionicons
+              name={focused ? TAB_ICONS_FOCUSED[route.name] : TAB_ICONS[route.name] ?? 'ellipse-outline'}
+              size={size}
+              color={color}
+            />
+          ),
+          tabBarActiveTintColor: accent.base,
+          tabBarInactiveTintColor: theme.colors.textMuted,
+          headerShown: false,
+          tabBarBadge: route.name === 'Inbox' && inboxCount > 0 ? inboxCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: accent.base,
+            color: theme.colors.onPrimary,
+            fontWeight: '700',
+          },
+          tabBarStyle: {
+            backgroundColor: theme.colors.surface,
+            borderTopColor: theme.colors.border,
+            paddingBottom: 6,
+            paddingTop: 6,
+            height: 64,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+        };
+      }}
     >
       <Tab.Screen name="Inbox" component={Inbox} />
       <Tab.Screen name="Hoje" component={Hoje} />
