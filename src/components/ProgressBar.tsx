@@ -5,12 +5,17 @@ import { theme } from '../lib/theme';
 interface ProgressBarProps {
   percentage: number;
   color: string;
+  /** True quando o componente já está dentro de um card (sem card próprio). */
+  embedded?: boolean;
 }
 
-export default function ProgressBar({ percentage, color }: ProgressBarProps) {
+export default function ProgressBar({ percentage, color, embedded = false }: ProgressBarProps) {
   const pct = Math.max(0, Math.min(100, Math.round(percentage)));
   return (
-    <View style={styles.container} accessibilityRole="progressbar">
+    <View
+      style={[styles.container, embedded && styles.containerEmbedded]}
+      accessibilityRole="progressbar"
+    >
       <View style={styles.header}>
         <Text style={styles.label}>Progresso de hoje</Text>
         <Text style={[styles.percentage, { color }]}>{pct}%</Text>
@@ -28,6 +33,10 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
+  },
+  containerEmbedded: {
+    backgroundColor: 'transparent',
+    marginBottom: 0,
   },
   header: {
     flexDirection: 'row',

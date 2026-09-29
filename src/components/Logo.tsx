@@ -29,7 +29,7 @@ export default function Logo({ layout = 'row', slogan = false, tone = 'paper' }:
         accessibilityRole="image"
         accessibilityLabel="Logo Minha Rotina"
       >
-        <Ionicons name="sunny" size={26} color={onBand ? theme.colors.primary : '#FFFFFF'} />
+        <Ionicons name="sunny" size={26} color={onBand ? theme.colors.primary : theme.colors.onPrimary} />
       </View>
       <View style={layout === 'stack' ? styles.center : undefined}>
         <Text style={[styles.wordmark, onBand && styles.wordmarkOnBand]}>

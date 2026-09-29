@@ -9,12 +9,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../src/components/Logo';
 import DatabaseSingleton from '../src/lib/database';
 import { setSessionUser } from '../src/lib/session';
 import { hashPassword, verifyPassword, normalizeEmail, isValidEmail } from '../src/lib/password';
-import { theme, cardShadow } from '../src/lib/theme';
+import { accents, bandColor, theme, cardShadow } from '../src/lib/theme';
 
 type Mode = 'login' | 'register';
 
@@ -115,10 +117,20 @@ export default function AuthScreen() {
   const isLogin = mode === 'login';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Logo layout="stack" slogan />
+    <SafeAreaView style={[styles.container, { backgroundColor: bandColor(accents.inbox) }]} edges={['top']}>
+      {/* A faixa verde é a mesma família do Inbox: o app já começa falando
+          a língua de cor que o usuário vai ver nas abas. */}
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={accents.inbox.band}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.band}
+      >
+        <Logo layout="stack" slogan tone="band" />
+      </LinearGradient>
 
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{isLogin ? 'Bem-vindo de volta' : 'Criar sua conta'}</Text>
           <Text style={styles.cardSub}>
@@ -244,11 +256,17 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
+  },
+  band: {
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.xl,
   },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
+    backgroundColor: theme.colors.bg,
     padding: theme.spacing.xl,
     gap: 28,
   },

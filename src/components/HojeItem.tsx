@@ -3,14 +3,17 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { HojeItem } from '../lib/types';
-import { dueLabel, CATEGORY_TEXT } from '../lib/date';
-import { theme, cardShadow } from '../lib/theme';
+import { dueLabel, CATEGORY_COLORS, CATEGORY_TEXT } from '../lib/date';
+import { accents, theme, cardShadow } from '../lib/theme';
+import { categoryIcon } from '../lib/icons';
 
 interface HojeItemProps {
   item: HojeItem;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
 }
+
+const HOJE = accents.hoje;
 
 export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItemProps) {
   const due = dueLabel(item.due_date);
@@ -38,14 +41,33 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
         {(due.label || item.category) && (
           <View style={styles.badges}>
             {due.label && (
-              <Text style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeCalm]}>
-                {due.label}
-              </Text>
+              <View style={styles.badgeRow}>
+                <Ionicons
+                  name="time-outline"
+                  size={12}
+                  color={due.urgent ? theme.colors.danger : theme.colors.textSecondary}
+                />
+                <Text style={[styles.badgeText, due.urgent ? styles.badgeUrgent : styles.badgeCalm]}>
+                  {due.label}
+                </Text>
+              </View>
             )}
             {item.category && (
-              <Text style={[styles.badge, { color: CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary }]}>
-                {item.category}
-              </Text>
+              <View
+                style={[
+                  styles.badgeRow,
+                  { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt },
+                ]}
+              >
+                <Ionicons
+                  name={categoryIcon(item.category)}
+                  size={12}
+                  color={CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary}
+                />
+                <Text style={[styles.badgeText, { color: CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary }]}>
+                  {item.category}
+                </Text>
+              </View>
             )}
           </View>
         )}
@@ -89,8 +111,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   checkboxChecked: {
-    backgroundColor: theme.colors.success,
-    borderColor: theme.colors.success,
+    backgroundColor: HOJE.base,
+    borderColor: HOJE.base,
   },
   content: {
     flex: 1,
@@ -105,9 +127,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 6,
+    marginTop: 8,
   },
-  badge: {
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+  },
+  badgeText: {
     fontSize: theme.type.caption,
     fontWeight: '700',
   },

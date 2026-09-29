@@ -6,16 +6,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   Modal,
   TextInput,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import ScreenShell from '../../../src/components/ScreenShell';
+import StatCard from '../../../src/components/StatCard';
 import { useSaida } from '../../../hooks/useSaida';
 import { SaidaItem } from '../../../src/lib/types';
-import { theme, cardShadow } from '../../../src/lib/theme';
+import { accents, theme, cardShadow } from '../../../src/lib/theme';
+
+const SAIDA = accents.saida;
 
 interface Editing {
   /** null = criando; número = editando o item com esse id. */
@@ -75,50 +77,94 @@ export default function SaidaScreen() {
     ]);
   };
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Saída</Text>
-          <Text style={styles.subtitle}>
-            {items.length === 0
-              ? 'Nada para conferir'
-              : allChecked
-                ? 'Tudo pronto — pode ir tranquilo'
-                : `${checked} de ${items.length} conferidos`}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={styles.addHeader}
-          onPress={() => setEditing({ id: null, content: '' })}
-          accessibilityLabel="Adicionar item ao checklist"
-        >
-          <Ionicons name="add" size={24} color={theme.colors.onPrimary} />
-        </TouchableOpacity>
-      </View>
+  const state =
+    items.length === 0
+      ? 'Nada para conferir'
+      : allChecked
+        ? 'Tudo pronto — pode ir tranquilo'
+        : `${checked} de ${items.length} conferidos`;
 
-      {loading ? (
-        <View style={styles.loader}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : (
-        <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-          {items.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="bag-check-outline" size={44} color={theme.colors.textMuted} />
-              <Text style={styles.emptyTitle}>Checklist vazio</Text>
-              <Text style={styles.emptyText}>
-                Toque no + para montar seu ritual de saída: chaves, carteira, celular…
-              </Text>
+  return (
+    <ScreenShell
+      accent="saida"
+      icon="exit"
+      label="Saída"
+      headline="Checklist de saída"
+      state={state}
+      stats={
+        items.length > 0 ? (
+          <>
+            <StatCard icon="bag-check-outline" value={`${checked}/${items.length}`} label="conferidos" />
+            <StatCard icon="time-outline" value={`${saidasHoje.length}`} label="saídas hoje" />
+          </>
+        ) : null
+      }
+      loading={loading}
+      footer={
+        loading ? undefined : (
+          <View style={styles.footer}>
+            <Text style={styles.horaAtual}>
+              {saidasHoje.length > 0
+                ? `${saidasHoje.length} ${saidasHoje.length === 1 ? 'saída hoje' : 'saídas hoje'} — última rotina cumprida`
+                : 'Nenhuma saída registrada hoje'}
+            </Text>
+            {saiuAs ? (
+              <View style={styles.saiuMsgRow}>
+                <Ionicons name="checkmark-circle-outline" size={20} color={theme.colors.success} />
+                <Text style={styles.saiuMsg}>Saída das {saiuAs} registrada</Text>
+              </View>
+            ) : (
               <TouchableOpacity
-                style={styles.emptyCta}
-                onPress={() => setEditing({ id: null, content: '' })}
+                style={[styles.btnConfirmar, !allChecked && styles.btnConfirmarDisabled]}
+                onPress={handleConfirmar}
+                disabled={!allChecked}
               >
-                <Text style={styles.emptyCtaText}>Adicionar primeiro item</Text>
+                <Ionicons
+                  name="exit"
+                  size={20}
+                  color={allChecked ? theme.colors.onPrimary : theme.colors.onDisabled}
+                />
+                <Text style={[styles.btnConfirmarText, !allChecked && styles.btnConfirmarTextDisabled]}>
+                  {allChecked
+                    ? 'Confirmar saída'
+                    : `Confira ${items.length - checked} ${items.length - checked === 1 ? 'item' : 'itens'} para sair`}
+                </Text>
               </TouchableOpacity>
+            )}
+          </View>
+        )
+      }
+    >
+      <ScrollView contentContainerStyle={styles.listContent}>
+        {items.length === 0 ? (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="bag-check-outline" size={34} color={SAIDA.base} />
             </View>
-          ) : (
-            items.map((item) => (
+            <Text style={styles.emptyTitle}>Checklist vazio</Text>
+            <Text style={styles.emptyText}>
+              Toque no + para montar seu ritual de saída: chaves, carteira, celular…
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyCta}
+              onPress={() => setEditing({ id: null, content: '' })}
+            >
+              <Ionicons name="add" size={20} color={theme.colors.onPrimary} />
+              <Text style={styles.emptyCtaText}>Adicionar primeiro item</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.addRow}
+              onPress={() => setEditing({ id: null, content: '' })}
+              accessibilityLabel="Adicionar item ao checklist"
+            >
+              <Ionicons name="add-circle-outline" size={20} color={SAIDA.base} />
+              <Text style={styles.addRowText}>Adicionar item</Text>
+            </TouchableOpacity>
+
+            {items.map(item => (
               <View key={item.id} style={[styles.item, item.checked && styles.itemChecked]}>
                 <TouchableOpacity
                   style={styles.toggleZone}
@@ -148,31 +194,10 @@ export default function SaidaScreen() {
                   <Ionicons name="trash-outline" size={20} color={theme.colors.danger} />
                 </TouchableOpacity>
               </View>
-            ))
-          )}
-        </ScrollView>
-      )}
-
-      <View style={styles.footer}>
-        <Text style={styles.horaAtual}>
-          {saidasHoje.length > 0
-            ? `${saidasHoje.length} ${saidasHoje.length === 1 ? 'saída hoje' : 'saídas hoje'} — última rotina cumprida`
-            : 'Nenhuma saída registrada hoje'}
-        </Text>
-        {saiuAs ? (
-          <Text style={styles.saiuMsg}>Saída das {saiuAs} registrada</Text>
-        ) : (
-          <TouchableOpacity
-            style={[styles.btnConfirmar, !allChecked && styles.btnConfirmarDisabled]}
-            onPress={handleConfirmar}
-            disabled={!allChecked}
-          >
-            <Text style={[styles.btnConfirmarText, !allChecked && styles.btnConfirmarTextDisabled]}>
-              {allChecked ? 'Confirmar saída' : `Confira ${items.length - checked} ${items.length - checked === 1 ? 'item' : 'itens'} para sair`}
-            </Text>
-          </TouchableOpacity>
+            ))}
+          </>
         )}
-      </View>
+      </ScrollView>
 
       <Modal
         visible={editing !== null}
@@ -207,54 +232,14 @@ export default function SaidaScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.bg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.md,
-  },
-  headerText: {
-    flex: 1,
-  },
-  title: {
-    fontSize: theme.type.largeTitle,
-    fontWeight: '800',
-    color: theme.colors.text,
-  },
-  subtitle: {
-    fontSize: theme.type.callout,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  addHeader: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loader: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  list: {
-    flex: 1,
-  },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.lg,
     paddingBottom: 24,
   },
   emptyState: {
@@ -263,6 +248,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     alignItems: 'center',
     ...cardShadow(),
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: SAIDA.soft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyTitle: {
     fontSize: theme.type.title,
@@ -279,16 +272,35 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 22,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: SAIDA.base,
   },
   emptyCtaText: {
     color: theme.colors.onPrimary,
     fontSize: theme.type.callout,
     fontWeight: '700',
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 48,
+    paddingHorizontal: 14,
+    marginBottom: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: SAIDA.soft,
+    borderWidth: 1,
+    borderColor: 'rgba(190,24,93,0.28)',
+  },
+  addRowText: {
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    color: SAIDA.base,
   },
   item: {
     flexDirection: 'row',
@@ -357,19 +369,26 @@ const styles = StyleSheet.create({
     fontSize: theme.type.footnote,
     color: theme.colors.textSecondary,
   },
+  saiuMsgRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   saiuMsg: {
     fontSize: theme.type.body,
     color: theme.colors.success,
     fontWeight: '700',
   },
   btnConfirmar: {
-    minHeight: 52,
-    width: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    minHeight: 52,
+    width: '100%',
     paddingHorizontal: 24,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: SAIDA.base,
   },
   btnConfirmarDisabled: {
     backgroundColor: theme.colors.disabled,
@@ -434,7 +453,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 28,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: SAIDA.base,
   },
   modalSaveText: {
     color: theme.colors.onPrimary,

@@ -1,18 +1,14 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTimer, formatMs } from '../../../hooks/useTimer';
+import ScreenShell from '../../../src/components/ScreenShell';
 import ProgressBar from '../../../src/components/ProgressBar';
-import { theme, statusColor, cardShadow } from '../../../src/lib/theme';
+import StatCard from '../../../src/components/StatCard';
+import { accents, statusColor, theme, cardShadow } from '../../../src/lib/theme';
 
 const TOTAL_MS = 25 * 60 * 1000;
+const TIMER = accents.timer;
 
 export default function TimerScreen() {
   const timer = useTimer({
@@ -25,33 +21,47 @@ export default function TimerScreen() {
   const progressColor = statusColor(progress);
   const pct = Math.round(progress);
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Foco</Text>
-        <Text style={styles.subtitle}>25 minutos de cada vez, sem culpa</Text>
-      </View>
+  const hint = !timer.running && progress === 0
+    ? 'Aperte começar e foque em uma coisa só'
+    : timer.running
+      ? 'Foco ligado — o resto espera'
+      : 'Pausado. Respire, depois continue.';
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+  return (
+    <ScreenShell
+      accent="timer"
+      icon="flame"
+      label="Timer"
+      headline="Foco"
+      state="25 minutos de cada vez, sem culpa"
+      stats={
+        <>
+          <StatCard icon="flame" value={`${pct}%`} label="do ciclo" />
+          <StatCard icon="timer-outline" value={formatMs(timer.remaining)} label="restante" />
+        </>
+      }
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.timerCard}>
           <Text style={styles.timeDisplay} accessibilityRole="timer">
             {formatMs(timer.remaining)}
           </Text>
           <View style={styles.dots} accessibilityLabel={`${pct}% do ciclo`}>
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4, 5].map(i => (
               <View
                 key={i}
                 style={[styles.dot, progress >= i * 20 ? styles.dotOn : styles.dotOff]}
               />
             ))}
           </View>
-          <Text style={styles.hint}>
-            {!timer.running && progress === 0
-              ? 'Aperte começar e foque em uma coisa só'
-              : timer.running
-                ? 'Foco ligado — o resto espera'
-                : 'Pausado. Respire, depois continue.'}
-          </Text>
+          <View style={styles.hintRow}>
+            <Ionicons
+              name={timer.running ? 'flame' : 'time-outline'}
+              size={15}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.hint}>{hint}</Text>
+          </View>
         </View>
 
         <View style={styles.buttons}>
@@ -85,46 +95,27 @@ export default function TimerScreen() {
         </View>
 
         <View style={styles.progressSection}>
-          <Text style={styles.progressTitle}>Ciclo atual</Text>
-          <ProgressBar percentage={progress} color={progressColor} />
-          <Text style={styles.progressLabel}>
-            {pct === 0
-              ? 'Ciclo novinho esperando por você'
-              : pct >= 100
-                ? 'Ciclo completo. Merece uma pausa.'
-                : `${pct}% do ciclo concluído`}
-          </Text>
+          <ProgressBar percentage={progress} color={progressColor} embedded />
+          <View style={styles.progressFoot}>
+            <Ionicons name="checkmark-done" size={15} color={theme.colors.textMuted} />
+            <Text style={styles.progressLabel}>
+              {pct === 0
+                ? 'Ciclo novinho esperando por você'
+                : pct >= 100
+                  ? 'Ciclo completo. Merece uma pausa.'
+                  : `${pct}% do ciclo concluído`}
+            </Text>
+          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.bg,
-  },
-  header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.md,
-  },
-  title: {
-    fontSize: theme.type.largeTitle,
-    fontWeight: '800',
-    color: theme.colors.text,
-  },
-  subtitle: {
-    fontSize: theme.type.callout,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
     paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.lg,
     paddingBottom: 24,
     gap: 16,
   },
@@ -152,15 +143,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   dotOn: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: TIMER.base,
   },
   dotOff: {
     backgroundColor: theme.colors.disabled,
   },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+  },
   hint: {
     fontSize: theme.type.footnote,
     color: theme.colors.textSecondary,
-    marginTop: 14,
     textAlign: 'center',
   },
   buttons: {
@@ -176,7 +172,7 @@ const styles = StyleSheet.create({
     gap: 8,
     minHeight: 54,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: TIMER.base,
   },
   btnPause: {
     flex: 1,
@@ -186,7 +182,7 @@ const styles = StyleSheet.create({
     gap: 8,
     minHeight: 54,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.warning,
+    backgroundColor: theme.colors.danger,
   },
   btnReset: {
     flexDirection: 'row',
@@ -216,18 +212,15 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     ...cardShadow(1),
   },
-  progressTitle: {
-    fontSize: theme.type.caption,
-    fontWeight: '700',
-    color: theme.colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 12,
+  progressFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
   },
   progressLabel: {
     fontSize: theme.type.footnote,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 4,
   },
 });
