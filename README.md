@@ -14,13 +14,18 @@ A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de 
 
 Os dados ficam salvos no próprio celular com SQLite, então não precisa de servidor. A conta é um perfil local (e-mail + senha com hash SHA-256 e salt); serve para separar o uso no mesmo aparelho.
 
+## Interface
+
+Cada aba tem a sua própria cor e o seu ícone, então dá para saber em que parte da rotina você está só de bater o olho: Inbox verde, Hoje azul, Timer âmbar, Saída rosa e Revisão teal. A faixa colorida do topo traz o resumo do dia em números, e todo item tem um ícone que diz a que categoria pertence. O contrato visual completo, com as regras de uso de cada cor, está em `docs/DESIGN.md`.
+
 ## Tecnologias
 
 - React Native com Expo + TypeScript
 - SQLite com expo-sqlite (inbox, hoje, saída, timer, ajustes, usuários, sessão)
 - React Navigation (pilha Auth + abas)
-- expo-crypto (hash de senha) e expo-haptics (micro-interação)
-- Git + GitHub
+- expo-crypto (hash de senha), expo-haptics (micro-interação) e
+  expo-linear-gradient (faixa colorida das telas)
+- @expo/vector-icons (ícones) e Git + GitHub
 
 ## Como rodar
 
@@ -41,8 +46,8 @@ Se preferir só ver as telas sem instalar nada, abra o arquivo `docs/telas-minha
 
 ```text
 app/                  telas (auth, inbox, hoje, saída, timer, revisão)
-src/components/       componentes reutilizáveis (Logo, CaptureInput, InboxItem, ...)
-src/lib/              tema, banco local (database.ts), sessão, senha e tipos
+src/components/       componentes reutilizáveis (ScreenShell, StatCard, Logo, CaptureInput, InboxItem, ...)
+src/lib/              tema e paleta por contexto (theme.ts), ícones (icons.ts), banco local (database.ts), sessão, senha e tipos
 hooks/                estado por tela (useInbox, useHoje, useSaida, useTimer)
 docs/                 TAP, EAP, DESIGN, protótipo e trabalho ABNT
 ```

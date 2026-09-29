@@ -3,29 +3,65 @@
 Sessão encerrada em: 29/09/2026. Ponto de partida da próxima sessão — ler só
 as duas primeiras seções para retomar sem contexto externo.
 
-## Onde paramos (29/09)
+## Onde paramos (29/09, 2º turno)
+
+Feedback do professor sobre a primeira tela: **"designer muito simples"**,
+**"perguntou das 4 cores da paleta"**, **"use ícones, coloque mais cores, dê
+mais vida"**. Escopo combinado com o usuário: as **5 telas**, não só a primeira.
+
+**Commits deste turno** (branch `main`):
+
+| Commit | Conteúdo |
+|---|---|
+| `597eaf1` | Paleta por contexto: `AccentKey`/`Accent`/`accents` (5 famílias) + tokens `onBand*` em `theme.ts`; `src/lib/icons.ts` (union `IconName` + `CATEGORY_ICONS`); `expo-linear-gradient` instalado. Nenhuma tela mudou. |
+| `2625f4c` | `ScreenShell` (faixa em gradiente + chip de ícone + StatusBar claro + corpo no papel) e `StatCard` (novos); Inbox redesenhado; `Logo` com `tone="band"`; ícones nas categorias/chips/botões/banner/empty. |
+| `eb42ef6` | Hoje, Timer, Saída e Revisão na mesma casca, cada uma na sua família; tab bar acende na tinta da aba; login ganhou a faixa verde + `StatusBar` claro; `ProgressBar` com prop `embedded`. |
+
+Contrato visual completo em `docs/DESIGN.md` (ler antes de mexer em UI).
+
+**Validação:** `npm run typecheck` limpo, `npx eslint src/ hooks/ app/ App.tsx
+--ext .ts,.tsx` 0 erros, `npx expo export --platform web` compila. **Falta
+validação humana no aparelho** — o redesign é 100% visual, então nenhum
+teste automatizado pega "ficou feio" ou "contraste quebrou".
+
+**Armadilha registrada nesta sessão:** `expo-status-bar` aplica o **último
+`<StatusBar>` montado**. As abas montam `style="light"` (faixa colorida);
+sem o `<StatusBar style="light" />` no `app/auth.tsx`, sair da sessão deixava a
+barra do sistema branca sobre o papel claro. Quem montar faixa colorida
+precisa declarar o seu.
+
+**Armadilha do `tsc`:** meu edit com `oldString: '} as const;'` casou com a
+fechadura errada e desmontou o `cardShadow()`. Ao editar `theme.ts`, sempre
+incluir linhas vizinhas no `oldString`.
+
+## Onde paramos (29/09, 1º turno)
 
 **Push para o GitHub PENDENTE** — tudo pronto localmente, travado só no login:
 `git push -u origin main` retorna **403** porque a conta atual do `gh`
 (`msantosgame-prog`) não tem escrita em `MateusCCI/MinhaRotina`. O usuário
 escolheu **trocar o login do gh** para a conta dona do repo. Falta ele rodar
-`gh auth login` no terminal dele e avisar; aí é só dar o push.
+`gh auth login` no terminal dele e avisar; aí é só dar o push. (Continua
+pendente depois do 2º turno.)
 
-Estado do git local (branch **`main`** — renomeada de `master` nesta sessão):
-`068bebf` (merge do README inicial remoto, autor corrigido para
-Mateus Outubro2020) no topo de `aa7ef02` + 19 commits de trabalho. Remoto em
-HTTPS (`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá
-`Permission denied` nesta máquina. Remoto tem só `main` com 1 commit
-(`bd41a42` Initial), já incorporado via merge `--allow-unrelated-histories`
-(README resolvido com `--ours`, o nosso é superset).
+Estado do git local (branch **`main`** — renomeada de `master` neste dia):
+`eb42ef6` no topo de `cab2722` + 22 commits de trabalho. Remoto em HTTPS
+(`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá `Permission denied`
+nesta máquina. Remoto tem só `main` com 1 commit (`bd41a42` Initial), já
+incorporado via merge `--allow-unrelated-histories` (README resolvido com
+`--ours`, o nosso é superset).
 **Não commitar/pushar:** `RELATORIO-TAILSCALE.md` (untracked, não é do projeto)
 nem artefatos Tailscale.
 
 ## Próximo passo sugerido
 
-1. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
-2. Validação humana do roteiro `docs/TESTES-MANUAIS.md` (10 cenários, 0 executados).
-3. Depois: DER atualizado (`users`, `meta`, colunas novas em `hoje_items`) + slide M3.
+1. **Rodar no aparelho e olhar as 5 telas com a faixa colorida** (é o que o
+   professor vai cobrar). Conferir: se a faixa não ficou alta demais em tela
+   pequena, se o branco passa de 4.5:1 em cada gradiente, se os StatCards não
+   apertam o número em "00:00".
+2. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
+3. Executar o roteiro `docs/TESTES-MANUAIS.md` (10 cenários, 0 executados) —
+   o cenário 1 (Inbox) precisa ser conferido de novo depois do redesign.
+4. Depois: DER atualizado (`users`, `meta`, colunas novas em `hoje_items`) + slide M3.
 
 ## Sessões anteriores (resumo)
 
