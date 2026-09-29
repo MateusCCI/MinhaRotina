@@ -123,7 +123,11 @@ export default function InboxScreen() {
         readyToCount ? (
           <>
             <StatCard icon="file-tray" value={String(summary.inbox)} label="no inbox" />
-            <StatCard icon="flag" value={`${summary.hojeDone}/${summary.hojeTotal}`} label="prioridades" />
+            <StatCard
+              icon="flag"
+              value={summary.hojeTotal > 0 ? `${summary.hojeDone}/${summary.hojeTotal}` : '—'}
+              label="prioridades"
+            />
             <StatCard icon="checkmark-done" value={`${summary.pct}%`} label="concluído" />
           </>
         ) : null

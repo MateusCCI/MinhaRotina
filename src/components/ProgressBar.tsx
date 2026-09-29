@@ -7,9 +7,16 @@ interface ProgressBarProps {
   color: string;
   /** True quando o componente já está dentro de um card (sem card próprio). */
   embedded?: boolean;
+  /** Rótulo da barra — o mesmo componente mede dia e ciclo do timer. */
+  label?: string;
 }
 
-export default function ProgressBar({ percentage, color, embedded = false }: ProgressBarProps) {
+export default function ProgressBar({
+  percentage,
+  color,
+  embedded = false,
+  label = 'Progresso de hoje',
+}: ProgressBarProps) {
   const pct = Math.max(0, Math.min(100, Math.round(percentage)));
   return (
     <View
@@ -17,7 +24,7 @@ export default function ProgressBar({ percentage, color, embedded = false }: Pro
       accessibilityRole="progressbar"
     >
       <View style={styles.header}>
-        <Text style={styles.label}>Progresso de hoje</Text>
+        <Text style={styles.label}>{label}</Text>
         <Text style={[styles.percentage, { color }]}>{pct}%</Text>
       </View>
       <View style={styles.track}>

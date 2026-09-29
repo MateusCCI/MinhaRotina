@@ -143,7 +143,7 @@ export default function RevisaoScreen() {
           <View style={styles.heroTrack}>
             <View style={[styles.heroFill, { width: `${progresso}%`, backgroundColor: corProgresso }]} />
           </View>
-          <Text style={styles.heroLabel}>do dia de hoje · {estado}</Text>
+          <Text style={styles.heroLabel}>concluído hoje · {stats.completosHoje} de {stats.totalHoje} prioridades</Text>
         </View>
 
         <View style={styles.section}>

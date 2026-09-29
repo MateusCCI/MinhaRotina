@@ -95,7 +95,7 @@ export default function TimerScreen() {
         </View>
 
         <View style={styles.progressSection}>
-          <ProgressBar percentage={progress} color={progressColor} embedded />
+          <ProgressBar percentage={progress} color={progressColor} embedded label="Progresso do ciclo" />
           <View style={styles.progressFoot}>
             <Ionicons name="checkmark-done" size={15} color={theme.colors.textMuted} />
             <Text style={styles.progressLabel}>
