@@ -1,8 +1,9 @@
 # HANDOFF — Minha Rotina
 
-Sessão (28/09/2026, parte 2): login completo com e-mail + senha (`d00bd47`,
-a commitar). Antes: bug promote, paleta alegre, logo, primeira tela, perfis
-(`ab6a14a`→`accf27d`).
+Sessão (28/09/2026, parte 2): login completo com e-mail + senha (`1270cfd`).
+Antes: bug promote, paleta alegre, logo, primeira tela, perfis
+(`ab6a14a`→`accf27d`). Depois: Saída editável (`52442cb`), repetir senha
+(`761c472`), README sincronizado, roteiro de testes manuais.
 
 ## Login completo (e-mail + senha)
 
@@ -15,6 +16,19 @@ a commitar). Antes: bug promote, paleta alegre, logo, primeira tela, perfis
 - Validação: `tsc` + `eslint` limpos, `expo export --platform web` compila.
 - Perfis antigos (só nome, sem e-mail) não entram pelo login novo — dado de
   dev; limpar com Clear site data (web) ou reinstalar (celular).
+
+## Sessão 28/09, parte 3 (`52442cb`, `761c472` + README sincronizado)
+
+- **Saída editável:** `insert/update/deleteSaidaItem` no banco,
+  `addItem/renameItem/removeItem` no `useSaida`, modal criar/editar, botões
+  lápis/lixeira por linha (excluir com confirmação), botão + no header.
+- **Repetir senha** no cadastro (`confirmPassword`, checagem de coincidência
+  inline, limpa as duas ao trocar de modo).
+- **README sincronizado** com a realidade: conta local, Saída CRUD, Timer
+  persistente, Revisão sem humor/sono, estrutura e tabelas atuais; removido
+  `expo-notifications` (não usado no código).
+- Roteiro de validação humana em `docs/TESTES-MANUAIS.md` (10 cenários —
+  serve de base aos testes do M3).
 
 ## Sessão 28/09 — o que foi feito
 

@@ -2,24 +2,24 @@
 
 App de organização de rotina feito para o Projeto Integrador do 4º semestre de Análise e Desenvolvimento de Sistemas — Brasília-DF, 2026.
 
-A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de notas e em vários apps, e no fim esquecia o que tinha que levar ao sair de casa e perdia prazo curto. O Minha Rotina tenta resolver isso de um jeito simples, com tudo em português e sem precisar criar conta.
+A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de notas e em vários apps, e no fim esquecia o que tinha que levar ao sair de casa e perdia prazo curto. O Minha Rotina tenta resolver isso de um jeito simples, com tudo em português e conta local no próprio aparelho (nome, e-mail e senha, sem servidor).
 
 ## Como funciona
 
-- **Inbox:** campo único no topo. Digitou e apertou Enter, salvou. Depois você decide o que vai para o Hoje ou apaga.
-- **Hoje:** só cabem 3 tarefas por dia. A 4ª o app bloqueia com um aviso. Tem barra de progresso que muda de cor conforme você conclui.
-- **Saída:** checklist de até 5 itens na ordem do caminho (ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e campo para anotar que horas você saiu.
-- **Timer:** Pomodoro de 25 minutos com iniciar e pausar. Quando termina, ele pergunta qual é o próximo item.
-- **Revisão:** resumo da semana com quantos dias você zerou o inbox e quantas saídas registrou, além de humor/sono e um ajuste para a semana seguinte.
+- **Inbox:** campo único no topo com prazo e categoria. Digitou e apertou Enter, salvou. Depois você edita, decide o que vira prioridade do Hoje ou apaga. Com 5+ itens o app sugere uma limpa rápida.
+- **Hoje:** só cabem 3 tarefas por dia. A 4ª o app bloqueia com um aviso. Tem barra de progresso que muda de cor conforme você conclui, e filtro por categoria.
+- **Saída:** checklist editável do ritual de saída (criar, renomear, excluir; ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e botão de confirmar saída, liberado quando tudo está marcado.
+- **Timer:** Pomodoro de 25 minutos com iniciar, pausar e zerar; o estado persiste no banco mesmo trocando de aba.
+- **Revisão:** resumo da semana com quantos dias você zerou o inbox, quantas saídas registrou e o horário médio, além de um ajuste escrito para a semana seguinte e a troca de perfil.
 
-Os dados ficam salvos no próprio celular com SQLite, então não precisa de conta nem de servidor.
+Os dados ficam salvos no próprio celular com SQLite, então não precisa de servidor. A conta é um perfil local (e-mail + senha com hash SHA-256 e salt); serve para separar o uso no mesmo aparelho.
 
 ## Tecnologias
 
 - React Native com Expo + TypeScript
-- SQLite com expo-sqlite
-- React Navigation (navegação por abas)
-- expo-notifications (alarme da saída e aviso de fim do bloco)
+- SQLite com expo-sqlite (inbox, hoje, saída, timer, ajustes, usuários, sessão)
+- React Navigation (pilha Auth + abas)
+- expo-crypto (hash de senha) e expo-haptics (micro-interação)
 - Git + GitHub
 
 ## Como rodar
@@ -40,13 +40,14 @@ Se preferir só ver as telas sem instalar nada, abra o arquivo `docs/telas-minha
 ## Estrutura do projeto
 
 ```text
-app/                  telas (inbox, hoje, saída, timer, revisão)
-src/components/       componentes reutilizáveis (CaptureInput, InboxItem, ...)
-src/lib/              banco local (database.ts) e tipos (types.ts)
-docs/                 TAP, EAP, protótipo e trabalho ABNT
+app/                  telas (auth, inbox, hoje, saída, timer, revisão)
+src/components/       componentes reutilizáveis (Logo, CaptureInput, InboxItem, ...)
+src/lib/              tema, banco local (database.ts), sessão, senha e tipos
+hooks/                estado por tela (useInbox, useHoje, useSaida, useTimer)
+docs/                 TAP, EAP, DESIGN, protótipo e trabalho ABNT
 ```
 
-O banco tem duas tabelas principais: `inbox_items` (id, content, created_at) e `hoje_items` (id, inbox_id, checked, created_at). O acesso passa por uma classe única (`DatabaseSingleton`), para não abrir várias conexões ao mesmo tempo.
+O banco tem tabelas para `inbox_items`, `hoje_items` (com cópia própria de conteúdo/prazo/categoria), `saida_items` + `saida_log`, `timer_state`, `ajustes_semanais`, `events`, `users` e `meta` (sessão). O acesso passa por uma classe única (`DatabaseSingleton`), para não abrir várias conexões ao mesmo tempo.
 
 ## Documentação
 
