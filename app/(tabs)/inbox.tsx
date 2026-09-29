@@ -1,18 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Modal, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import CaptureInput, { CaptureMeta } from '../../src/components/CaptureInput';
 import InboxItemComponent from '../../src/components/InboxItem';
-import Logo from '../../src/components/Logo';
-import ProgressBar from '../../src/components/ProgressBar';
+import ScreenShell from '../../src/components/ScreenShell';
+import StatCard from '../../src/components/StatCard';
 import { useInbox } from '../../hooks/useInbox';
 import { useHoje } from '../../hooks/useHoje';
 import { InboxItem } from '../../src/lib/types';
-import { theme, cardShadow } from '../../src/lib/theme';
+import { accents, theme, cardShadow } from '../../src/lib/theme';
+import { categoryIcon } from '../../src/lib/icons';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../../src/lib/date';
 
 const CLEANUP_LIMIT = 5;
+const INBOX = accents.inbox;
 
 /** Resumo do dia derivado de dois hooks — tipo explícito, função pura. */
 interface DaySummary {
@@ -52,6 +53,9 @@ export default function InboxScreen() {
     const pct = hojeItems.length > 0 ? Math.round((hojeDone / hojeItems.length) * 100) : 0;
     return { inbox: items.length, hojeTotal: hojeItems.length, hojeDone, pct };
   }, [items.length, hojeItems]);
+
+  const ready = !loading && !hojeLoading;
+  const readyToCount = ready && (summary.inbox > 0 || summary.hojeTotal > 0);
 
   const handlePromote = async (id: number): Promise<void> => {
     try {
@@ -102,44 +106,39 @@ export default function InboxScreen() {
   };
 
   const needsCleanup = items.length >= CLEANUP_LIMIT;
+  const inboxState =
+    items.length === 0
+      ? 'Tudo despejado, mente leve'
+      : `${items.length} ${items.length === 1 ? 'ideia esperando' : 'ideias esperando'} por você`;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Logo layout="row" />
-        <Text style={styles.greeting}>
-          {greetingFor(now)} · {todayLabel(now)}
-        </Text>
-        <Text style={styles.subtitle}>
-          {items.length === 0
-            ? 'Tudo despejado, mente leve'
-            : `${items.length} ${items.length === 1 ? 'ideia esperando' : 'ideias esperando'} por você`}
-        </Text>
-      </View>
-
-      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} keyboardShouldPersistTaps="handled">
-        {!loading && !hojeLoading && (summary.inbox > 0 || summary.hojeTotal > 0) && (
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Resumo do dia</Text>
-            <View style={styles.summaryRow}>
-              <View style={styles.summaryStat}>
-                <Text style={styles.summaryValue}>{summary.inbox}</Text>
-                <Text style={styles.summaryLabel}>no inbox</Text>
-              </View>
-              <View style={styles.summaryDivider} />
-              <View style={styles.summaryStat}>
-                <Text style={styles.summaryValue}>{summary.hojeDone}/{summary.hojeTotal}</Text>
-                <Text style={styles.summaryLabel}>prioridades</Text>
-              </View>
-              <View style={styles.summaryDivider} />
-              <View style={styles.summaryStat}>
-                <Text style={styles.summaryValue}>{summary.pct}%</Text>
-                <Text style={styles.summaryLabel}>concluído</Text>
-              </View>
+    <ScreenShell
+      accent="inbox"
+      icon="file-tray"
+      label="Inbox"
+      headline={greetingFor(now)}
+      state={inboxState}
+      meta={todayLabel(now)}
+      stats={
+        readyToCount ? (
+          <>
+            <StatCard icon="file-tray" value={String(summary.inbox)} label="no inbox" />
+            <StatCard icon="flag" value={`${summary.hojeDone}/${summary.hojeTotal}`} label="prioridades" />
+            <StatCard icon="checkmark-done" value={`${summary.pct}%`} label="concluído" />
+          </>
+        ) : null
+      }
+    >
+      <ScrollView contentContainerStyle={styles.bodyContent} keyboardShouldPersistTaps="handled">
+        {readyToCount && (
+          <View style={styles.progressCard}>
+            <View style={styles.progressHead}>
+              <Ionicons name="checkmark-done" size={16} color={INBOX.base} />
+              <Text style={styles.progressTitle}>Progresso de hoje</Text>
             </View>
-            {summary.hojeTotal > 0 && (
-              <ProgressBar percentage={summary.pct} color={theme.colors.primary} />
-            )}
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: `${summary.pct}%` }]} />
+            </View>
           </View>
         )}
 
@@ -147,7 +146,9 @@ export default function InboxScreen() {
 
         {needsCleanup && (
           <View style={styles.cleanupBanner}>
-            <Ionicons name="sparkles-outline" size={22} color={theme.colors.primary} />
+            <View style={styles.cleanupIcon}>
+              <Ionicons name="sparkles" size={20} color={theme.colors.warning} />
+            </View>
             <View style={styles.cleanupBody}>
               <Text style={styles.cleanupTitle}>Que tal uma limpa rápida?</Text>
               <Text style={styles.cleanupText}>
@@ -158,16 +159,18 @@ export default function InboxScreen() {
           </View>
         )}
 
-        {isEmpty && !loading ? (
+        {isEmpty && ready ? (
           <View style={styles.emptyState}>
-            <Ionicons name="file-tray-outline" size={44} color={theme.colors.textMuted} />
+            <View style={styles.emptyIcon}>
+              <Ionicons name="sparkles-outline" size={34} color={INBOX.base} />
+            </View>
             <Text style={styles.emptyTitle}>Inbox zerado. Respira.</Text>
             <Text style={styles.emptyText}>
               Quando surgir qualquer ideia, despeje no campo acima. Ela vai esperar por você aqui.
             </Text>
           </View>
         ) : (
-          !loading && (
+          ready && (
             <View style={styles.list}>
               {items.map((item: InboxItem) => (
                 <InboxItemComponent
@@ -184,7 +187,7 @@ export default function InboxScreen() {
 
         {loading && (
           <View style={styles.loader}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <ActivityIndicator size="large" color={INBOX.base} />
           </View>
         )}
       </ScrollView>
@@ -197,7 +200,16 @@ export default function InboxScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Editar ideia</Text>
+            <View style={styles.modalHead}>
+              <Text style={styles.modalTitle}>Editar ideia</Text>
+              <TouchableOpacity
+                style={styles.modalClose}
+                onPress={() => setEditing(null)}
+                accessibilityLabel="Fechar"
+              >
+                <Ionicons name="close-circle-outline" size={26} color={theme.colors.textMuted} />
+              </TouchableOpacity>
+            </View>
 
             <TextInput
               style={styles.modalInput}
@@ -216,6 +228,11 @@ export default function InboxScreen() {
                   style={[styles.chip, editing?.dueKey === opt.key && styles.chipActive]}
                   onPress={() => setEditing(prev => (prev ? { ...prev, dueKey: opt.key } : prev))}
                 >
+                  <Ionicons
+                    name="time-outline"
+                    size={15}
+                    color={editing?.dueKey === opt.key ? theme.colors.onPrimary : theme.colors.textSecondary}
+                  />
                   <Text style={[styles.chipText, editing?.dueKey === opt.key && styles.chipTextActive]}>
                     {opt.label}
                   </Text>
@@ -240,6 +257,11 @@ export default function InboxScreen() {
                       )
                     }
                   >
+                    <Ionicons
+                      name={categoryIcon(cat)}
+                      size={15}
+                      color={active ? (CATEGORY_TEXT[cat] ?? theme.colors.text) : theme.colors.textSecondary}
+                    />
                     <Text style={[styles.chipText, active && { color: CATEGORY_TEXT[cat] }]}>
                       {cat}
                     </Text>
@@ -259,81 +281,45 @@ export default function InboxScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.bg,
-  },
-  header: {
+  bodyContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.md,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: 32,
   },
-  title: {
-    fontSize: theme.type.largeTitle,
-    fontWeight: '800',
-    color: theme.colors.text,
-  },
-  greeting: {
-    fontSize: theme.type.callout,
-    fontWeight: '700',
-    color: theme.colors.primary,
-    marginTop: 10,
-  },
-  subtitle: {
-    fontSize: theme.type.callout,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  summaryCard: {
+  progressCard: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     ...cardShadow(),
   },
-  summaryTitle: {
-    fontSize: theme.type.caption,
-    fontWeight: '700',
-    color: theme.colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 12,
-  },
-  summaryRow: {
+  progressHead: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    gap: 8,
+    marginBottom: 12,
   },
-  summaryStat: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  summaryValue: {
-    fontSize: theme.type.title,
-    fontWeight: '800',
-    color: theme.colors.text,
-  },
-  summaryLabel: {
-    fontSize: theme.type.caption,
+  progressTitle: {
+    fontSize: theme.type.callout,
+    fontWeight: '600',
     color: theme.colors.textSecondary,
-    marginTop: 2,
   },
-  summaryDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: theme.colors.border,
+  track: {
+    height: 12,
+    backgroundColor: theme.colors.surfaceAlt,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
-  body: {
-    flex: 1,
-  },
-  bodyContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: 32,
+  fill: {
+    height: '100%',
+    borderRadius: 6,
+    minWidth: 4,
+    backgroundColor: accents.inbox.base,
   },
   cleanupBanner: {
     flexDirection: 'row',
@@ -342,8 +328,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.warningSoft,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
-    borderColor: theme.colors.borderStrong,
+    borderColor: 'rgba(180,83,9,0.30)',
     marginBottom: theme.spacing.md,
+  },
+  cleanupIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cleanupBody: {
     flex: 1,
@@ -351,7 +345,7 @@ const styles = StyleSheet.create({
   cleanupTitle: {
     fontSize: theme.type.callout,
     fontWeight: '700',
-    color: theme.colors.primary,
+    color: theme.colors.text,
     marginBottom: 2,
   },
   cleanupText: {
@@ -365,6 +359,15 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     alignItems: 'center',
     ...cardShadow(),
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: accents.inbox.soft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
   },
   emptyTitle: {
     fontSize: theme.type.title,
@@ -403,11 +406,23 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: theme.colors.border,
   },
+  modalHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
   modalTitle: {
     fontSize: theme.type.title,
     fontWeight: '800',
     color: theme.colors.text,
-    marginBottom: 12,
+  },
+  modalClose: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -10,
   },
   modalInput: {
     backgroundColor: theme.colors.bg,
@@ -435,9 +450,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surfaceAlt,
@@ -475,9 +492,11 @@ const styles = StyleSheet.create({
     fontSize: theme.type.callout,
   },
   modalSave: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primary,
   },

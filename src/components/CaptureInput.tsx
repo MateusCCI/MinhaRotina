@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../lib/date';
-import { theme, cardShadow } from '../lib/theme';
+import { accents, theme, cardShadow } from '../lib/theme';
+import { categoryIcon } from '../lib/icons';
 
 export interface CaptureMeta {
   dueDate?: string | null;
@@ -12,6 +14,13 @@ interface CaptureInputProps {
   onCapture: (text: string, meta: CaptureMeta) => void;
 }
 
+const INBOX = accents.inbox;
+
+/**
+ * Campo de captura: despejar uma ideia tem de custar um toque. Por isso o
+ * campo é o elemento mais alto do card e o botão nasce com o ícone — o
+ * rótulo sozinho obriga a ler antes de apertar.
+ */
 export default function CaptureInput({ onCapture }: CaptureInputProps) {
   const [text, setText] = useState('');
   const [category, setCategory] = useState<string | null>(null);
@@ -27,9 +36,17 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
     setDueKey('none');
   };
 
+  const canSubmit = !!text.trim();
+
   return (
     <View style={styles.card}>
-      <Text style={styles.prompt}>O que está na sua cabeça?</Text>
+      <View style={styles.promptRow}>
+        <View style={styles.promptIcon}>
+          <Ionicons name="sparkles" size={16} color={INBOX.base} />
+        </View>
+        <Text style={styles.prompt}>O que está na sua cabeça?</Text>
+      </View>
+
       <View style={styles.row}>
         <TextInput
           style={styles.input}
@@ -42,51 +59,63 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
           accessibilityLabel="Campo de captura rápida"
         />
         <TouchableOpacity
-          style={[styles.btn, !text.trim() && styles.btnDisabled]}
+          style={[styles.btn, !canSubmit && styles.btnDisabled]}
           onPress={handleSubmit}
-          disabled={!text.trim()}
+          disabled={!canSubmit}
           accessibilityLabel="Salvar item"
         >
-          <Text style={[styles.btnText, !text.trim() && styles.btnTextDisabled]}>Guardar</Text>
+          <Ionicons
+            name="checkmark"
+            size={18}
+            color={canSubmit ? theme.colors.onPrimary : theme.colors.onDisabled}
+          />
+          <Text style={[styles.btnText, !canSubmit && styles.btnTextDisabled]}>Guardar</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.optionsLabel}>Quando lembrar?</Text>
+      <View style={styles.optionsHead}>
+        <Ionicons name="time-outline" size={14} color={theme.colors.textMuted} />
+        <Text style={styles.optionsLabel}>Quando lembrar?</Text>
+      </View>
       <View style={styles.chips}>
-        {DUE_OPTIONS.map(opt => (
-          <TouchableOpacity
-            key={opt.key}
-            style={[styles.chip, dueKey === opt.key && styles.chipActive]}
-            onPress={() => setDueKey(opt.key)}
-          >
-            <Text style={[styles.chipText, dueKey === opt.key && styles.chipTextActive]}>
-              {opt.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {DUE_OPTIONS.map(opt => {
+          const active = dueKey === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              style={[styles.chip, active && styles.chipActive]}
+              onPress={() => setDueKey(opt.key)}
+            >
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      <Text style={styles.optionsLabel}>É sobre o quê?</Text>
+      <View style={styles.optionsHead}>
+        <Ionicons name="pricetags-outline" size={14} color={theme.colors.textMuted} />
+        <Text style={styles.optionsLabel}>É sobre o quê?</Text>
+      </View>
       <View style={styles.chips}>
         {CATEGORIES.map(cat => {
           const active = category === cat;
+          const tint = CATEGORY_COLORS[cat];
+          const ink = CATEGORY_TEXT[cat] ?? theme.colors.text;
           return (
             <TouchableOpacity
               key={cat}
-              style={[
-                styles.chip,
-                active && { backgroundColor: CATEGORY_COLORS[cat], borderColor: CATEGORY_COLORS[cat] },
-              ]}
+              style={[styles.chip, active && { backgroundColor: tint, borderColor: tint }]}
               onPress={() => setCategory(prev => (prev === cat ? null : cat))}
+              accessibilityLabel={`Categoria ${cat}`}
             >
-              <Text
-                style={[
-                  styles.chipText,
-                  active && { color: CATEGORY_TEXT[cat] ?? theme.colors.text },
-                ]}
-              >
-                {cat}
-              </Text>
+              <Ionicons
+                name={categoryIcon(cat)}
+                size={15}
+                color={active ? ink : theme.colors.textSecondary}
+              />
+              <Text style={[styles.chipText, active && { color: ink }]}>{cat}</Text>
             </TouchableOpacity>
           );
         })}
@@ -103,11 +132,24 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     ...cardShadow(),
   },
+  promptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: theme.spacing.sm,
+  },
+  promptIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 9,
+    backgroundColor: accents.inbox.soft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   prompt: {
     fontSize: theme.type.title,
     fontWeight: '700',
     color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
   },
   row: {
     flexDirection: 'row',
@@ -128,12 +170,13 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   btn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     minHeight: 48,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   btnDisabled: {
     backgroundColor: theme.colors.disabled,
@@ -146,12 +189,17 @@ const styles = StyleSheet.create({
   btnTextDisabled: {
     color: theme.colors.onDisabled,
   },
+  optionsHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+    marginTop: 4,
+  },
   optionsLabel: {
     fontSize: theme.type.caption,
     fontWeight: '700',
     color: theme.colors.textMuted,
-    marginBottom: 8,
-    marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
@@ -162,9 +210,11 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surfaceAlt,

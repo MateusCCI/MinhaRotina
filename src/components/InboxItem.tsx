@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { InboxItem } from '../lib/types';
 import { dueLabel, CATEGORY_COLORS, CATEGORY_TEXT } from '../lib/date';
-import { theme, cardShadow } from '../lib/theme';
+import { accents, theme, cardShadow } from '../lib/theme';
+import { categoryIcon } from '../lib/icons';
 
 interface InboxItemProps {
   item: InboxItem;
@@ -16,6 +17,7 @@ interface InboxItemProps {
 export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }: InboxItemProps) {
   const due = dueLabel(item.due_date);
   const hasBadges = due.label || item.category;
+  const categoryInk = (item.category && CATEGORY_TEXT[item.category]) || theme.colors.textSecondary;
 
   const handlePromote = (): void => {
     void Haptics.selectionAsync();
@@ -28,14 +30,18 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
       {hasBadges && (
         <View style={styles.badges}>
           {item.category && (
-            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#E7E5E4' }]}>
-              <Text style={[styles.badgeText, { color: CATEGORY_TEXT[item.category] ?? theme.colors.textSecondary }]}>
-                {item.category}
-              </Text>
+            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt }]}>
+              <Ionicons name={categoryIcon(item.category)} size={13} color={categoryInk} />
+              <Text style={[styles.badgeText, { color: categoryInk }]}>{item.category}</Text>
             </View>
           )}
           {due.label && (
             <View style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeDue]}>
+              <Ionicons
+                name="time-outline"
+                size={13}
+                color={due.urgent ? theme.colors.danger : theme.colors.primary}
+              />
               <Text style={[styles.badgeText, due.urgent ? styles.badgeUrgentText : styles.badgeDueText]}>
                 {due.label}
               </Text>
@@ -50,8 +56,7 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
           accessibilityLabel={`Editar ${item.content}`}
           accessibilityRole="button"
         >
-          <Ionicons name="pencil-outline" size={20} color={theme.colors.textSecondary} />
-          <Text style={styles.iconBtnText}>Editar</Text>
+          <Ionicons name="pencil-outline" size={18} color={theme.colors.textSecondary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.primaryBtn}
@@ -68,7 +73,7 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
           accessibilityLabel={`Excluir ${item.content}`}
           accessibilityRole="button"
         >
-          <Ionicons name="trash-outline" size={20} color={theme.colors.danger} />
+          <Ionicons name="trash-outline" size={18} color={theme.colors.danger} />
         </TouchableOpacity>
       </View>
     </View>
@@ -100,7 +105,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   badge: {
-    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: theme.radius.pill,
   },
@@ -126,18 +134,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    minWidth: 44,
     minHeight: 44,
-    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surfaceAlt,
-  },
-  iconBtnText: {
-    fontSize: theme.type.footnote,
-    fontWeight: '600',
-    color: theme.colors.textSecondary,
   },
   primaryBtn: {
     flex: 1,
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: 14,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: accents.inbox.base,
   },
   primaryBtnText: {
     fontSize: theme.type.footnote,
