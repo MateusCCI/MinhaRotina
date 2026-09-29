@@ -1,5 +1,43 @@
 # HANDOFF — Minha Rotina
 
+Sessão encerrada em: 29/09/2026. Ponto de partida da próxima sessão — ler só
+as duas primeiras seções para retomar sem contexto externo.
+
+## Onde paramos (29/09)
+
+**Push para o GitHub PENDENTE** — tudo pronto localmente, travado só no login:
+`git push -u origin main` retorna **403** porque a conta atual do `gh`
+(`msantosgame-prog`) não tem escrita em `MateusCCI/MinhaRotina`. O usuário
+escolheu **trocar o login do gh** para a conta dona do repo. Falta ele rodar
+`gh auth login` no terminal dele e avisar; aí é só dar o push.
+
+Estado do git local (branch **`main`** — renomeada de `master` nesta sessão):
+`068bebf` (merge do README inicial remoto, autor corrigido para
+Mateus Outubro2020) no topo de `aa7ef02` + 19 commits de trabalho. Remoto em
+HTTPS (`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá
+`Permission denied` nesta máquina. Remoto tem só `main` com 1 commit
+(`bd41a42` Initial), já incorporado via merge `--allow-unrelated-histories`
+(README resolvido com `--ours`, o nosso é superset).
+**Não commitar/pushar:** `RELATORIO-TAILSCALE.md` (untracked, não é do projeto)
+nem artefatos Tailscale.
+
+## Próximo passo sugerido
+
+1. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
+2. Validação humana do roteiro `docs/TESTES-MANUAIS.md` (10 cenários, 0 executados).
+3. Depois: DER atualizado (`users`, `meta`, colunas novas em `hoje_items`) + slide M3.
+
+## Sessões anteriores (resumo)
+
+- 28/09 p3: Saída editável (`52442cb`), repetir senha (`761c472`), README
+  sincronizado, `docs/TESTES-MANUAIS.md` (`aa7ef02`).
+- 28/09 p2: login e-mail+senha com SHA-256+salt (`1270cfd`).
+- 28/09 p1: fix perda de dado no promote (`ab6a14a`), paleta alegre em teste,
+  logo Sol Nascente, Inbox enriquecido (`ebd21ea`, `7558472`, `accf27d`).
+- 26/09: redesign claro iOS; 25/09: tema dark + 5 tabs (ver histórico abaixo).
+
+---
+
 Sessão (28/09/2026, parte 2): login completo com e-mail + senha (`1270cfd`).
 Antes: bug promote, paleta alegre, logo, primeira tela, perfis
 (`ab6a14a`→`accf27d`). Depois: Saída editável (`52442cb`), repetir senha

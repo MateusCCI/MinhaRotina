@@ -1,6 +1,6 @@
 # STATUS — Minha Rotina (foto da situação)
 
-Atualizado em: 28/09/2026. Saída editável + repetir senha commitados (`52442cb`, `761c472`); README sincronizado; roteiro de 10 testes manuais em `docs/TESTES-MANUAIS.md` aguardando execução humana. Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
+Atualizado em: 29/09/2026. Sessão encerrada com **push pendente** (403: trocar login do `gh` e rodar `git push -u origin main`; branch local agora é `main`). Código pronto; `docs/TESTES-MANUAIS.md` com 10 cenários aguardando execução humana. Detalhes no `docs/HANDOFF.md`. Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer sessão continuar sem contexto externo.
 
 > **Sessão a sessão:** o detalhamento técnico da última sessão (commits, tokens do tema, comandos de validação) está no **`docs/HANDOFF.md`** — leia-o antes de codar.
 
