@@ -25,6 +25,7 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export default function AuthScreen() {
     setMode(next);
     setError(null);
     setPassword('');
+    setConfirmPassword('');
   };
 
   const enterSession = async (userId: number): Promise<void> => {
@@ -86,6 +88,10 @@ export default function AuthScreen() {
     }
     if (password.length < MIN_PASSWORD) {
       setError(`A senha precisa de pelo menos ${MIN_PASSWORD} caracteres.`);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem. Confira os dois campos.');
       return;
     }
     setBusy(true);
@@ -170,7 +176,7 @@ export default function AuthScreen() {
             <TouchableOpacity
               style={styles.eye}
               onPress={() => setShowPassword(v => !v)}
-              accessibilityLabel={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+              accessibilityLabel={showPassword ? 'Esconder senhas' : 'Mostrar senhas'}
             >
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -179,6 +185,25 @@ export default function AuthScreen() {
               />
             </TouchableOpacity>
           </View>
+
+          {!isLogin && (
+            <>
+              <Text style={styles.label}>Repetir senha</Text>
+              <TextInput
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                onSubmitEditing={handleRegister}
+                placeholder="Digite a senha de novo"
+                placeholderTextColor={theme.colors.textMuted}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="done"
+                accessibilityLabel="Repita a senha"
+              />
+            </>
+          )}
 
           {error && (
             <View style={styles.errorBox}>
