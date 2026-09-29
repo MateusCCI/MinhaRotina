@@ -1,17 +1,23 @@
 import { Platform } from 'react-native';
 
 /**
- * Mundo visual "Papel & Âmbar" — tema claro, amigável, gramática iOS.
+ * Mundo visual "Papel & Aurora" — tema claro, amigável, gramática iOS.
  *
- * Teste de paleta alegre (sessão 28/09): tinta primária Verde Folha e texto
- * Marrom Café; o Âmbar segue como acento quente (avisos, prazos).
+ * Paleta por contexto (sessão 29/09, revisão do professor): a estratégia
+ * saiu de Restrained (1 tinta + neutros) para **cinco famílias de cor, uma
+ * por contexto**, cada uma com regra fixa de uso. A pergunta do professor
+ * sobre "as 4 cores" virou o eixo do design: a cor agora *informa* em que
+ * parte da rotina o usuário está, em vez de repetir a mesma tinta nas 5 telas.
+ *
+ * Regra de uso dos acentos (idêntica nas 5 telas):
+ * 1. A faixa colorida (`band`) abre a tela e carrega o título — identidade.
+ * 2. `base` tinta ícones, valores e estados ativos do conteúdo.
+ * 3. `soft` é a versão translúcida para cards e chips sobre o papel claro.
+ * 4. `primary` (Verde Folha) continua sendo a ação primária do app — a marca.
  *
  * Cena física: pessoa com TDAH confere a rotina no celular durante o dia,
  * com uma mão, sob luz ambiente clara — por isso fundo claro quente
- * (grouped) com cards brancos, e não o inverso.
- *
- * Estratégia de cor: Restrained (modo Operate) — neutros quentes + UMA
- * tinta (âmbar queimado) só para ação primária, seleção e estado.
+ * (grouped) com cards brancos, e nunca o inverso.
  * Contrastes miram ≥4.5:1 em texto e placeholder (craft floor).
  */
 export const theme = {
@@ -30,7 +36,7 @@ export const theme = {
     textSecondary: '#6E6A61',
     textMuted: '#6E6A61',
 
-    // Tinta única: Verde Folha (ação primária, seleção, foco)
+    // Tinta da marca: ação primária, seleção e foco
     primary: '#15803D',
     primaryPress: '#166534',
     primarySoft: 'rgba(21,128,61,0.10)',
@@ -43,6 +49,13 @@ export const theme = {
     dangerSoft: 'rgba(220,38,38,0.08)',
     warning: '#B45309',
     warningSoft: 'rgba(180,83,9,0.10)',
+
+    // Sobre a faixa colorida (todos os `band` passam de 4.5:1 com branco)
+    onBand: '#FFFFFF',
+    onBandMuted: 'rgba(255,255,255,0.90)',
+    onBandFaint: 'rgba(255,255,255,0.78)',
+    onBandSoft: 'rgba(255,255,255,0.16)',
+    onBandBorder: 'rgba(255,255,255,0.30)',
 
     disabled: '#E7E5E4',
     onDisabled: '#6E6A61',
@@ -69,6 +82,37 @@ export const theme = {
     caption: 12,
   },
 } as const;
+
+export type AccentKey = 'inbox' | 'hoje' | 'timer' | 'saida' | 'revisao';
+
+export interface Accent {
+  /** Tinta da família: ícones, valores e estado ativo do conteúdo. */
+  base: string;
+  /** Segundo tom da faixa (escuro: branco sobre ele passa de 4.5:1). */
+  deep: string;
+  /** Versão translúcida para cards e chips sobre o papel claro. */
+  soft: string;
+  /** Par [base, deep] na ordem da faixa, de cima para baixo. */
+  band: readonly [string, string];
+}
+
+/**
+ * Cinco famílias de cor, uma por contexto. Escolhidas por matiz e não por
+ * gosto: verde (guardar), azul (focar), âmbar (esforço), rosa/violeta
+ * (encerrar) e teal (revisar) — nenhuma se repete dentro da faixa.
+ */
+export const accents: Record<AccentKey, Accent> = {
+  inbox: { base: '#15803D', deep: '#0E7490', soft: 'rgba(21,128,61,0.10)', band: ['#15803D', '#0E7490'] },
+  hoje: { base: '#1D4ED8', deep: '#4338CA', soft: 'rgba(29,78,216,0.10)', band: ['#1D4ED8', '#4338CA'] },
+  timer: { base: '#B45309', deep: '#C2410C', soft: 'rgba(180,83,9,0.10)', band: ['#B45309', '#C2410C'] },
+  saida: { base: '#BE185D', deep: '#7C3AED', soft: 'rgba(190,24,93,0.10)', band: ['#BE185D', '#7C3AED'] },
+  revisao: { base: '#0F766E', deep: '#065F46', soft: 'rgba(15,118,110,0.10)', band: ['#0F766E', '#065F46'] },
+};
+
+/** Cor sólida da faixa, para pintar o container atrás da área do notch. */
+export function bandColor(accent: Accent): string {
+  return accent.band[0];
+}
 
 /** Sombra suave de card claro: sempre com offset + blur (nunca halo). */
 export function cardShadow(elev = 2) {
