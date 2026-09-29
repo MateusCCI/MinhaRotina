@@ -51,7 +51,42 @@ export function useSaida() {
     }
   }, []);
 
+  const addItem = useCallback(async (content: string): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      const id = await db.insertSaidaItem(content);
+      setItems(prev => [...prev, { id, content: content.trim(), checked: false, checked_at: null }]);
+    } catch (error) {
+      console.error('Erro ao adicionar item de saída:', error);
+      throw error;
+    }
+  }, []);
+
+  const renameItem = useCallback(async (id: number, content: string): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      await db.updateSaidaItem(id, content);
+      setItems(prev =>
+        prev.map(item => (item.id === id ? { ...item, content: content.trim() } : item))
+      );
+    } catch (error) {
+      console.error('Erro ao renomear item de saída:', error);
+      throw error;
+    }
+  }, []);
+
+  const removeItem = useCallback(async (id: number): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      await db.deleteSaidaItem(id);
+      setItems(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Erro ao excluir item de saída:', error);
+      throw error;
+    }
+  }, []);
+
   const allChecked = items.length > 0 && items.every(i => i.checked);
 
-  return { items, loading, allChecked, saidasHoje, toggleItem, registerSaida, fetchItems };
+  return { items, loading, allChecked, saidasHoje, toggleItem, registerSaida, fetchItems, addItem, renameItem, removeItem };
 }

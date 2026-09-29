@@ -222,6 +222,49 @@ class DatabaseSingleton {
     }
   }
 
+  async insertSaidaItem(content: string): Promise<number> {
+    const traceId = this.generateTraceId();
+    try {
+      const row = await this.db!.getFirstAsync<{ m: number | null }>(
+        'SELECT MAX(position) as m FROM saida_items'
+      );
+      const result = await this.db!.runAsync(
+        'INSERT INTO saida_items (content, position) VALUES (?, ?)',
+        [content.trim(), (row?.m ?? -1) + 1]
+      );
+      console.log(`[S1][TRACE:${traceId}] Item de saída criado: id=${result.lastInsertRowId}`);
+      return result.lastInsertRowId as number;
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao criar item de saída:`, error);
+      throw error;
+    }
+  }
+
+  async updateSaidaItem(id: number, content: string): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync(
+        'UPDATE saida_items SET content = ? WHERE id = ?',
+        [content.trim(), id]
+      );
+      console.log(`[S1][TRACE:${traceId}] Item de saída editado: id=${id}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao editar item de saída:`, error);
+      throw error;
+    }
+  }
+
+  async deleteSaidaItem(id: number): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync('DELETE FROM saida_items WHERE id = ?', [id]);
+      console.log(`[S1][TRACE:${traceId}] Item de saída excluído: id=${id}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao excluir item de saída:`, error);
+      throw error;
+    }
+  }
+
   async registerSaida(): Promise<void> {
     const traceId = this.generateTraceId();
     try {
