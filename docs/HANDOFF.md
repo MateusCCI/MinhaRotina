@@ -3,6 +3,23 @@
 Sessão encerrada em: 29/09/2026 (3º turno). Ponto de partida da próxima
 sessão — ler só as duas primeiras seções para retomar sem contexto externo.
 
+## Onde paramos (29/09, 5º turno) — um lápis só na Saída
+
+O usuário pediu para tirar o lápis de todas as opções da aba Saída e deixar
+**um** que edita tudo. Feito no commit `a44293f`: as linhas ficaram só com
+checkbox + texto, e existe um único *Editar tudo* que abre a folha
+`EditarChecklist` com todos os itens em campo próprio (renomeia no lugar).
+
+**Assumi uma coisa e avisei:** tirei a lixeira por linha também. Deixar só a
+lixeira enquanto o lápis vai para a folha ficaria torto — e apagar é decisão
+sobre **um** item, então continua por linha, agora dentro da folha. Se quiser
+a lixeira de volta na lista, é uma linha de mudança.
+
+**A régua que saiu disso** (registrada no DESIGN.md): botão em linha é para
+ação frequente; ação de manutenção fica atrás de um único ponto de entrada.
+Marcar o que já está na tela acontece o dia inteiro; renomear e excluir são
+raros.
+
 ## Onde paramos (29/09, 4º turno) — alarme de saída + aviso de fim de bloco
 
 O usuário pediu "atualizar o que tiver desatualizado". Isso revelou um

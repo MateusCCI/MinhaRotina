@@ -128,7 +128,7 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
      banner de limpa rápida a partir de 5 ideias.
   A faixa do topo traz os três StatCards (prioridades, no inbox, concluído) e
   o badge da aba conta o Inbox — é o que ainda espera virar prioridade.
-- **Saída** — checklist do ritual, editável, com confirmar saída, e o card do
+- **Saída** — checklist do ritual e o card do
   **lembrete de saída** (`src/lib/alarme.ts`): escolhe-se a hora de sair e o
   celular avisa 15 min antes. O agendamento anterior é cancelado a cada
   mudança e o horário fica na tabela `meta` (chave/valor, sem migração).
@@ -143,7 +143,19 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   bloco convida a continuar o que já foi escolhido.
 - **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
 
-### Revelação progressiva: um lápis por linha
+### Revelação progressiva: um lápis, e ele edita tudo
+
+Na aba Hoje, a linha do Inbox carrega **um só botão: o lápis**, que abre a
+folha `RowActions` com as três ações (promover, editar, excluir).
+
+Na aba Saída a mesma ideia foi um passo adiante: as linhas **não têm botão
+nenhum** — só checkbox e texto — e existe **um único lápis na tela**, que abre
+a folha `EditarChecklist` com todos os itens de uma vez, cada um em campo
+próprio já preenchido (renomeia no lugar, grava ao sair do campo). Apagar
+continua por linha, porque apagar é sempre decisão sobre **um** item, e não
+sobre a lista inteira.
+
+### Por que as linhas da Saída ficaram sem botões
 
 Cada linha do Inbox carrega **um só botão: o lápis**. Ele abre a folha
 `RowActions` com as três ações (promover, editar, excluir), cada uma com
@@ -153,6 +165,11 @@ olho vai para o botão, não para a tarefa. A folha também **avisa em texto**
 quando o foco já está cheio (3/3), em vez de deixar o usuário descobrir só
 depois do erro. Mesmo padrão vale na linha do Hoje: checkbox à esquerda,
 remover à direita, uma ação por elemento.
+
+A régua que guia os dois casos: **botão em linha é para ação frequente;
+ação de manutenção fica atrás de um único ponto de entrada.** Marcar o que
+já está na tela acontece o dia inteiro; renomear e excluir são raros. Por
+isso o checkbox fica exposto e o lápis é um só.
 
 ## Ícones (`src/lib/icons.ts`)
 

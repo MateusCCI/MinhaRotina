@@ -26,6 +26,7 @@ Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer 
 - [x] **Fusão Inbox + Hoje numa tela só**, com zonas de cor própria e lápis único que abre a folha de ações (`fa17827`)
 - [x] **Avisos que funcionam no navegador** (`notify.ts`) — o `Alert` do react-native-web era no-op silencioso
 - [x] **Lembrete de saída com agendamento** e **aviso de fim de bloco** (RF07 / CA-PI05) — e o **`useTimer` reescrito**: o relógio era quadrático e acelerava sem parar (`d2192c5`)
+- [x] **Um único lápis na Saída**, que edita o checklist inteiro em folha; as linhas ficaram só com checkbox e texto (`a44293f`)
 - [x] Lint e typecheck zerados (`npm run typecheck` + `eslint`)
 
 ## Pendente

@@ -79,12 +79,19 @@ cinza). A informação não pode depender só da cor: quem não distingue
 vermelho de verde precisa ler o ícone. Checagem rápida: force a tela e veja se
 os três continuam legíveis.
 
-### 10 — Saída
-**Passos:** adicionar item, renomear, excluir (com confirmação), marcar todos,
-*Confirmar saída*.
-**Esperado:** o CRUD persiste; a confirmação de exclusão **aparece**; o botão
-de confirmar só libera com tudo marcado e registra a hora; ao sair, a revisão
-conta mais uma saída no dia.
+### 10 — Saída: checklist e o único lápis
+**Passos:** *Adicionar* → criar item. Depois *Editar tudo* → renomear dois
+itens (um apertando "pronto" no teclado, outro só clicando fora do campo) →
+excluir um (confirmação) → *Pronto*. Marcar todos e *Confirmar saída*.
+**Esperado:**
+- na lista **não há lápis nem lixeira por linha** — a linha é só checkbox e
+  texto. Existe **um** botão *Editar tudo*;
+- renomear no campo grava (ao sair do campo ou no "pronto") e a lista de
+  baixo **não sobrescreve** o que está sendo digitado enquanto a folha está
+  aberta;
+- a confirmação de exclusão **aparece** e o item sai da lista;
+- *Pronto* fecha; o botão de confirmar saída só libera com tudo marcado,
+  registra a hora, e a revisão conta mais uma saída no dia.
 
 ### 11 — Timer: relógio, persistência e fim de bloco
 **Passos:** zerar, anotar o relógio, esperar **30 segundos**, ler de novo.
