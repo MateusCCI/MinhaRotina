@@ -30,12 +30,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# misc arquivos locais acidentais
-tailscale.tgz
-setup-tailscale.sh
-start-tailscale-user.sh
-cleanup-tailscale.sh
-/tailscale_*/
+# Pastas de trabalho local, fora do repositório.
+# lixeira/ guarda material descartado (instaladores, rascunhos antigos);
+/lixeira/
+# docs/interno/ guarda anotacoes de trabalho e relatorio de correcoes;
+/docs/interno/
 
 # local env files
 .env*.local
