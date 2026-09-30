@@ -66,7 +66,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
-    padding: theme.spacing.md,
+    // Vertical mais apertado que o horizontal: o cartão do Inbox é o mais
+    // repetido da tela, e 4 px a menos em cima e embaixo em cada item
+    // somam rápido numa lista de 10+. A lateral fica igual porque é onde
+    // os pills encostam. Padding só encolhe onde **não** há alvo de toque.
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
     ...cardShadow(),
   },
