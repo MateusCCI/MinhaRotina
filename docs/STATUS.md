@@ -33,7 +33,7 @@ Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer 
 - [ ] **Validação visual no aparelho** — as 4 abas com a faixa colorida, contraste dos StatCards, altura da faixa em tela pequena, e se as duas zonas da aba Hoje se distinguem bem
 - [ ] **Validação funcional:** rodar o roteiro `docs/TESTES-MANUAIS.md` (15 cenários) — o roteiro foi reescrito para as 4 abas
 - [ ] **Validação no aparelho Android** — fecha o CA-PI07 e a demo de 10 min, que o trabalho ABNT marca como pendentes. Tentar hotspot invertido ou `--tunnel`
-- [ ] Push para o GitHub (travado no `gh auth login` da conta dona do repo)
+- [ ] Push para o GitHub — travado no login: `gh auth status` ainda está em `msantosgame-prog`, que não tem escrita no repo. Destrava com `gh auth logout && gh auth login` como `MateusCCI`; depois `git push -u origin main`. Branch/tag locais (`designer-antigo`, `v1-...`, `v2-...`) só sobem com push explícito
 - [ ] M3 (S5-S6): DER (5 tabelas) + slide 10min + testes manuais
 - [ ] Tarefa de background para a notificação de saída checar pendência no momento de disparar (hoje a contagem vai congelada no agendamento)
 - [ ] Banca: congelar código 3 dias antes + demo de 10 min sem crash

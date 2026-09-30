@@ -93,8 +93,8 @@ zero `pageerror`.
 
 **Falta validação humana no aparelho** (contraste real, altura da faixa em tela
 pequena, se as duas zonas do Hoje se distinguem). O roteiro
-`docs/TESTES-MANUAIS.md` (10 cenários) foi escrito para a estrutura antiga de
-5 telas: os cenários de Inbox e Hoje precisam de releitura antes de rodar.
+`docs/TESTES-MANUAIS.md` foi reescrito depois para a estrutura de 4 telas
+(15 cenários) — a versão de 10 cenários citada aqui não existe mais.
 
 ## Onde paramos (29/09, 2º turno)
 
@@ -106,12 +106,33 @@ aí é só dar o push. Branch e tag locais (`designer-antigo`,
 `v1-designer-simples`, `v2-designer-por-contexto`) só vão para o remoto com
 push explícito.
 
-Remoto em HTTPS (`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá
-`Permission denied` nesta máquina. Remoto tem só `main` com 1 commit
-(`bd41a42` Initial), já incorporado via merge `--allow-unrelated-histories`
-(README resolvido com `--ours`, o nosso é superset).
+> **Reconferido no 4º turno:** `gh auth status` **continua** em
+> `msantosgame-prog` (escopos `repo`, `read:org`, `workflow`, `gist` — o token
+> tem permissão, falta é ser da conta certa). `origin/main` continua com
+> 1 commit só (`bd41a42`). Nada foi enviado em nenhum turno. Para destravar:
+> `gh auth logout && gh auth login` entrando como `MateusCCI`.
+
+### Estado do git (2º turno)
+
+Branch local **`main`** — renomeada de `master` no 1º turno. O push é
+`git push -u origin main`.
+
+Remoto em HTTPS (`https://github.com/MateusCCI/MinhaRotina.git`); **SSH dá
+`Permission denied` nesta máquina**, então não adianta tentar
+`git@github.com:MateusCCI/MinhaRotina.git`.
+
+Remoto tem só `main` com 1 commit (`bd41a42` Initial), já incorporado por
+merge `--allow-unrelated-histories` (README resolvido com `--ours`, o nosso é
+superset).
+
+**O hash do merge é `2421859`.** Antes de corrigir o autor ele era `068bebf`;
+a correção de autoria (de `msantosgame-prog` para `Mateus Outubro2020`)
+reescreveu o commit e mudou o hash. Se algum texto antigo citar `068bebf`, ele
+está desatualizado — o parágrafo acima é a única fonte.
+
 **Não commitar/pushar:** `RELATORIO-TAILSCALE.md` (untracked, não é do projeto)
-nem artefatos Tailscale.
+nem artefatos Tailscale (`tailscale.tgz`, scripts, `tailscale_1.102.4_amd64/`),
+nem `~`.
 
 ## Próximo passo sugerido
 
