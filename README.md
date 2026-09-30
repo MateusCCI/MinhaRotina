@@ -9,8 +9,8 @@ A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de 
 São quatro abas, e o dia inteiro acontece na primeira:
 
 - **Hoje:** o funil inteiro em uma tela só: até 3 prioridades do dia no topo, captura no meio, Inbox despejado embaixo. Cada ideia tem um lápis que abre as três ações (virar prioridade, editar, excluir) em uma folha. Com 5+ ideias o app sugere uma limpa rápida.
-- **Saída:** checklist editável do ritual de saída (criar, renomear, excluir; ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e botão de confirmar saída, liberado quando tudo está marcado.
-- **Timer:** Pomodoro de 25 minutos com iniciar, pausar e zerar; o estado persiste no banco mesmo trocando de aba.
+- **Saída:** checklist editável do ritual de saída (criar, renomear, excluir; ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e botão de confirmar saída, liberado quando tudo está marcado. Dá para programar um **lembrete 15 minutos antes** de sair — o celular avisa mesmo com o app fechado.
+- **Timer:** Pomodoro de 25 minutos com iniciar, pausar e zerar; o estado persiste no banco mesmo trocando de aba. No fim do bloco, uma folha mostra quanto do dia já saiu e oferece a prioridade que continua em aberto.
 - **Revisão:** resumo da semana com quantos dias você zerou o inbox, quantas saídas registrou e o horário médio, além de um ajuste escrito para a semana seguinte e a troca de perfil.
 
 Os dados ficam salvos no próprio celular com SQLite, então não precisa de servidor. A conta é um perfil local (e-mail + senha com hash SHA-256 e salt); serve para separar o uso no mesmo aparelho.
@@ -26,7 +26,7 @@ Dentro do Hoje, as duas zonas têm identidades separadas — as prioridades são
 - React Native com Expo + TypeScript
 - SQLite com expo-sqlite (inbox, hoje, saída, timer, ajustes, usuários, sessão)
 - React Navigation (pilha Auth + abas)
-- expo-crypto (hash de senha), expo-haptics (micro-interação) e
+- expo-crypto (hash de senha), expo-haptics (micro-interação), expo-notifications (lembrete de saída) e
   expo-linear-gradient (faixa colorida das telas)
 - @expo/vector-icons (ícones) e Git + GitHub
 

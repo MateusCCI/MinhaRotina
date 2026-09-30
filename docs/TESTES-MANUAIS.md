@@ -86,19 +86,50 @@ os três continuam legíveis.
 de confirmar só libera com tudo marcado e registra a hora; ao sair, a revisão
 conta mais uma saída no dia.
 
-### 11 — Timer
-**Passos:** iniciar, trocar de aba e voltar, pausar, zerar.
-**Esperado:** o tempo **persiste** (não zera ao trocar de aba), a pausa congela,
-o zerar limpa, e a barra do ciclo mostra a % com o rótulo "Progresso do ciclo".
+### 11 — Timer: relógio, persistência e fim de bloco
+**Passos:** zerar, anotar o relógio, esperar **30 segundos**, ler de novo.
+Depois: iniciar, trocar de aba, voltar, pausar, retomar, zerar.
+**Esperado:**
+- o relógio anda **no ritmo certo** — em 30 s de espera ele perde 30 s, não
+  30 min (bug corrigido em 29/09: o timer era quadrático e acelerava);
+- *Continuar* **retoma** de onde parou, não volta a 25:00;
+- trocar de aba não zera; a pausa congela; *Zerar* limpa;
+- **"Zerar" não abre a folha de fim de bloco** — zerar não é terminar;
+- a barra do ciclo mostra a % com o rótulo "Progresso do ciclo".
 
-### 12 — Avisos no navegador (bug de 29/09)
+**Como medir sem calendário:** anote o relógio (ex.: 00:24:30), espere 30 s,
+leia de novo. Tem que estar perto de 00:24:00. Se perder minutos em segundos,
+o relógio voltou a ser quadrático.
+
+### 12 — Aviso de fim de bloco (RF07)
+**Passos:** deixar um ciclo de 25 min terminar. Para não esperar, dá para
+esperar de verdade ou Reduce Motion; **não há atalho de teste** — se quiser
+acelerar, troque `TOTAL_MS` temporariamente em `app/(tabs)/timer/index.tsx`.
+**Esperado:** abre uma folha com "Bloco de 25 minutos concluído", o progresso
+do dia no formato `x/3 concluídas — NN%` e as prioridades em aberto para
+escolher. Se as 3 estiverem concluídas, a folha pede pausa em vez de oferecer
+trabalho. O aviso **não** oferece adicionar uma 4ª prioridade, e **não
+aparece durante o ciclo** — só no fim.
+
+### 13 — Avisos no navegador (bug de 29/09)
 **Passos:** no **navegador**, provocar qualquer aviso: promover com foco cheio,
 excluir um item da Saída, ou entrar com senha errada.
 **Esperado:** o aviso **aparece**. O `Alert` do react-native-web é no-op
 silencioso — se nada aparecer, o shim `src/lib/notify.ts` não está sendo usado.
 **Este cenário só vale no web; no celular o diálogo é nativo.**
 
-### 13 — Revisão
+### 14 — Lembrete de saída
+**Passos:** aba Saída → *Programar lembrete*. Mexer nos botões de 15 min.
+**Esperado:** o card mostra o horário escolhido e, abaixo, **a hora em que o
+celular avisa** (15 min antes). Agendar de novo substitui o agendamento
+anterior, e *Desligar lembrete* cancela. No navegador o aviso aparece no app
+aberto; **no Android ele chega com o app fechado** — essa parte só dá para
+confirmar no aparelho, e é a validação que falta para o CA-PI07.
+**Limitação conhecida:** a contagem de pendências vai congelada no momento do
+agendamento (notificação local não lê o banco depois). O texto do rodapé da
+tela Saída avisa isso.
+
+### 15 — Revisão
 **Passos:** ver % do dia e o resumo da semana, salvar um ajuste, trocar de perfil.
 **Esperado:** o ajuste aparece em "Ajustes anteriores"; *Trocar* volta ao login;
 os números da faixa batem com a tela do dia.
@@ -106,9 +137,10 @@ os números da faixa batem com a tela do dia.
 ## Critério de aceite
 
 Todos os cenários com ✅, **sem erro vermelho no console** e sem crash.
-Falha no **5** é bloqueante (perda de dado). Falha no **12** significa que a
-feedback de erro voltou a ser silencioso — o app *parece* funcionar enquanto
-esconde problema, que é o pior tipo de falha.
+Falha no **5** é bloqueante (perda de dado). Falha no **11** significa que o
+relógio voltou a correr acelerado. Falha no **13** significa que a feedback de
+erro voltou a ser silencioso — o app *parece* funcionar enquanto esconde
+problema, que é o pior tipo de falha.
 
 ## O que estes testes não pegam
 

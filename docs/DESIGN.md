@@ -128,8 +128,19 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
      banner de limpa rápida a partir de 5 ideias.
   A faixa do topo traz os três StatCards (prioridades, no inbox, concluído) e
   o badge da aba conta o Inbox — é o que ainda espera virar prioridade.
-- **Saída** — checklist do ritual, editável, com confirmar saída.
-- **Timer** — Pomodoro de 25 min com dois StatCards (ciclo e restante).
+- **Saída** — checklist do ritual, editável, com confirmar saída, e o card do
+  **lembrete de saída** (`src/lib/alarme.ts`): escolhe-se a hora de sair e o
+  celular avisa 15 min antes. O agendamento anterior é cancelado a cada
+  mudança e o horário fica na tabela `meta` (chave/valor, sem migração).
+  **Limite honesto:** notificação local agendada não lê o banco no instante
+  em que dispara, então a contagem de pendências vai congelada no momento do
+  agendamento. A condição real exigiria tarefa de background, fora do escopo
+  — e o rodapé do card diz isso para o usuário.
+- **Timer** — Pomodoro de 25 min com dois StatCards (ciclo e restante) e a
+  folha de fim de bloco (`BlocoConcluido`), que só abre **no fim do ciclo**
+  (RF07): mostra `x/3 concluídas — NN%` e oferece as prioridades em aberto.
+  Não oferece uma 4ª — o limite de 3 é o princípio do produto, e o fim do
+  bloco convida a continuar o que já foi escolhido.
 - **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
 
 ### Revelação progressiva: um lápis por linha
@@ -225,6 +236,23 @@ na Revisão. A tela de login abre com a faixa verde do Inbox e o logo em
 `tone="band"` — o app já começa falando a língua de cor das abas. Limite
 honesto: sem comparação em tempo constante nem bloqueio contra força bruta —
 fora do escopo do MVP local.
+
+## Cronômetro (o relógio que quase mentia)
+
+`useTimer` modela o tempo com dois valores: `baseRef` (já consumido, congelado
+durante a pausa) e `startRef` (início do segmento atual). O decorrido é
+`base + (agora - início)`, calculado **fora** do acumulador.
+
+A primeira versão somava dentro do acumulador — `prev.elapsed + (Date.now()
+- startRef.current)` —, o que **conta o tempo duas vezes**: a cada quadro o
+decorado inteiro desde o início voltava a ser somado por cima do já
+acumulado. O relógio ficava quadrático e acelerava sem parar; 25 minutos
+acabavam em segundos. Passou anos de "funcionando" porque nenhum teste olhou
+o relógio por tempo suficiente para o desvio aparecer. **A regra que evita a
+reincidência:** nunca guarde o valor calculado dentro da ref que o produziu —
+a conta tem que ser derivada, não acumulada. Junto disso: `reset` não pode
+disparar `onComplete` (zerar não é terminar), e o `raf` precisa parar quando o
+tempo chega a zero, senão o callback de fim dispara a cada quadro.
 
 ## Notas de implementação
 

@@ -25,15 +25,17 @@ Este arquivo diz onde o projeto está e qual é o próximo passo, para qualquer 
 - [x] **Paleta por contexto: famílias de cor por tela, faixa em gradiente, ícones por categoria/tela/estatística/estado** (commits `597eaf1`, `2625f4c`, `eb42ef6`, `cad7e8d`, `cdef02a`)
 - [x] **Fusão Inbox + Hoje numa tela só**, com zonas de cor própria e lápis único que abre a folha de ações (`fa17827`)
 - [x] **Avisos que funcionam no navegador** (`notify.ts`) — o `Alert` do react-native-web era no-op silencioso
+- [x] **Lembrete de saída com agendamento** e **aviso de fim de bloco** (RF07 / CA-PI05) — e o **`useTimer` reescrito**: o relógio era quadrático e acelerava sem parar (`d2192c5`)
 - [x] Lint e typecheck zerados (`npm run typecheck` + `eslint`)
 
 ## Pendente
 
 - [ ] **Validação visual no aparelho** — as 4 abas com a faixa colorida, contraste dos StatCards, altura da faixa em tela pequena, e se as duas zonas da aba Hoje se distinguem bem
-- [ ] **Validação funcional:** rodar o roteiro `docs/TESTES-MANUAIS.md` (10 cenários) — os cenários de Inbox e Hoje mudaram de forma
+- [ ] **Validação funcional:** rodar o roteiro `docs/TESTES-MANUAIS.md` (15 cenários) — o roteiro foi reescrito para as 4 abas
+- [ ] **Validação no aparelho Android** — fecha o CA-PI07 e a demo de 10 min, que o trabalho ABNT marca como pendentes. Tentar hotspot invertido ou `--tunnel`
 - [ ] Push para o GitHub (travado no `gh auth login` da conta dona do repo)
 - [ ] M3 (S5-S6): DER (5 tabelas) + slide 10min + testes manuais
-- [ ] Conferir notificações (expo-notifications) — README menciona, código não usa ainda
+- [ ] Tarefa de background para a notificação de saída checar pendência no momento de disparar (hoje a contagem vai congelada no agendamento)
 - [ ] Banca: congelar código 3 dias antes + demo de 10 min sem crash
 
 ## Como continuar

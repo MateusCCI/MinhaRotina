@@ -3,7 +3,32 @@
 Sessão encerrada em: 29/09/2026 (3º turno). Ponto de partida da próxima
 sessão — ler só as duas primeiras seções para retomar sem contexto externo.
 
-## Onde paramos (29/09, 3º turno) — **4 abas, funil em uma tela**
+## Onde paramos (29/09, 4º turno) — alarme de saída + aviso de fim de bloco
+
+O usuário pediu "atualizar o que tiver desatualizado". Isso revelou um
+problema de integridade no trabalho ABNT: a seção 5 declarava **CA-PI05 e
+CA-PI06 como "Aprovado"**, e nada dos dois existia (`onComplete: () => {}`,
+`expo-notifications` sem nenhuma chamada). O usuário escolheu **implementar o
+que faltava** em vez de rebaixar os critérios.
+
+| Commit | Conteúdo |
+|---|---|
+| `d2192c5` | `alarme.ts` (lembrete de saída 15 min antes), `BlocoConcluido.tsx` (RF07), e o **`useTimer` reescrito** — o relógio era quadrático |
+
+**Bug grave e pré-existente, encontrado ao ligar o `onComplete`:** o timer
+somava o tempo duas vezes (`prev.elapsed + (Date.now() - startRef.current)`),
+o que fazia o relógio acelerar sem parar — 25 min acabavam em segundos. Nenhum
+testo pegou porque ninguém olhou o relógio por tempo suficiente. Só apareceu
+medindo tempo de parede contra relógio. Ver `docs/DESIGN.md`, seção
+"Cronômetro".
+
+**O que ficou parcial (e o trabalho ABNT diz isso):** CA-PI06 é **parcial** —
+a notificação local não consegue ler o banco no instante em que dispara, então
+a contagem de pendências vai congelada no agendamento. CA-PI07 e a demo de 10
+min estão marcados como **pendentes de validação no aparelho Android**, porque
+o ambiente de rede de teste bloqueava o celular.
+
+### Onde paramos (29/09, 3º turno) — **4 abas, funil em uma tela**
 
 O usuário, vendo o redesign, pediu três coisas: (1) fundir Inbox e Hoje numa
 tela só, (2) mais cor que signifique algo na primeira tela, (3) **um único
@@ -90,11 +115,15 @@ nem artefatos Tailscale.
 
 ## Próximo passo sugerido
 
-1. **Rodar no aparelho e olhar as 4 abas** com a faixa colorida e as duas
-   zonas do Hoje.
-2. **Releitura do `docs/TESTES-MANUAIS.md`** para a estrutura de 4 telas.
+1. **Rodar no aparelho Android** — é o que fecha CA-PI07 e a demo de 10 min,
+   e é o único jeito de confirmar que a notificação de saída chega com o app
+   fechado. Tentar hotspot invertido ou `npx expo start --tunnel` (a rede
+   institucional bloqueou o teste anterior).
+2. **Rodar `docs/TESTES-MANUAIS.md`** (15 cenários). O 11 mede o relógio: anote
+   o tempo, espere 30 s, leia de novo.
 3. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
-4. Depois: DER atualizado (`users`, `meta`, colunas novas em `hoje_items`) + slide M3.
+4. Depois: DER atualizado (agora com 9 tabelas, incluindo `users`, `meta` e a
+   chave `alarme_saida`) + slide M3.
 
 ## Sessões anteriores (resumo)
 

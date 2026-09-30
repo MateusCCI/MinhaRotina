@@ -165,15 +165,15 @@ aba no meio de um funil só custava velocidade.
 
 Checklist de até 5 itens na ordem do caminho (ex.: chave, ponto, marmita, fone, portão). Um toque marca cada um. Depois tem o campo `saí às __:__` para registrar a hora.
 
-Dá para programar um alarme uns 15 minutos antes (ex.: 7h25 para sair 7h40). Ele só toca se ainda tem pendência.
+Também dá para programar um lembrete uns 15 minutos antes de sair (ex.: avisar 07:25 para sair 07:40). O horário fica guardado no aparelho e o agendamento é refeito a cada mudança. Uma limitação que vale registrar: a notificação diz quantas pendências existiam **no momento em que foi agendada** — uma notificação local não consegue ler o banco no instante em que dispara, então a condição real ("só toca se ainda tem pendência") exigiria tarefa em segundo plano, que ficou fora do escopo.
 
 ### 4.4 Timer Pomodoro
 
-Timer de 25 minutos com iniciar e pausar. Quando acaba, mostra o progresso atualizado (ex.: "2/3 concluídos — 66%") e pergunta o próximo item. A mesma barra do Hoje aparece aqui, com vermelho (0-33%), amarelo (34-66%) e verde (67-100%).
+Timer de 25 minutos com iniciar, pausar e zerar, que sobrevive à troca de aba. Quando o bloco acaba, aparece uma folha com o progresso do dia (ex.: "2/3 concluídas — 66%") e as prioridades que continuam em aberto, para escolher qual atacar em seguida. O app **não** oferece acrescentar uma 4ª prioridade aí: o limite de 3 é o princípio do projeto, e o fim do bloco é um convite a continuar o que já foi escolhido, não a reabrir a lista. A mesma barra aparece aqui, com vermelho (0-33%), âmbar (34-66%) e verde (67-100%).
 
 ### 4.5 Revisão Semanal
 
-No domingo (ou na sexta, como preferir) dá para ver: total no Inbox, dias com inbox zerado e média de saídas. Também registra humor e sono e um ajuste para a semana seguinte.
+No domingo (ou na sexta, como preferir) dá para ver: dias com Inbox zerado, total de saídas registradas e o horário médio de saída. Também registra um ajuste escrito para a semana seguinte e guarda os ajustes anteriores. A ideia de registrar humor e sono chegou a ser desenhada, mas ficou fora da versão entregue.
 
 ---
 
@@ -184,14 +184,22 @@ Definimos 7 critérios de aceite e testamos na mão num Android com o app instal
 | CA | Critério | Status |
 |---|---|---|
 | CA-PI01 | Anotar aparece na hora; apagar não trava com 50 itens | Aprovado |
-| CA-PI02 | Hoje trava no 3º item e avisa na 4ª tentativa | Aprovado |
-| CA-PI03 | Botão [HOJE] leva em 1 toque | Aprovado |
+| CA-PI02 | O dia trava no 3º item e avisa na 4ª tentativa | Aprovado |
+| CA-PI03 | Levar uma ideia capturada para as prioridades do dia | Aprovado |
 | CA-PI04 | Barra muda cor e % a cada conclusão | Aprovado |
-| CA-PI05 | Aviso só dispara no fim do timer | Aprovado |
-| CA-PI06 | Alarmes só tocam se tem pendência; toque abre o item | Aprovado |
-| CA-PI07 | Abre pelo QR no Android depois de instalado; sem travar em 10min de demo | Aprovado |
+| CA-PI05 | O aviso só dispara no fim do bloco de 25 minutos, e mostra o quanto do dia já saiu | Aprovado |
+| CA-PI06 | Lembrete de saída agendado 15 minutos antes do horário escolhido | **Parcial** |
+| CA-PI07 | Rodar no Android sem travar | **Pendente de validação** |
 
-A demo foi de 10 minutos seguindo o fluxo Inbox → Hoje → checklist → timer → revisão, num aparelho físico.
+Sobre o CA-PI06: foi entregue o agendamento do lembrete com o horário escolhido, e o texto da
+notificação diz quantas pendências existiam **no momento do agendamento**. A condição real
+("só toca se ainda tem pendência") e o toque abrindo direto o item dependem de tarefa em segundo
+plano, que ficou fora do escopo. Por isso o critério é parcial, não aprovado.
+
+Sobre o CA-PI07 e a demo: a validação completa foi feita no navegador e os fluxos passaram, mas
+**a passagem no aparelho Android físico ainda está pendente** — o ambiente de rede onde fizemos os
+testes bloqueava a conexão do celular com o computador, e não foi possível fechar essa etapa antes
+da entrega deste texto. É o que falta para os dois últimos itens saírem do papel.
 
 ---
 
