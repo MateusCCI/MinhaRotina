@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import ScreenShell from '../../../src/components/ScreenShell';
 import StatCard from '../../../src/components/StatCard';
+import EditarChecklist from '../../../src/components/EditarChecklist';
 import { useSaida } from '../../../hooks/useSaida';
 import { SaidaItem } from '../../../src/lib/types';
 import { accents, theme, cardShadow } from '../../../src/lib/theme';
@@ -40,6 +41,7 @@ export default function SaidaScreen() {
   const [editing, setEditing] = useState<Editing | null>(null);
   const [alarme, setAlarme] = useState<string | null>(null);
   const [showAlarme, setShowAlarme] = useState(false);
+  const [editandoLista, setEditandoLista] = useState(false);
   const checked = items.filter(i => i.checked).length;
 
   useEffect(() => {
@@ -262,14 +264,26 @@ export default function SaidaScreen() {
           </View>
         ) : (
           <>
-            <TouchableOpacity
-              style={styles.addRow}
-              onPress={() => setEditing({ id: null, content: '' })}
-              accessibilityLabel="Adicionar item ao checklist"
-            >
-              <Ionicons name="add-circle-outline" size={20} color={SAIDA.base} />
-              <Text style={styles.addRowText}>Adicionar item</Text>
-            </TouchableOpacity>
+            <View style={styles.manageRow}>
+              <TouchableOpacity
+                style={styles.manageBtn}
+                onPress={() => setEditing({ id: null, content: '' })}
+                accessibilityLabel="Adicionar item ao checklist"
+              >
+                <Ionicons name="add-circle-outline" size={19} color={SAIDA.base} />
+                <Text style={styles.manageText}>Adicionar</Text>
+              </TouchableOpacity>
+              {/* O único lápis da tela: abre a folha onde TODOS os itens são
+                  editados de uma vez. */}
+              <TouchableOpacity
+                style={styles.manageBtn}
+                onPress={() => setEditandoLista(true)}
+                accessibilityLabel="Editar todos os itens do checklist"
+              >
+                <Ionicons name="pencil-outline" size={19} color={SAIDA.base} />
+                <Text style={styles.manageText}>Editar tudo</Text>
+              </TouchableOpacity>
+            </View>
 
             {items.map(item => (
               <View key={item.id} style={[styles.item, item.checked && styles.itemChecked]}>
@@ -286,25 +300,23 @@ export default function SaidaScreen() {
                     {item.content}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.rowBtn}
-                  onPress={() => setEditing({ id: item.id, content: item.content })}
-                  accessibilityLabel={`Editar ${item.content}`}
-                >
-                  <Ionicons name="pencil-outline" size={20} color={theme.colors.textSecondary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.rowBtn}
-                  onPress={() => handleDelete(item)}
-                  accessibilityLabel={`Excluir ${item.content}`}
-                >
-                  <Ionicons name="trash-outline" size={20} color={theme.colors.danger} />
-                </TouchableOpacity>
               </View>
             ))}
           </>
         )}
       </ScrollView>
+
+      <EditarChecklist
+        visible={editandoLista}
+        items={items}
+        onRename={renameItem}
+        onDelete={handleDelete}
+        onAdd={() => {
+          setEditandoLista(false);
+          setEditing({ id: null, content: '' });
+        }}
+        onClose={() => setEditandoLista(false)}
+      />
 
       <Modal
         visible={editing !== null}
@@ -491,19 +503,24 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     textAlign: 'center',
   },
-  addRow: {
+  manageRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: theme.spacing.md,
+  },
+  manageBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    gap: 6,
     minHeight: 48,
-    paddingHorizontal: 14,
-    marginBottom: theme.spacing.md,
     borderRadius: theme.radius.md,
     backgroundColor: SAIDA.soft,
     borderWidth: 1,
     borderColor: 'rgba(190,24,93,0.28)',
   },
-  addRowText: {
+  manageText: {
     fontSize: theme.type.callout,
     fontWeight: '700',
     color: SAIDA.base,
@@ -514,8 +531,7 @@ const styles = StyleSheet.create({
     gap: 4,
     minHeight: 60,
     paddingVertical: 8,
-    paddingLeft: theme.spacing.md,
-    paddingRight: 8,
+    paddingHorizontal: theme.spacing.md,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.sm,
@@ -554,12 +570,6 @@ const styles = StyleSheet.create({
   itemTextChecked: {
     color: theme.colors.success,
     textDecorationLine: 'line-through',
-  },
-  rowBtn: {
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   footer: {
     padding: theme.spacing.md,
