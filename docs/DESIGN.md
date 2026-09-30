@@ -7,18 +7,19 @@ app Operate (o visitante completa tarefas; a ferramenta some na tarefa).
 
 O professor leu a paleta anterior como "4 cores" e pediu mais cor, mais ícones
 e mais vida. A resposta **não** foi espalhar cor: foi dar a cada contexto a
-sua própria família, com regra fixa de uso. Agora são 5 famílias + 1 tinta de
-marca + 6 matizes de categoria, todas com nome, todas com regra.
+sua própria família, com regra fixa de uso. E, na revisão seguinte, ficou
+claro que a primeira tela continuava monocromática — o que a matiz é que
+precisa de **regra para aparecer**, não só existir.
 
 ### As três respostas ao feedback
 
 | Pergunta do professor | Resposta no design |
 |---|---|
-| "só 4 cores?" | A paleta deixou de ser uma lista e virou um **sistema de 5 famílias por contexto**. Cada cor responde a uma pergunta — *em que parte da rotina eu estou?* — em vez de repetir a mesma tinta 5 vezes. |
-| "coloque mais cores" | Cores novas **com significado**: faixa colorida em todas as telas, 3–4 cartões de estatística com cor própria, fundo colorido no logo, ícones por categoria. Nada de cor decorativa. |
-| "use ícones" | `src/lib/icons.ts` — um ícone por categoria, por tela e por estatística. Ícone nomeia contexto, nunca decora. |
+| "só 4 cores?" | A paleta deixou de ser uma lista e virou um **sistema: 4 famílias de contexto + 6 matizes de categoria + 1 tinta de marca**. Cada cor responde a uma pergunta — *em que parte da rotina eu estou?* e *do que é essa tarefa?* |
+| "coloque mais cores" | Faixa em gradiente no topo de cada aba, StatCards que acendem quando um objetivo é batido, as **6 categorias sempre visíveis** e um bloco colorido no empty state. Nada de cor decorativa. |
+| "use ícones" | `src/lib/icons.ts` — um ícone por categoria, por tela, por estatística, por ação e **por estado de prazo**. Ícone nomeia contexto, nunca decora. |
 
-### Regra de uso dos acentos (válida nas 5 telas)
+### Regra 1 — cor por contexto (a faixa)
 
 1. **A faixa colorida** (`band`) abre a tela e carrega o título — identidade.
    O corpo volta ao papel claro; cards brancos sobre ele.
@@ -29,14 +30,36 @@ marca + 6 matizes de categoria, todas com nome, todas com regra.
 
 | Tela | Família | `base` | `deep` (fim do gradiente) |
 |---|---|---|---|
-| Inbox | verde → teal | `#15803D` | `#0E7490` |
-| Hoje | azul → índigo | `#1D4ED8` | `#4338CA` |
-| Timer | âmbar → laranja | `#B45309` | `#C2410C` |
+| Hoje (Inbox + prioridades) | verde → teal | `#15803D` | `#0E7490` |
 | Saída | rosa → violeta | `#BE185D` | `#7C3AED` |
+| Timer | âmbar → laranja | `#B45309` | `#C2410C` |
 | Revisão | teal → esmeralda | `#0F766E` | `#065F46` |
 
 Os dois tons de cada faixa são **escuros de propósito**: é o que garante
 contraste ≥ 4.5:1 com o texto branco do topo até o fim do gradiente.
+
+### Regra 2 — cor por zona (dentro da tela do dia)
+
+Com Inbox e Hoje fundidos em uma tela, uma família só não bastava. As duas
+zonas do mesmo scroll usam famílias diferentes:
+
+- **Prioridades de hoje** — família `hoje` (azul). É a parte que exige foco.
+- **Inbox despejado** — família `inbox` (verde). É a parte que despeja.
+
+A faixa do topo é verde (a marca do app); o azul entra na primeira vez que o
+olho desce para a zona de foco. É por isso que a primeira tela mostra **verde
++ azul + as 6 categorias** sem virar uma competição de cores.
+
+### Regra 3 — a cor que significa algo aparece (a correção importante)
+
+A primeira versão do redesign **não resolveu** a queixa das "4 cores": os
+chips de categoria existiam, mas nasciam cinza e só ganhavam cor depois do
+toque. Resultado: a tela abria branco + verde + cinza, exatamente a complaint.
+
+**Regra:** toda cor que carrega informação que o usuário age sobre aparece
+**antes** do toque. Hoje isso significa os 6 chips de categoria já tingidos
+(selecionado ganha borda na tinta da categoria) e o empty state em bloco
+colorido. Cor que não informa nada não entra — é o oposto do que foi pedido.
 
 ## Cena física (decide claro vs. escuro)
 
@@ -49,19 +72,22 @@ ambiente clara. Por isso: fundo claro quente + cards brancos — nunca o inverso
   de 3, progresso celebrado. Recusa o arranjo padrão da categoria (dark
   "hacker" com gold neon + emoji como ícone).
 - **OWN-WORLD:** papel quente `#F4F2EC` com cards brancos de sombra suave
-  (offset + blur, nunca halo); faixa em gradiente no topo de cada aba; cinco
+  (offset + blur, nunca halo); faixa em gradiente no topo de cada aba; quatro
   famílias de cor por contexto; pills pastéis por categoria com texto escuro da
   mesma matiz; tipografia do sistema; ícones Ionicons de traço único (nunca
   emoji como ícone); cópia em português que ensina e encoraja.
-- **STORY:** o usuário despeja sem filtro no Inbox, promove até 3 prioridades,
-  confere a saída, foca em ciclos de 25min e revisa a semana com carinho.
+- **STORY:** o usuário abre o app e vê o dia inteiro: despeja uma ideia sem
+  filtro, promove até 3 prioridades, conclui, foca em ciclos de 25min e fecha
+  revisando a semana com carinho. Tudo isso cabe em quatro abas, e a primeira
+  é o funil completo.
 - **FIRST VIEWPORT:** cada aba abre com faixa colorida (chip de ícone + rótulo
   + título + estado) e, quando há número, três StatCards translúcidos sobre a
-  faixa. O corpo abre com o campo de captura ou a lista, sobre o papel.
-- **FORM:** iOS grouped lists + tab bar branca com 5 seções (seções, nunca
+  faixa. Na aba Hoje, as três zonas (prioridades, captura, Inbox) começam logo
+  abaixo da faixa, sobre o papel.
+- **FORM:** iOS grouped lists + tab bar branca com 4 seções (seções, nunca
   ações) que acende na tinta da aba; bottom-sheet para tarefas focadas (editar,
-  escolher do Inbox), sem modal central. Modo: Operate, estratégia Contida por
-  contexto.
+  escolher do Inbox) e para as ações da linha, sem modal central. Modo:
+  Operate, estratégia Contida por contexto.
 - **FINISH:** unreviewed and undocumented is unfinished; this build ends with
   the finish review, the verdict, DESIGN.md, and every shipping raster carrying
   its provenance.
@@ -87,19 +113,54 @@ ambiente clara. Por isso: fundo claro quente + cards brancos — nunca o inverso
 offset (0,2) + blur 8 + elevation. `bandColor(accent)`: cor sólida da faixa,
 para pintar o container atrás da área do notch.
 
+## Forma das telas (4 abas, funil em uma tela só)
+
+A decisão do usuário: **Inbox e Hoje viraram uma tela**. O funil inteiro —
+capturar, promover, executar — acontece em uma rolagem, sem pular de aba.
+Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
+`inbox_items` e `hoje_items` já eram tabelas separadas.
+
+- **Hoje** — três zonas na mesma `ScrollView`:
+  1. `Prioridades de hoje` (0/3, família azul) no topo: os itens de hoje com
+     checkbox e a barra de progresso; empty tracejado explicando o próximo passo.
+  2. `Captura` no meio: o campo de despejo com prazo e categoria.
+  3. `Inbox` (família verde) embaixo: a lista com o lápis por linha e o
+     banner de limpa rápida a partir de 5 ideias.
+  A faixa do topo traz os três StatCards (prioridades, no inbox, concluído) e
+  o badge da aba conta o Inbox — é o que ainda espera virar prioridade.
+- **Saída** — checklist do ritual, editável, com confirmar saída.
+- **Timer** — Pomodoro de 25 min com dois StatCards (ciclo e restante).
+- **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
+
+### Revelação progressiva: um lápis por linha
+
+Cada linha do Inbox carrega **um só botão: o lápis**. Ele abre a folha
+`RowActions` com as três ações (promover, editar, excluir), cada uma com
+ícone, rótulo e uma linha de apoio que explica o efeito. Com três botões em
+cada linha, a lista vira um mural de controles e a hierarquia se perde — o
+olho vai para o botão, não para a tarefa. A folha também **avisa em texto**
+quando o foco já está cheio (3/3), em vez de deixar o usuário descobrir só
+depois do erro. Mesmo padrão vale na linha do Hoje: checkbox à esquerda,
+remover à direita, uma ação por elemento.
+
 ## Ícones (`src/lib/icons.ts`)
 
 Um ícone por contexto, nunca decorativo:
 
 - **Categorias** — Trabalho `briefcase`, Estudo `school`, Família `people`,
   Casa `home`, Mercado `cart`, Outros `pricetags`.
-- **Telas** — Inbox `file-tray`, Hoje `flag`, Timer `timer`/`flame`,
-  Saída `exit`, Revisão `bar-chart`.
+- **Telas** — Hoje `sunny`, Timer `timer`/`flame`, Saída `exit`,
+  Revisão `bar-chart`.
 - **Estatísticas** — `file-tray` (inbox), `flag` (prioridades),
   `checkmark-done` (concluído), `bag-check-outline` (conferidos),
   `time-outline` (prazo/horário), `sparkles` (ação de cuidado).
-- **Ações** — `pencil-outline`, `trash-outline`, `close-circle-outline`,
-  `add`, `checkmark`, `arrow-forward`, `refresh-outline`.
+- **Ações** — `pencil-outline` (menu da linha), `arrow-up-circle` (promover),
+  `create-outline` (editar), `trash-outline` (excluir), `add`,
+  `checkmark`, `arrow-forward`, `refresh-outline`.
+- **Prazo por estado** — `alert-circle` (atrasado), `time` (vence hoje),
+  `calendar-outline` (amanhã/futuro). Cor e ícone andam juntos: a cor é o
+  reforço, o glifo é a informação. Vermelho vs. verde é justamente o par
+  que ~8% dos homens não distinguem (deuteranopia), então nunca é a única pista.
 
 ## Categorias (`src/lib/date.ts`)
 
@@ -116,20 +177,32 @@ Pill pastel + texto escuro da matiz (nunca cinza sobre cor):
 
 ## Componentes e convenções
 
-- **`ScreenShell`** — casca única das 5 abas (e da faixa do login): gradiente,
+- **`ScreenShell`** — casca única das 4 abas (e da faixa do login): gradiente,
   chip de ícone, `StatusBar` claro, corpo sobre o papel, `footer` opcional.
   Uma tela só de cabeçalho significa que nenhuma aba diverge da outra.
 - **`StatCard`** — ícone + número + rótulo dentro da faixa, em fundo
   translúcido. O número responde "quanto", o rótulo "quanto de quê", e o ícone
-  dispensa ler o rótulo.
+  dispensa ler o rótulo. `tone="positive"` inverte o card (fundo branco, tinta
+  verde) para marcar um objetivo batido — foco cheio, dia em 100% — sem
+  inventar uma cor nova.
+- **`RowActions`** — folha de ações do item (bottom sheet), com `statusBarTranslucent`
+  para o conteúdo não ficar sob a barra do sistema. É onde mora a revelação
+  progressiva: a linha mostra o lápis, a folha mostra as opções.
 - **Alvos de toque:** mínimo 44pt (chips, botões de ícone, itens de lista);
   CTAs primários com 52–54pt.
 - **Raios:** `lg 20` (cards), `md 14` (botões/inputs), `pill 999` (chips),
   `sm 10` (chips de bloco).
 - **Tipo:** headline da faixa 28/800, title 20, body 17, callout 15,
   footnote 13, caption 12 (labels uppercase com tracking 0.8–1.1).
-- **Sheets:** edição e "escolha do Inbox" sobem de baixo (`animationType="slide"`)
-  com overlay `rgba(68,64,60,0.45)`; cancelar fecha por swipe/gesto do SO.
+- **Sheets:** edição, ações da linha e "escolha do Inbox" sobem de baixo
+  (`animationType="slide"`) com overlay `rgba(68,64,60,0.45)` e
+  `statusBarTranslucent`; cancelar fecha por toque no fundo, swipe/gesto do SO.
+- **Avisos:** `src/lib/notify.ts` (`notify` / `confirmDestructive`) em vez de
+  `Alert` cru. No Android/iOS é o diálogo nativo; no web cai no diálogo do
+  navegador. Motivo: o `Alert` do react-native-web é **no-op silencioso** — o
+  navegador é o ambiente de teste e todo aviso sumia. Visibilidade de erro
+  vale mais que estética. Evolução natural: um toast no app, no mesmo padrão
+  pub/sub de `inboxCount.ts`.
 - **Micro-interação (uma só):** `expo-haptics` `selectionAsync` ao concluir,
   promover e marcar saída — estado físico, não decoração.
 - **Statubar:** cada aba declara `StatusBar style="light"` via `ScreenShell`; o

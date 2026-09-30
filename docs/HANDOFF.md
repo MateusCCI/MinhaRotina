@@ -1,70 +1,105 @@
 # HANDOFF — Minha Rotina
 
-Sessão encerrada em: 29/09/2026. Ponto de partida da próxima sessão — ler só
-as duas primeiras seções para retomar sem contexto externo.
+Sessão encerrada em: 29/09/2026 (3º turno). Ponto de partida da próxima
+sessão — ler só as duas primeiras seções para retomar sem contexto externo.
 
-## Onde paramos (29/09, 2º turno)
+## Onde paramos (29/09, 3º turno) — **4 abas, funil em uma tela**
 
-Feedback do professor sobre a primeira tela: **"designer muito simples"**,
-**"perguntou das 4 cores da paleta"**, **"use ícones, coloque mais cores, dê
-mais vida"**. Escopo combinado com o usuário: as **5 telas**, não só a primeira.
+O usuário, vendo o redesign, pediu três coisas: (1) fundir Inbox e Hoje numa
+tela só, (2) mais cor que signifique algo na primeira tela, (3) **um único
+ícone de lápis** por linha, em vez de vários botões, para não poluir o layout.
+Fechado com: fusão das telas, categorias sempre coloridas, folha de ações, e
+`notify()` no lugar de `Alert`.
 
 **Commits deste turno** (branch `main`):
 
 | Commit | Conteúdo |
 |---|---|
-| `597eaf1` | Paleta por contexto: `AccentKey`/`Accent`/`accents` (5 famílias) + tokens `onBand*` em `theme.ts`; `src/lib/icons.ts` (union `IconName` + `CATEGORY_ICONS`); `expo-linear-gradient` instalado. Nenhuma tela mudou. |
-| `2625f4c` | `ScreenShell` (faixa em gradiente + chip de ícone + StatusBar claro + corpo no papel) e `StatCard` (novos); Inbox redesenhado; `Logo` com `tone="band"`; ícones nas categorias/chips/botões/banner/empty. |
-| `eb42ef6` | Hoje, Timer, Saída e Revisão na mesma casca, cada uma na sua família; tab bar acende na tinta da aba; login ganhou a faixa verde + `StatusBar` claro; `ProgressBar` com prop `embedded`. |
+| `fa17827` | Fusão Inbox + Hoje (4 abas), `RowActions` (folha de ações), categorias coloridas de cara, `StatCard tone='positive'`, `notify.ts` no lugar de `Alert` |
 
-Contrato visual completo em `docs/DESIGN.md` (ler antes de mexer em UI).
+Antes disso, no 2º turno: `597eaf1` (paleta por contexto), `2625f4c`
+(`ScreenShell`/`StatCard` + Inbox redesenhado), `eb42ef6` (as 5 telas na casca
+nova), `cad7e8d` (tab bar por tinta), `cdef02a` (rótulos de contexto errados,
+achados na inspeção visual no navegador).
 
-**Validação:** `npm run typecheck` limpo, `npx eslint src/ hooks/ app/ App.tsx
---ext .ts,.tsx` 0 erros, `npx expo export --platform web` compila. **Falta
-validação humana no aparelho** — o redesign é 100% visual, então nenhum
-teste automatizado pega "ficou feio" ou "contraste quebrou".
+Referências: `v2-designer-por-contexto` (estado de 5 abas) e
+`designer-antigo` / `v1-designer-simples` (a v1 de 4 cores, para comparação
+com o professor).
 
-**Armadilha registrada nesta sessão:** `expo-status-bar` aplica o **último
-`<StatusBar>` montado**. As abas montam `style="light"` (faixa colorida);
-sem o `<StatusBar style="light" />` no `app/auth.tsx`, sair da sessão deixava a
-barra do sistema branca sobre o papel claro. Quem montar faixa colorida
-precisa declarar o seu.
+### O que mudou de verdade
 
-**Armadilha do `tsc`:** meu edit com `oldString: '} as const;'` casou com a
-fechadura errada e desmontou o `cardShadow()`. Ao editar `theme.ts`, sempre
-incluir linhas vizinhas no `oldString`.
+- **`app/(tabs)/hoje.tsx`** reescrito: três zonas na mesma `ScrollView` —
+  Prioridades (0/3, família **azul**) → captura → Inbox (família **verde**).
+  `app/(tabs)/inbox.tsx` e `app/index.tsx` removidos. **Sem mudança de banco**:
+  `inbox_items` e `hoje_items` já eram separadas.
+- **`src/components/RowActions.tsx`** (novo): folha de ações com ícone, rótulo
+  e linha de apoio. A linha do Inbox carrega só o lápis; promover, editar e
+  excluir saem dali. A folha avisa **em texto** quando o foco está cheio (3/3).
+- **Categorias sempre visíveis**: os 6 chips nascem com a tinta da categoria
+  (selecionado ganha borda na tinta). Antes ficavam cinza até o toque — era
+  exatamente a queixa das "4 cores" na primeira tela.
+- **`src/lib/notify.ts`** (novo): o `Alert` do react-native-web é **no-op
+  silencioso**; `notify`/`confirmDestructive` usam o diálogo nativo no
+  Android/iOS e o do navegador no web. Migrados os 15 `Alert.alert`.
+- **`dueLabel`** passou a devolver `tone` (`overdue`/`today`/`later`) e
+  `DUE_ICONS` dá um glifo por estado — cor não pode ser a única pista
+  (deuteranopia).
 
-## Onde paramos (29/09, 1º turno)
+### Armadilhas desta sessão
 
-**Push para o GitHub PENDENTE** — tudo pronto localmente, travado só no login:
-`git push -u origin main` retorna **403** porque a conta atual do `gh`
-(`msantosgame-prog`) não tem escrita em `MateusCCI/MinhaRotina`. O usuário
-escolheu **trocar o login do gh** para a conta dona do repo. Falta ele rodar
-`gh auth login` no terminal dele e avisar; aí é só dar o push. (Continua
-pendente depois do 2º turno.)
+- **`git add -A src` pega `src/lib/notify.ts`.** O `fa17827` acabou juntando a
+  fusão e o `notify` num commit só porque o `add` cobriu a pasta inteira. Não
+  consegui separar sem `git add -p` (interativo); preferi corrigir a mensagem
+  do commit a fingir que tinha separado.
+- **Editor: `oldString` curto casa na occurrence errada.** Um `} as const;`
+  isolado desmontou o `cardShadow()` do `theme.ts` e o `tsc` acusou
+  `Modifiers cannot appear here`. Ao editar, sempre leve linhas vizinhas no
+  `oldString`.
+- **`StyleSheet.absoluteFillObject` não existe** nesta versão do RN — use
+  `StyleSheet.absoluteFill` ou posicione explicitamente.
 
-Estado do git local (branch **`main`** — renomeada de `master` neste dia):
-`eb42ef6` no topo de `cab2722` + 22 commits de trabalho. Remoto em HTTPS
-(`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá `Permission denied`
-nesta máquina. Remoto tem só `main` com 1 commit (`bd41a42` Initial), já
-incorporado via merge `--allow-unrelated-histories` (README resolvido com
-`--ours`, o nosso é superset).
+### Validação
+
+`npm run typecheck` limpo · `npx eslint src/ hooks/ app/ App.tsx --ext .ts,.tsx`
+0 erros 0 warnings · `npx expo export --platform web` compila · **Chromium
+headless**: cadastro → 4 capturas com categoria → promover 3 → concluir 1 →
+limite de foco avisa → editar abre sheet → exclusão confirma → varre as 4 abas,
+zero `pageerror`.
+
+**Falta validação humana no aparelho** (contraste real, altura da faixa em tela
+pequena, se as duas zonas do Hoje se distinguem). O roteiro
+`docs/TESTES-MANUAIS.md` (10 cenários) foi escrito para a estrutura antiga de
+5 telas: os cenários de Inbox e Hoje precisam de releitura antes de rodar.
+
+## Onde paramos (29/09, 2º turno)
+
+**Push para o GitHub PENDENTE** — `git push -u origin main` retorna **403**
+porque a conta atual do `gh` (`msantosgame-prog`) não tem escrita em
+`MateusCCI/MinhaRotina`. O usuário escolheu **trocar o login do gh** para a
+conta dona do repo. Falta ele rodar `gh auth login` no terminal dele e avisar;
+aí é só dar o push. Branch e tag locais (`designer-antigo`,
+`v1-designer-simples`, `v2-designer-por-contexto`) só vão para o remoto com
+push explícito.
+
+Remoto em HTTPS (`https://github.com/MateusCCI/MinhaRotina.git`); SSH dá
+`Permission denied` nesta máquina. Remoto tem só `main` com 1 commit
+(`bd41a42` Initial), já incorporado via merge `--allow-unrelated-histories`
+(README resolvido com `--ours`, o nosso é superset).
 **Não commitar/pushar:** `RELATORIO-TAILSCALE.md` (untracked, não é do projeto)
 nem artefatos Tailscale.
 
 ## Próximo passo sugerido
 
-1. **Rodar no aparelho e olhar as 5 telas com a faixa colorida** (é o que o
-   professor vai cobrar). Conferir: se a faixa não ficou alta demais em tela
-   pequena, se o branco passa de 4.5:1 em cada gradiente, se os StatCards não
-   apertam o número em "00:00".
-2. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
-3. Executar o roteiro `docs/TESTES-MANUAIS.md` (10 cenários, 0 executados) —
-   o cenário 1 (Inbox) precisa ser conferido de novo depois do redesign.
+1. **Rodar no aparelho e olhar as 4 abas** com a faixa colorida e as duas
+   zonas do Hoje.
+2. **Releitura do `docs/TESTES-MANUAIS.md`** para a estrutura de 4 telas.
+3. Confirmar `gh auth status` com a conta certa → `git push -u origin main`.
 4. Depois: DER atualizado (`users`, `meta`, colunas novas em `hoje_items`) + slide M3.
 
 ## Sessões anteriores (resumo)
 
+- 29/09 p2: paleta por contexto, faixa em gradiente, 5 telas redesenhadas,
+  tab bar por tinta, rótulos de contexto corrigidos.
 - 28/09 p3: Saída editável (`52442cb`), repetir senha (`761c472`), README
   sincronizado, `docs/TESTES-MANUAIS.md` (`aa7ef02`).
 - 28/09 p2: login e-mail+senha com SHA-256+salt (`1270cfd`).

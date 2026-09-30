@@ -6,8 +6,9 @@ A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de 
 
 ## Como funciona
 
-- **Inbox:** campo único no topo com prazo e categoria. Digitou e apertou Enter, salvou. Depois você edita, decide o que vira prioridade do Hoje ou apaga. Com 5+ itens o app sugere uma limpa rápida.
-- **Hoje:** só cabem 3 tarefas por dia. A 4ª o app bloqueia com um aviso. Tem barra de progresso que muda de cor conforme você conclui, e filtro por categoria.
+São quatro abas, e o dia inteiro acontece na primeira:
+
+- **Hoje:** o funil inteiro em uma tela só: até 3 prioridades do dia no topo, captura no meio, Inbox despejado embaixo. Cada ideia tem um lápis que abre as três ações (virar prioridade, editar, excluir) em uma folha. Com 5+ ideias o app sugere uma limpa rápida.
 - **Saída:** checklist editável do ritual de saída (criar, renomear, excluir; ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e botão de confirmar saída, liberado quando tudo está marcado.
 - **Timer:** Pomodoro de 25 minutos com iniciar, pausar e zerar; o estado persiste no banco mesmo trocando de aba.
 - **Revisão:** resumo da semana com quantos dias você zerou o inbox, quantas saídas registrou e o horário médio, além de um ajuste escrito para a semana seguinte e a troca de perfil.
@@ -16,7 +17,9 @@ Os dados ficam salvos no próprio celular com SQLite, então não precisa de ser
 
 ## Interface
 
-Cada aba tem a sua própria cor e o seu ícone, então dá para saber em que parte da rotina você está só de bater o olho: Inbox verde, Hoje azul, Timer âmbar, Saída rosa e Revisão teal. A faixa colorida do topo traz o resumo do dia em números, e todo item tem um ícone que diz a que categoria pertence. O contrato visual completo, com as regras de uso de cada cor, está em `docs/DESIGN.md`.
+Cada aba tem a sua própria cor e o seu ícone, então dá para saber em que parte da rotina você está só de bater o olho: Hoje verde, Saída rosa, Timer âmbar e Revisão teal. A faixa colorida do topo traz o resumo do dia em números que acendem quando você bate um objetivo (foco cheio, dia em 100%).
+
+Dentro do Hoje, as duas zonas têm identidades separadas — as prioridades são **azuis** e o Inbox é **verde** — e os seis chips de categoria já aparecem coloridos de cara (Trabalho azul, Estudo roxo, Família lima, Casa laranja, Mercado rosa, Outs cinza). Nenhum item depende só da cor: prazo atrasado, hoje e futuro têm ícones diferentes, porque vermelho e verde não são distinguíveis por todo mundo. O contrato visual completo, com as regras de uso de cada cor, está em `docs/DESIGN.md`.
 
 ## Tecnologias
 
@@ -46,7 +49,7 @@ Se preferir só ver as telas sem instalar nada, abra o arquivo `docs/telas-minha
 
 ```text
 app/                  telas (auth, inbox, hoje, saída, timer, revisão)
-src/components/       componentes reutilizáveis (ScreenShell, StatCard, Logo, CaptureInput, InboxItem, ...)
+src/components/       componentes reutilizáveis (ScreenShell, StatCard, RowActions, CaptureInput, InboxItem, ...)
 src/lib/              tema e paleta por contexto (theme.ts), ícones (icons.ts), banco local (database.ts), sessão, senha e tipos
 hooks/                estado por tela (useInbox, useHoje, useSaida, useTimer)
 docs/                 TAP, EAP, DESIGN, protótipo e trabalho ABNT
