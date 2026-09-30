@@ -45,11 +45,17 @@ export default function InboxItemComponent({ item, onMenu }: InboxItemProps) {
         )}
         <TouchableOpacity
           style={styles.iconBtn}
+          // O desenho encolhe para a altura da linha, mas o **alvo de toque**
+          // continua com 44pt: `hitSlop` estende a área sensível além do
+          // desenho. As duas coisas importam — alvo pequeno demais atrapalha
+          // quem tem dificuldade motora, desenho grande demais empurra a
+          // linha para baixo.
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           onPress={() => onMenu(item)}
           accessibilityLabel={`Ações para ${item.content}`}
           accessibilityRole="button"
         >
-          <Ionicons name="pencil-outline" size={18} color={theme.colors.textSecondary} />
+          <Ionicons name="pencil-outline" size={15} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -94,12 +100,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   iconBtn: {
-    minWidth: 44,
-    minHeight: 44,
+    width: 28,
+    height: 28,
     marginLeft: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: theme.radius.md,
+    borderRadius: 9,
     backgroundColor: theme.colors.surfaceAlt,
   },
 });
