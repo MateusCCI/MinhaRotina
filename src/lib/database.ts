@@ -104,12 +104,12 @@ class DatabaseSingleton {
       `);
       await this.ensureColumn('inbox_items', 'due_date', 'TEXT');
       await this.ensureColumn('inbox_items', 'category', 'TEXT');
-      // Migração do bug do promote (sessão 28/09): hoje_items agora carrega o
+      // Correção de 28/09 (bug do promote): hoje_items passou a carregar o
       // próprio conteúdo em vez de depender do JOIN com inbox_items.
       await this.ensureColumn('hoje_items', 'content', "TEXT NOT NULL DEFAULT ''");
       await this.ensureColumn('hoje_items', 'due_date', 'TEXT');
       await this.ensureColumn('hoje_items', 'category', 'TEXT');
-      // Migração do login completo (sessão 28/09): credenciais no perfil.
+      // Correção de 28/09 (login com e-mail e senha): credenciais no perfil.
       await this.ensureColumn('users', 'email', 'TEXT');
       await this.ensureColumn('users', 'salt', 'TEXT');
       await this.ensureColumn('users', 'password_hash', 'TEXT');

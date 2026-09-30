@@ -3,13 +3,14 @@ import { Platform } from 'react-native';
 /**
  * Mundo visual "Papel & Aurora" — tema claro, amigável, gramática iOS.
  *
- * Paleta por contexto (sessão 29/09, revisão do professor): a estratégia
- * saiu de Restrained (1 tinta + neutros) para **cinco famílias de cor, uma
- * por contexto**, cada uma com regra fixa de uso. A pergunta do professor
- * sobre "as 4 cores" virou o eixo do design: a cor agora *informa* em que
- * parte da rotina o usuário está, em vez de repetir a mesma tinta nas 5 telas.
+ * Paleta por contexto (revisão de 29/09): a estratégia saiu de Restrained
+ * (uma tinta e neutros) para **cinco famílias de cor, uma por contexto**,
+ * cada uma com regra fixa de uso. A cor passou a *informar* em que parte da
+ * rotina o usuário está, em vez de repetir a mesma tinta nas 4 abas. São 5
+ * famílias em 4 abas porque a família `hoje` (azul) identifica a zona de
+ * prioridades dentro da tela do dia, que tem faixa verde.
  *
- * Regra de uso dos acentos (idêntica nas 5 telas):
+ * Regra de uso dos acentos (idêntica nas 4 abas):
  * 1. A faixa colorida (`band`) abre a tela e carrega o título — identidade.
  * 2. `base` tinta ícones, valores e estados ativos do conteúdo.
  * 3. `soft` é a versão translúcida para cards e chips sobre o papel claro.
