@@ -146,7 +146,13 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
 ### Revelação progressiva: um lápis, e ele edita tudo
 
 Na aba Hoje, a linha do Inbox carrega **um só botão: o lápis**, que abre a
-folha `RowActions` com as três ações (promover, editar, excluir).
+folha `RowActions` com as três ações (promover, editar, excluir). Ele fica na
+**mesma linha dos pills**, encostado à direita: o item ocupa dois blocos (texto
+e metadados) em vez de três, e o olho percorre o cartão numa varredura só. A
+linha de metadados existe mesmo quando o item não tem prazo nem categoria —
+senão o lápis pularia de lugar conforme a lista muda, e alvo que se move é
+alvo que se erra. A explicação do que o lápis faz aparece **uma vez**, sob o
+cabeçalho da zona, e não repetida em cada linha.
 
 Na aba Saída a mesma ideia foi um passo adiante: as linhas **não têm botão
 nenhum** — só checkbox e texto — e existe **um único lápis na tela**, que abre

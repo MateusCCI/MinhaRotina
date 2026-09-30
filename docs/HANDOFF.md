@@ -3,6 +3,18 @@
 Sessão encerrada em: 29/09/2026 (3º turno). Ponto de partida da próxima
 sessão — ler só as duas primeiras seções para retomar sem contexto externo.
 
+## Onde paramos (29/09, 6º turno) — lápis do Inbox na linha dos pills
+
+O usuário pediu o lápis do Inbox na mesma linha do lembrete. Feito
+(`d8d2273`): o item passou de três linhas (texto, pills, botão) para duas, com
+o lápis encostado à direita dos pills. A dica do que o lápis faz saiu de cada
+linha (viravam três cópias da mesma frase) e ficou uma, sob o cabeçalho da
+zona.
+
+**Detalhe que importa para quem mexer nisso:** a linha de metadados é
+renderizada **sempre**, mesmo sem prazo e sem categoria. Sem isso o lápis
+mudaria de lugar de um item para outro, e alvo que se move é alvo que se erra.
+
 ## Onde paramos (29/09, 5º turno) — um lápis só na Saída
 
 O usuário pediu para tirar o lápis de todas as opções da aba Saída e deixar
