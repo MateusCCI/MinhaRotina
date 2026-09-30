@@ -42,9 +42,12 @@ senha errada; depois com e-mail que não existe.
 ### 4 — Captura
 **Passos:** despejar 2 ideias — uma com prazo *Hoje* + categoria *Trabalho*,
 outra sem nada.
-**Esperado:** as duas aparecem **no topo** do Inbox. A primeira mostra dois
-pills: o da categoria com o ícone dela (maleta, no azul) e o de prazo
-*vence hoje* (relógio, no âmbar). A segunda, sem pills.
+**Esperado:** as duas aparecem **no topo** do Inbox, em faixas de uma linha só.
+A primeira mostra o pill da categoria com o ícone dela (maleta, no azul) e, do
+prazo, **só o círculo com o glifo** (relógio, no âmbar) — a palavra fica no
+rótulo de acessibilidade, não na linha. A segunda fica só com o texto e o
+lápis. **Ideia com nome comprido** deve truncar com reticências, nunca com o
+pill em cima do texto.
 
 ### 5 — Promover (regressão do bug de 28/09)
 **Passos:** na ideia, tocar no **lápis** → *Virar prioridade de hoje*.

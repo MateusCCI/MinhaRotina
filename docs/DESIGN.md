@@ -146,13 +146,22 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
 ### Revelação progressiva: um lápis, e ele edita tudo
 
 Na aba Hoje, a linha do Inbox carrega **um só botão: o lápis**, que abre a
-folha `RowActions` com as três ações (promover, editar, excluir). Ele fica na
-**mesma linha dos pills**, encostado à direita: o item ocupa dois blocos (texto
-e metadados) em vez de três, e o olho percorre o cartão numa varredura só. A
-linha de metadados existe mesmo quando o item não tem prazo nem categoria —
-senão o lápis pularia de lugar conforme a lista muda, e alvo que se move é
-alvo que se erra. A explicação do que o lápis faz aparece **uma vez**, sob o
-cabeçalho da zona, e não repetida em cada linha.
+folha `RowActions` com as três ações (promover, editar, excluir).
+
+O item do Inbox é **uma faixa de 52 px**: texto, categoria, prazo e lápis na
+mesma linha. Quem cede espaço é o texto (`flex: 1`); pills e lápis têm
+`flexShrink: 0`, porque é deles que se lê o prazo e a categoria sem abrir nada.
+
+**O prazo é só ícone** — um círculo de 24 px com o glifo, não a palavra. Isso
+não é economia de pixels, é o resultado de medir: o pill "vence hoje" custava
+96 px, quase o texto inteiro da tarefa, e até "Revisar o DER" truncava para
+"Revisar o ...". Uma lista em que não se lê o que a lista contém não é densa,
+é cega. A cor continua dizendo a urgência, o glifo continua dizendo o estado
+e as palavras ficaram no `accessibilityLabel` (com `accessible`, senão o
+Android/iOS não anuncia). O texto da tarefa usa `callout/600`, não `body/17`:
+corpo menor em linha de lista devolve espaço justamente para o texto.
+
+A explicação do que o lápis faz aparece **uma vez**, sob o cabeçalho da zona.
 
 Na aba Saída a mesma ideia foi um passo adiante: as linhas **não têm botão
 nenhum** — só checkbox e texto — e existe **um único lápis na tela**, que abre
