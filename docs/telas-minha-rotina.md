@@ -1,5 +1,15 @@
 # Telas do Minha Rotina — Desenho em Texto
 
+> **Protótipo da fase M1, antes do código.** Desenhado para validar as telas e
+> fazer a EAP; não é o estado final do app.
+>
+> O que mudou depois: **Inbox e Hoje viraram uma tela só** (as prioridades no
+> topo, a captura no meio, o inbox embaixo, em 4 abas no total), e a paleta
+> passou a ter uma família de cor por aba. O desenho abaixo ainda mostra as 5
+> telas separadas. Para o contrato visual do que foi entregue, ver
+> [`DESIGN.md`](DESIGN.md).
+
+
 ## TELA 1 — Inbox (Home / Captura)
 
 ```

@@ -1,84 +1,126 @@
 # Minha Rotina
 
-App de organização de rotina feito para o Projeto Integrador do 4º semestre de Análise e Desenvolvimento de Sistemas — Brasília-DF, 2026.
+App de organização de rotina para adultos com rotina variável — projeto
+integrador do 4º semestre de Análise e Desenvolvimento de Sistemas.
 
-A ideia surgiu de um problema comum: a gente anotava tudo em papel, no bloco de notas e em vários apps, e no fim esquecia o que tinha que levar ao sair de casa e perdia prazo curto. O Minha Rotina tenta resolver isso de um jeito simples, com tudo em português e conta local no próprio aparelho (nome, e-mail e senha, sem servidor).
+A ideia nasceu de um problema comum: a gente anota tudo em papel, no bloco de
+notas e em três ou quatro apps, e no fim esquece o que tinha que levar ao sair
+de casa e perde prazo curto no meio da anotação espalhada. O Minha Rotina junta
+tudo num app só, em português, com os dados no próprio aparelho.
 
-## Como funciona
+## O que ele faz
 
-São quatro abas, e o dia inteiro acontece na primeira:
+Quatro abas, e o dia inteiro acontece na primeira:
 
-- **Hoje:** o funil inteiro em uma tela só: até 3 prioridades do dia no topo, captura no meio, Inbox despejado embaixo. Cada ideia tem um lápis que abre as três ações (virar prioridade, editar, excluir) em uma folha. Com 5+ ideias o app sugere uma limpa rápida.
-- **Saída:** checklist editável do ritual de saída (criar, renomear, excluir; ex.: chave, ponto, marmita, fone, portão). Um toque para marcar cada um e botão de confirmar saída, liberado quando tudo está marcado. Dá para programar um **lembrete 15 minutos antes** de sair — o celular avisa mesmo com o app fechado.
-- **Timer:** Pomodoro de 25 minutos com iniciar, pausar e zerar; o estado persiste no banco mesmo trocando de aba. No fim do bloco, uma folha mostra quanto do dia já saiu e oferece a prioridade que continua em aberto.
-- **Revisão:** resumo da semana com quantos dias você zerou o inbox, quantas saídas registrou e o horário médio, além de um ajuste escrito para a semana seguinte e a troca de perfil.
+- **Hoje** — o funil completo numa tela só. No topo, até 3 prioridades do dia; no
+  meio, o campo de captura com prazo e categoria; embaixo, o inbox despejado.
+  Cada ideia tem um lápis que abre *virar prioridade*, *editar* e *excluir* numa
+  folha.
+- **Saída** — checklist do ritual de porta (chave, ponto, marmita, fone,
+  portão), editável, com confirmação de saída e um lembrete opcional 15 minutos
+  antes.
+- **Timer** — Pomodoro de 25 minutos que sobrevive à troca de aba. No fim do
+  bloco, uma folha mostra quanto do dia já saiu e oferece a prioridade que
+  continua em aberto.
+- **Revisão** — dias com inbox zerado, saídas registradas, horário médio de
+  saída e um ajuste escrito para a semana seguinte.
 
-Os dados ficam salvos no próprio celular com SQLite, então não precisa de servidor. A conta é um perfil local (e-mail + senha com hash SHA-256 e salt); serve para separar o uso no mesmo aparelho.
-
-## Interface
-
-Cada aba tem a sua própria cor e o seu ícone, então dá para saber em que parte da rotina você está só de bater o olho: Hoje verde, Saída rosa, Timer âmbar e Revisão teal. A faixa colorida do topo traz o resumo do dia em números que acendem quando você bate um objetivo (foco cheio, dia em 100%).
-
-Dentro do Hoje, as duas zonas têm identidades separadas — as prioridades são **azuis** e o Inbox é **verde** — e os seis chips de categoria já aparecem coloridos de cara (Trabalho azul, Estudo roxo, Família lima, Casa laranja, Mercado rosa, Outs cinza). Nenhum item depende só da cor: prazo atrasado, hoje e futuro têm ícones diferentes, porque vermelho e verde não são distinguíveis por todo mundo. O contrato visual completo, com as regras de uso de cada cor, está em `docs/DESIGN.md`.
-
-## Tecnologias
-
-- React Native com Expo + TypeScript
-- SQLite com expo-sqlite (inbox, hoje, saída, timer, ajustes, usuários, sessão)
-- React Navigation (pilha Auth + abas)
-- expo-crypto (hash de senha), expo-haptics (micro-interação), expo-notifications (lembrete de saída) e
-  expo-linear-gradient (faixa colorida das telas)
-- @expo/vector-icons (ícones) e Git + GitHub
+Sem servidor. A conta é um perfil local (e-mail e senha com hash SHA-256 e
+salt), só para separar o uso no mesmo aparelho.
 
 ## Como rodar
 
-Pré-requisitos: Node 18+, app Expo Go instalado no Android e o celular e o PC na mesma rede Wi-Fi.
+Precisa de Node 18+.
 
 ```bash
-git clone https://github.com/seu-usuario/minha-rotina.git
-cd minha-rotina
+git clone https://github.com/MateusCCI/MinhaRotina.git
+cd MinhaRotina
 npm install
 npx expo start
 ```
 
-Depois abra a câmera do Expo Go e leia o QR que aparece no terminal. Na primeira vez demora um pouco para carregar.
+Abra o QR com o app Expo Go no celular, na mesma rede do computador. Se a rede
+da faculdade isolar o celular, use `npx expo start --tunnel` ou um hotspot
+invertido.
 
-Se preferir só ver as telas sem instalar nada, abra o arquivo `docs/telas-minha-rotina.html` em qualquer navegador.
+Para ver as telas sem instalar nada: `npx expo start --web` (o SQLite no
+navegador usa OPFS, então **só uma aba por vez**).
 
-## Estrutura do projeto
+## Validação
 
-```text
-app/                  telas (auth, inbox, hoje, saída, timer, revisão)
-src/components/       componentes reutilizáveis (ScreenShell, StatCard, RowActions, CaptureInput, InboxItem, ...)
-src/lib/              tema e paleta por contexto (theme.ts), ícones (icons.ts), banco local (database.ts), sessão, senha e tipos
-hooks/                estado por tela (useInbox, useHoje, useSaida, useTimer)
-docs/                 TAP, EAP, DESIGN, protótipo e trabalho ABNT
+```bash
+npm run typecheck   # tsc --noEmit
+npm run lint        # eslint, sem erros nem avisos
 ```
 
-O banco tem tabelas para `inbox_items`, `hoje_items` (com cópia própria de conteúdo/prazo/categoria), `saida_items` + `saida_log`, `timer_state`, `ajustes_semanais`, `events`, `users` e `meta` (sessão). O acesso passa por uma classe única (`DatabaseSingleton`), para não abrir várias conexões ao mesmo tempo.
+O roteiro de validação manual está em
+[`docs/TESTES-MANUAIS.md`](docs/TESTES-MANUAIS.md) — 15 cenários, com o
+critério de aceite de cada um.
+
+## Estrutura
+
+```text
+App.tsx                    navegação, tema e login
+app/
+  auth.tsx                 login e cadastro
+  (tabs)/                  as 4 telas
+src/
+  components/              ScreenShell, StatCard, RowActions, EditarChecklist,
+                           CaptureInput, InboxItem, HojeItem, BlocoConcluido…
+  lib/
+    database.ts            Singleton do SQLite + criação e migração do schema
+    types.ts               InboxItem, HojeItem, SaidaItem, WeeklyStats
+    theme.ts               tokens e paleta por contexto
+    icons.ts               vocabulário de ícones
+    password.ts            hash e verificação de senha
+    session.ts             sessão do usuário (Observer)
+    inboxCount.ts          contador do inbox para a tab bar (Observer)
+    alarme.ts              lembrete de saída com notificação agendada
+    notify.ts              avisos que funcionam também no navegador
+hooks/                     useInbox, useHoje, useSaida, useTimer
+docs/                      TAP, EAP, testes, contrato visual e o relatório
+```
+
+Duas decisões de modelagem que valem explicação:
+
+- **`inbox_items` e `hoje_items` são tabelas separadas.** Promover uma ideia
+  copia o conteúdo para `hoje_items` e apaga do inbox. Quando as duas eram uma
+  tabela só com um campo de status, o item sumia das duas telas ao promover.
+- **O banco é um Singleton** (`DatabaseSingleton.getInstance()`), com
+  migração defensiva por `ensureColumn` — abrir um app antigo nunca quebra por
+  coluna faltando.
 
 ## Documentação
 
-| Documento | O que tem dentro |
+| Documento | O que tem |
 |---|---|
-| `docs/TAP-PI-Minha-Rotina.md` | Termo de abertura: objetivo, escopo, prazo e riscos |
-| `docs/EAP-MinhaRotina.md` | Divisão do trabalho por entrega e por responsável |
-| `docs/telas-minha-rotina.md` | Desenho das telas em texto |
-| `docs/telas-minha-rotina.html` | Protótipo navegável das telas |
-| `docs/MinhaRotina-PI-ABNT.docx` | Trabalho final formatado |
-| `docs/STATUS.md` | Andamento do projeto |
+| [`docs/MinhaRotina-PI.docx`](docs/MinhaRotina-PI.docx) | Relatório final do projeto |
+| [`docs/TAP-PI-Minha-Rotina.md`](docs/TAP-PI-Minha-Rotina.md) | Termo de abertura: objetivo, escopo, prazo e riscos |
+| [`docs/EAP-MinhaRotina.md`](docs/EAP-MinhaRotina.md) | Estrutura analítica: entregas e responsáveis |
+| [`docs/DESIGN.md`](docs/DESIGN.md) | Contrato visual: paleta, ícones, componentes |
+| [`docs/TESTES-MANUAIS.md`](docs/TESTES-MANUAIS.md) | 15 cenários de validação manual |
+| [`docs/telas-minha-rotina.md`](docs/telas-minha-rotina.md) | Desenho das telas, primeira versão |
+| [`docs/telas-minha-rotina.html`](docs/telas-minha-rotina.html) | Protótipo navegável da primeira versão |
 
-## Quem fez
+As duas últimas peças são o protótipo feito antes do código (M1). O app
+final mudou em dois pontos depois: Inbox e Hoje viraram uma tela só, e a paleta
+virou uma família de cor por aba.
 
-- Mateus — telas de Saída e Timer, banco SQLite e DER
-- Helian — telas de Inbox, Hoje e Revisão, testes
+## Autores
+
+- **Mateus** — telas de Saída e Timer, banco SQLite e DER
+- **Helian** — telas de Inbox, Hoje e Revisão, e os testes
 - Orientador: Prof. Sosthenes Carlos Ferreira do Nascimento
 
-## O que deu trabalho e próximos passos
+## O que ficou para trás
 
-A parte mais chata foi o limite de 3 itens no Hoje e não deixar o timer zerar quando troca de aba. Também tivemos que simplificar o escopo no meio do caminho porque não ia dar tempo de fazer tudo em 6 semanas.
+Duas coisas deram trabalho e não são óbvias pelo código: o limite de 3
+prioridades no Hoje (que é a decisão de produto, não um detalhe) e o timer
+persistir sem zerar ao trocar de aba. Também cortamos escopo no meio do caminho
+porque não cabia em seis semanas.
 
-Ficou de fora (ideia para o TCC 2): sincronizar entre aparelhos, sugerir as 3 tarefas do dia e versão para iOS.
+Para o TCC 2 ficaram: sincronizar entre aparelhos, sugerir as três prioridades
+do dia e versão para iOS.
 
 ## Licença
 
