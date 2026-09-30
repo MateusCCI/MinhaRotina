@@ -11,13 +11,13 @@ Brasília-DF, setembro de 2026
 
 ## RESUMO
 
-Este Projeto Integrador apresenta o desenvolvimento do Minha Rotina, um aplicativo de organização de rotina para adultos com rotina variável que acabam esquecendo itens ao sair de casa e perdendo prazos curtos. O app foi feito com React Native, TypeScript e banco SQLite no próprio aparelho. O trabalho junta o que vimos em quatro disciplinas: Programação para Dispositivos Móveis I, Programação Orientada a Objetos, Tópicos Avançados em ADS e Avaliação de Software. O desenvolvimento foi dividido em três sprints de duas semanas, com protótipo das telas antes do código e testes manuais no celular. O resultado é um app simples, em português e sem conta: Inbox para anotar rápido, Hoje com no máximo 3 tarefas, checklist de saída, timer de 25 minutos e revisão da semana.
+Este Projeto Integrador apresenta o desenvolvimento do Minha Rotina, um aplicativo de organização de rotina para adultos com rotina variável que acabam esquecendo itens ao sair de casa e perdendo prazos curtos. O app foi feito com React Native, TypeScript e banco SQLite no próprio aparelho. O trabalho junta o que vimos em quatro disciplinas: Programação para Dispositivos Móveis I, Programação Orientada a Objetos, Tópicos Avançados em ADS e Avaliação de Software. O desenvolvimento foi dividido em três sprints de duas semanas, com protótipo das telas antes do código e testes manuais no celular. O resultado é um app simples, em português e com conta local no próprio aparelho (e-mail e senha com hash SHA-256 e salt, sem servidor): uma tela de dia que junta o Inbox de captura rápida com o limite de 3 prioridades, mais o checklist de saída, o timer de 25 minutos e a revisão da semana.
 
 Palavras-chave: Projeto Integrador; Desenvolvimento Mobile; React Native; GTD; Organização Pessoal.
 
 ## ABSTRACT
 
-This Integrative Project presents Minha Rotina, a routine organization app for adults with variable schedules who often forget items when leaving home and miss short deadlines. The app was built with React Native, TypeScript and SQLite stored on the device. The work brings together four subjects: Mobile Programming I, Object-Oriented Programming, Advanced Topics in Systems Analysis and Development, and Software Evaluation. Development was split into three two-week sprints, with screen prototypes before coding and manual tests on a real phone. The result is a simple app, in Portuguese and with no account needed: Inbox for quick notes, Today limited to 3 tasks, exit checklist, 25-minute timer and weekly review.
+This Integrative Project presents Minha Rotina, a routine organization app for adults with variable schedules who often forget items when leaving home and miss short deadlines. The app was built with React Native, TypeScript and SQLite stored on the device. The work brings together four subjects: Mobile Programming I, Object-Oriented Programming, Advanced Topics in Systems Analysis and Development, and Software Evaluation. Development was split into three two-week sprints, with screen prototypes before coding and manual tests on a real phone. The result is a simple app, in Portuguese and with a local account stored on the device (e-mail and password hashed with SHA-256 and a salt, no server): a day screen that brings the quick-capture Inbox together with the 3-priority limit, plus the exit checklist, the 25-minute timer and the weekly review.
 
 Keywords: Integrative Project; Mobile Development; React Native; GTD; Personal Organization.
 
@@ -27,7 +27,7 @@ Keywords: Integrative Project; Mobile Development; React Native; GTD; Personal O
 
 Quase todo mundo hoje tem celular, mas muita gente continua se perdendo na rotina. No nosso caso, o problema era bem concreto: a gente conferia as coisas no quarto e lembrava do que faltou já na escada, montava lista de 20 tarefas que mais travava do que ajudava e perdia prazo curto no meio de anotação espalhada. Os apps que testamos pediam conta, salvavam tudo em servidor ou eram em inglês, e a gente acabava largando.
 
-A proposta do Minha Rotina foi fazer um app simples para esse dia a dia: anotar rápido no Inbox, escolher só 3 coisas para o Hoje, marcar um checklist na hora de sair e usar um timer de 25 minutos para focar. Tudo em português e com os dados guardados no próprio celular, sem servidor.
+A proposta do Minha Rotina foi fazer um app simples para esse dia a dia: anotar rápido, escolher só 3 coisas para o dia, marcar um checklist na hora de sair e usar um timer de 25 minutos para focar. Tudo em português e com os dados guardados no próprio celular, sem servidor. A captura e o dia do usuário acabaram na mesma tela, porque o caminho da ideia até a prioridade é um funil só e trocar de aba no meio dele só custava velocidade.
 
 O projeto também serviu para juntar as matérias do semestre num trabalho só, que é a ideia do Projeto Integrador.
 
@@ -37,8 +37,8 @@ Desenvolver um aplicativo de organização de rotina com React Native e TypeScri
 
 ### 1.2 Objetivos Específicos
 
--   Fazer a tela de Inbox para anotar tarefa em texto livre sem precisar classificar na hora;
--   Fazer a tela de Hoje com no máximo 3 itens escolhidos pelo usuário;
+-   Fazer a captura rápida de tarefa em texto livre, sem precisar classificar na hora;
+-   Fazer o limite de no máximo 3 prioridades por dia, escolhidas pelo usuário;
 -   Montar o checklist de saída com até 5 itens que dá para editar e campo da hora que saiu;
 -   Implementar o timer de 25 minutos com iniciar e pausar;
 -   Guardar tudo em SQLite no próprio aparelho;
@@ -72,13 +72,13 @@ Requisitos funcionais do MVP:
 -   RF02: Mostrar no máximo 3 tarefas no Hoje, escolhidas pelo usuário;
 -   RF03: Checklist de saída com até 5 itens que dá para editar;
 -   RF04: Timer de 25 minutos com iniciar e pausar;
--   RF05: Botão [HOJE] no Inbox que leva o item para o Hoje com 1 toque;
+-   RF05: Levar uma ideia capturada para as prioridades do dia com poucos toques, pela folha de ações do item;
 -   RF06: Barra de progresso do dia com % e cor que muda (vermelho, amarelo, verde);
 -   RF07: Aviso quando o bloco termina, perguntando o próximo item, sem apitar no meio do foco;
 -   RF08: Revisão da semana com contagem de dias com inbox zerado.
 
 Por que decidimos assim:
--   *Botão [HOJE]:* Gollwitzer e Sheeran (2006) mostram que transformar intenção em ação de 1 toque ("se acontecer X, faço Y") aumenta a chance de cumprir. A ideia foi diminuir a preguiça de começar.
+-   *Promoção com poucos toques:* Gollwitzer e Sheeran (2006) mostram que transformar intenção em ação de poucos toques ("se acontecer X, faço Y") aumenta a chance de cumprir. A ideia foi diminuir a preguiça de começar. Na primeira versão era um botão [HOJE] direto na linha; na revisão de interface virou um único lápis que abre a folha de ações, porque três botões em cada linha faziam o olhar ir para o controle em vez de ir para a tarefa.
 -   *Barra de progresso:* muita gente perde a noção do tempo no meio do dia. Em vez de só número, colocamos barra colorida que enche, que é mais fácil de entender batendo o olho.
 -   *Aviso só no fim do bloco:* Jones et al. (2021) mostram que lembrete ajuda bastante, mas notificação demais faz a pessoa ignorar tudo. Então o app só chama no fim do bloco.
 
@@ -98,22 +98,32 @@ Fizemos em sprints curtos, um módulo por vez, com Git para versionar e cada um 
 -   **Expo** — jeito mais simples de rodar React Native sem configurar nativo;
 -   **TypeScript** — JavaScript com tipo, que ajuda a pegar erro antes de rodar;
 -   **expo-sqlite** — banco que fica dentro do app;
--   **expo-notifications** — alarme da saída e aviso de fim do bloco;
--   **React Navigation** — navegação por abas;
+-   **expo-notifications** — dependência prevista para o aviso de fim do bloco (RF07), ainda **não implementada** no código;
+-   **React Navigation** — navegação por abas (pilha de autenticação + 4 abas);
+-   **expo-linear-gradient** — a faixa colorida que identifica cada aba;
 -   **VS Code** — editor que usamos.
 
 ### 3.2 Banco de dados
 
-Modelamos quatro tabelas principais:
+Modelamos nove tabelas:
 
 | Tabela | O que guarda |
 |---|---|
-| `tasks` | id, título, status (inbox/hoje/backlog/concluído), se está no hoje, horário |
-| `today` | task_id, dia da semana |
-| `checklist_saida` | id, texto, ordem, marcado ou não, data |
-| `progresso_dia` | data, total de tarefas, concluídas, cor da barra |
+| `inbox_items` | id, conteúdo, prazo, categoria, data de criação |
+| `hoje_items` | id, id do item de origem, conteúdo, prazo, categoria, marcado, data |
+| `saida_items` | id, conteúdo, ordem, marcado |
+| `saida_log` | horário de cada saída registrada |
+| `timer_state` | chave e valor do ciclo em andamento |
+| `ajustes_semanais` | texto do ajuste e data |
+| `events` | evento do dia (por exemplo, inbox zerado), com data |
+| `users` | nome, e-mail, salt e hash da senha |
+| `meta` | chave e valor — guarda qual usuário está com a sessão aberta |
 
-A `tasks` recebe o que é anotado no Inbox; a `today` guarda as 3 do dia; a `checklist_saida` guarda os itens da porta; e a `progresso_dia` guarda o estado da barra para mostrar no Hoje.
+A `inbox_items` recebe o que é anotado; a `hoje_items` guarda as 3 do dia — as
+duas são tabelas **separadas de propósito**, e não uma tabela só com um status,
+porque foi exatamente essa escolha que evitou a perda de dado corrigida em
+setembro: ao promover, o item é copiado para `hoje_items` e apagado do Inbox.
+A `users` e a `meta` sustentam a conta local, sem servidor.
 
 ### 3.3 Como foi o passo a passo
 
@@ -127,15 +137,29 @@ Congelamos o código três dias antes da apresentação para não quebrar nada n
 
 ### 4.1 Tela Inbox
 
-Um campo de texto de uma linha no topo. Apertou Enter, salva com data e hora. Não pergunta categoria nem prioridade na hora, para não travar e anotar em segundos.
+Um campo de captura no meio da tela, com prazo e categoria opcionais logo abaixo
+— dá para despachar em segundos e classificar depois, se quiser. Apertou *Guardar*,
+o item entra na lista do Inbox com data e hora.
 
-Depois, em outra parte da tela, tem 4 opções por item: **[Fazer <2min]** / **[→Hoje]** / **[Backlog]** / **[Lixo]**. Decidir cada item leva uns 10 segundos.
+Cada item da lista carrega **um único botão: o lápis**. Ele abre uma folha de
+ações com três opções — *virar prioridade de hoje*, *editar* e *excluir* — cada
+uma com uma linha de texto explicando o efeito. Na primeira versão eram quatro
+botões direto na linha (**[Fazer <2min]** / **[→Hoje]** / **[Backlog]** /
+**[Lixo]**); a revisão de interface trocou por um só, porque quatro controles em
+cada linha faziam o olhar ir para o botão em vez de ir para a tarefa. A folha
+também avisa em texto, antes de você decidir, quando o dia já tem as 3
+prioridades ocupadas.
 
 ### 4.2 Tela Hoje
 
 Mostra no máximo 3 tarefas escolhidas pelo usuário. O limite de 3 foi de propósito, para não virar aquela lista gigante que ninguém faz — tem a ver com o Essencialismo (MCKEOWN, 2014). No topo tem a barra com hora atual, fração (ex.: `2/3`) e cor que muda com o progresso.
 
-A escolha é sempre da pessoa, o app não sugere nada sozinho. O que não foi para o Hoje fica no backlog sem marcação de atraso. O botão [HOJE] no Inbox leva direto, sem abrir outra tela.
+A escolha é sempre da pessoa, o app não sugere nada sozinho. O que não foi promovido fica no Inbox, sem marcação de atraso.
+
+O Hoje e o Inbox chegaram a ser telas separadas. Na revisão de interface foram
+fundidos numa tela só, com as prioridades no topo, a captura no meio e o Inbox
+despejado embaixo: o caminho da ideia até a prioridade é um funil, e trocar de
+aba no meio de um funil só custava velocidade.
 
 ### 4.3 Tela Saída
 
