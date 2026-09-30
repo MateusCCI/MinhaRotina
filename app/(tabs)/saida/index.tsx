@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { useSaida } from '../../../hooks/useSaida';
 import { SaidaItem } from '../../../src/lib/types';
 import { accents, theme, cardShadow } from '../../../src/lib/theme';
 import { confirmDestructive, notify } from '../../../src/lib/notify';
+import { agendarAlarme, cancelarAlarme, horarioAlarme, unsupportedPlatform } from '../../../src/lib/alarme';
+import DatabaseSingleton from '../../../src/lib/database';
 
 const SAIDA = accents.saida;
 
@@ -25,11 +27,54 @@ interface Editing {
   content: string;
 }
 
+/** Meia hora à frente, arredondada — padrão sensato para "quando saio?". */
+function nextHalfHour(): string {
+  const d = new Date(Date.now() + 30 * 60 * 1000);
+  d.setMinutes(d.getMinutes() > 30 ? 60 : 30, 0, 0);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export default function SaidaScreen() {
   const { items, loading, allChecked, saidasHoje, toggleItem, registerSaida, addItem, renameItem, removeItem } = useSaida();
   const [saiuAs, setSaiuAs] = useState<string | null>(null);
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [alarme, setAlarme] = useState<string | null>(null);
+  const [showAlarme, setShowAlarme] = useState(false);
   const checked = items.filter(i => i.checked).length;
+
+  useEffect(() => {
+    DatabaseSingleton.getInstance()
+      .then(db => db.getAlarmeSaida())
+      .then(setAlarme)
+      .catch(() => setAlarme(null));
+  }, []);
+
+  /** Agenda (ou cancela) o lembrete 15 min antes da saída escolhida. */
+  const aplicarAlarme = async (hora: string | null): Promise<void> => {
+    try {
+      const db = await DatabaseSingleton.getInstance();
+      if (hora === null) {
+        await cancelarAlarme();
+        await db.setAlarmeSaida(null);
+        setAlarme(null);
+        return;
+      }
+      const total = await db.countPendenciasSaida();
+      const feito = await agendarAlarme(hora, total);
+      await db.setAlarmeSaida(feito ? hora : hora);
+      setAlarme(hora);
+    } catch {
+      notify('Ops', 'Não consegui agendar o lembrete. Tente de novo.');
+    }
+  };
+
+  const handleAlarmeChange = (delta: number): void => {
+    const [h, m] = (alarme ?? nextHalfHour()).split(':').map(Number);
+    const total = ((h * 60 + m + delta) % 1440 + 1440) % 1440;
+    const nova = `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+    setAlarme(nova);
+    void aplicarAlarme(nova);
+  };
 
   const handleToggle = (id: number): void => {
     void Haptics.selectionAsync();
@@ -131,6 +176,73 @@ export default function SaidaScreen() {
       }
     >
       <ScrollView contentContainerStyle={styles.listContent}>
+        {/* Alarme de saída: 15 min antes, no canal de notificações do sistema */}
+        <View style={styles.alarmCard}>
+          <View style={styles.alarmHead}>
+            <View style={styles.alarmIcon}>
+              <Ionicons name={alarme ? 'alarm' : 'alarm-outline'} size={20} color={SAIDA.base} />
+            </View>
+            <View style={styles.alarmBody}>
+              <Text style={styles.alarmTitle}>{alarme ? `Saída às ${alarme}` : 'Lembrete de saída'}</Text>
+              <Text style={styles.alarmSub}>
+                {alarme
+                  ? `O celular avisa às ${horarioAlarme(alarme)} — 15 min antes.`
+                  : unsupportedPlatform()
+                    ? 'Avise 15 min antes de sair para não esquecer nada.'
+                    : 'Receba um aviso 15 minutos antes, sem apitar no meio do dia.'}
+              </Text>
+            </View>
+          </View>
+
+          {!showAlarme ? (
+            <TouchableOpacity style={styles.alarmBtn} onPress={() => setShowAlarme(true)}>
+              <Ionicons name="add" size={18} color={theme.colors.onPrimary} />
+              <Text style={styles.alarmBtnText}>{alarme ? 'Mudar horário' : 'Programar lembrete'}</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.alarmPicker}>
+              <TouchableOpacity
+                style={styles.alarmStep}
+                onPress={() => handleAlarmeChange(-15)}
+                accessibilityLabel="15 minutos antes"
+              >
+                <Ionicons name="chevron-back" size={18} color={SAIDA.base} />
+              </TouchableOpacity>
+              <View style={styles.alarmValue}>
+                <Text style={styles.alarmValueText}>{alarme ?? nextHalfHour()}</Text>
+                <Text style={styles.alarmValueLabel}>avisa {horarioAlarme(alarme ?? nextHalfHour())}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.alarmStep}
+                onPress={() => handleAlarmeChange(15)}
+                accessibilityLabel="15 minutos depois"
+              >
+                <Ionicons name="chevron-forward" size={18} color={SAIDA.base} />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {alarme && (
+            <TouchableOpacity
+              style={styles.alarmOff}
+              onPress={() => {
+                setShowAlarme(false);
+                void aplicarAlarme(null);
+              }}
+            >
+              <Ionicons name="close-circle-outline" size={16} color={theme.colors.textSecondary} />
+              <Text style={styles.alarmOffText}>Desligar lembrete</Text>
+            </TouchableOpacity>
+          )}
+
+          {unsupportedPlatform() && alarme && (
+            <Text style={styles.alarmWarn}>
+              No navegador o lembrete fica salvo, mas quem avisa é o app aberto — no celular ele
+              avisa mesmo com o app fechado.
+            </Text>
+          )}
+        </View>
+
         {items.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
@@ -279,6 +391,105 @@ const styles = StyleSheet.create({
     color: theme.colors.onPrimary,
     fontSize: theme.type.callout,
     fontWeight: '700',
+  },
+  alarmCard: {
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(190,24,93,0.26)',
+    marginBottom: theme.spacing.lg,
+  },
+  alarmHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: theme.spacing.md,
+  },
+  alarmIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: SAIDA.soft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alarmBody: {
+    flex: 1,
+  },
+  alarmTitle: {
+    fontSize: theme.type.body,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  alarmSub: {
+    fontSize: theme.type.footnote,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
+    lineHeight: 19,
+  },
+  alarmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 48,
+    borderRadius: theme.radius.md,
+    backgroundColor: SAIDA.base,
+  },
+  alarmBtnText: {
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    color: theme.colors.onPrimary,
+  },
+  alarmPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  alarmStep: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.md,
+    backgroundColor: SAIDA.soft,
+  },
+  alarmValue: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  alarmValueText: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: theme.colors.text,
+    fontVariant: ['tabular-nums'],
+  },
+  alarmValueLabel: {
+    fontSize: theme.type.caption,
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
+    marginTop: 2,
+  },
+  alarmOff: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 44,
+    marginTop: theme.spacing.sm,
+  },
+  alarmOffText: {
+    fontSize: theme.type.footnote,
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
+  },
+  alarmWarn: {
+    fontSize: theme.type.caption,
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.xs,
+    lineHeight: 16,
+    textAlign: 'center',
   },
   addRow: {
     flexDirection: 'row',

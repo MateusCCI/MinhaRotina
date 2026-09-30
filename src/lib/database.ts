@@ -655,6 +655,38 @@ class DatabaseSingleton {
       [String(id)]
     );
   }
+
+  /**
+   * Horário de saída programado, em "HH:MM" (24h), ou null se não houver.
+   * Vive na `meta` (chave/valor) em vez de uma tabela nova: é um valor
+   * único, e mexer no schema por causa dele custaria migração à toa.
+   */
+  async getAlarmeSaida(): Promise<string | null> {
+    const row = await this.db!.getFirstAsync<{ value: string }>(
+      "SELECT value FROM meta WHERE key = 'alarme_saida'"
+    );
+    return row?.value ?? null;
+  }
+
+  async setAlarmeSaida(hora: string | null): Promise<void> {
+    if (hora === null) {
+      await this.db!.runAsync("DELETE FROM meta WHERE key = 'alarme_saida'");
+      return;
+    }
+    await this.db!.runAsync(
+      `INSERT INTO meta (key, value) VALUES ('alarme_saida', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      [hora]
+    );
+  }
+
+  /** Quantos itens do checklist de saída ainda faltam marcar. */
+  async countPendenciasSaida(): Promise<number> {
+    const row = await this.db!.getFirstAsync<{ total: number }>(
+      'SELECT COUNT(*) AS total FROM saida_items WHERE checked = 0'
+    );
+    return row?.total ?? 0;
+  }
 }
 
 export default DatabaseSingleton;

@@ -1,25 +1,51 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTimer, formatMs } from '../../../hooks/useTimer';
 import ScreenShell from '../../../src/components/ScreenShell';
 import ProgressBar from '../../../src/components/ProgressBar';
 import StatCard from '../../../src/components/StatCard';
+import BlocoConcluido from '../../../src/components/BlocoConcluido';
+import { useHoje } from '../../../hooks/useHoje';
 import { accents, statusColor, theme, cardShadow } from '../../../src/lib/theme';
+import { notify } from '../../../src/lib/notify';
 
 const TOTAL_MS = 25 * 60 * 1000;
 const TIMER = accents.timer;
 
 export default function TimerScreen() {
+  // O Timer precisa saber o que está em aberto para oferecer o próximo passo
+  // no fim do bloco (RF07). Só lê; quem escreve é a aba Hoje.
+  const { items: hojeItems, toggleItem } = useHoje();
+
+  const [blocoAberto, setBlocoAberto] = useState(false);
+
+  /** RF07: o aviso só acontece no fim do bloco, e uma vez só. */
+  const handleComplete = useCallback(() => {
+    setBlocoAberto(true);
+  }, []);
+
   const timer = useTimer({
     prefix: 'pomodoro',
     totalMs: TOTAL_MS,
-    onComplete: () => {},
+    onComplete: handleComplete,
   });
 
   const progress = TOTAL_MS > 0 ? ((TOTAL_MS - timer.remaining) / TOTAL_MS) * 100 : 0;
   const progressColor = statusColor(progress);
   const pct = Math.round(progress);
+
+  const done = hojeItems.filter(i => i.checked).length;
+  const dayPct = hojeItems.length > 0 ? Math.round((done / hojeItems.length) * 100) : 0;
+  const proximas = hojeItems.filter(i => !i.checked);
+
+  const handleEscolher = useCallback(
+    (id: number) => {
+      setBlocoAberto(false);
+      void toggleItem(id).catch(() => notify('Ops', 'Não consegui atualizar o item. Tente de novo.'));
+    },
+    [toggleItem],
+  );
 
   const hint = !timer.running && progress === 0
     ? 'Aperte começar e foque em uma coisa só'
@@ -108,6 +134,16 @@ export default function TimerScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <BlocoConcluido
+        visible={blocoAberto}
+        concluidas={done}
+        total={hojeItems.length}
+        pct={dayPct}
+        proximas={proximas}
+        onEscolher={handleEscolher}
+        onClose={() => setBlocoAberto(false)}
+      />
     </ScreenShell>
   );
 }
