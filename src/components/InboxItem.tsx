@@ -26,38 +26,47 @@ export default function InboxItemComponent({ item, onMenu }: InboxItemProps) {
 
   return (
     <View style={[styles.container, due.tone === 'overdue' && styles.containerUrgent]}>
-      <Text style={styles.content} numberOfLines={3}>{item.content}</Text>
-      {/* Uma linha só de metadados: os pills à esquerda, o lápis à direita.
-          Enquanto o item não tem prazo nem categoria, a linha continua
-          existindo para o lápis não mudar de lugar de um item para outro. */}
-      <View style={styles.badges}>
-        {item.category && (
-          <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt }]}>
-            <Ionicons name={categoryIcon(item.category)} size={13} color={categoryInk} />
-            <Text style={[styles.badgeText, { color: categoryInk }]}>{item.category}</Text>
-          </View>
-        )}
-        {due.label && (
-          <View style={[styles.badge, { backgroundColor: dueColors.bg }]}>
-            <Ionicons name={dueIcon(due.tone)} size={13} color={dueColors.fg} />
-            <Text style={[styles.badgeText, { color: dueColors.fg }]}>{due.label}</Text>
-          </View>
-        )}
-        <TouchableOpacity
-          style={styles.iconBtn}
-          // O desenho encolhe para a altura da linha, mas o **alvo de toque**
-          // continua com 44pt: `hitSlop` estende a área sensível além do
-          // desenho. As duas coisas importam — alvo pequeno demais atrapalha
-          // quem tem dificuldade motora, desenho grande demais empurra a
-          // linha para baixo.
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          onPress={() => onMenu(item)}
-          accessibilityLabel={`Ações para ${item.content}`}
-          accessibilityRole="button"
+      {/* Item de UMA linha: texto, pills e lápis na mesma faixa. O texto é
+          o único que cede espaço (`flex: 1` com `numberOfLines={1}`): os
+          pills e o lápis mantêm o tamanho, porque é deles que se lê o
+          prazo e a categoria sem precisar abrir nada. */}
+      <Text style={styles.content} numberOfLines={1}>{item.content}</Text>
+      {item.category && (
+        <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt }]}>
+          <Ionicons name={categoryIcon(item.category)} size={13} color={categoryInk} />
+          <Text style={[styles.badgeText, { color: categoryInk }]}>{item.category}</Text>
+        </View>
+      )}
+      {due.label && (
+        // O prazo vira **só ícone** nesta linha. Medido: o pill "vence hoje"
+        // custava 96 px, quase o texto inteiro da tarefa, e aí até "Revisar o
+        // DER" truncava. A cor segue dizendo a urgência e o glifo segue
+        // dizendo o estado; as palavras ficaram no accessibilityLabel, que é
+        // o que o leitor de tela lê.
+        <View
+          style={[styles.dueDot, { backgroundColor: dueColors.bg }]}
+          // `accessible` é o que faz o Android/iOS Announcescaremente o
+          // rótulo: sem ele, um View sem papel só é lido na web.
+          accessible
+          accessibilityLabel={`Prazo: ${due.label}`}
         >
-          <Ionicons name="pencil-outline" size={15} color={theme.colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
+          <Ionicons name={dueIcon(due.tone)} size={13} color={dueColors.fg} />
+        </View>
+      )}
+      <TouchableOpacity
+        style={styles.iconBtn}
+        // O desenho encolhe para a altura da linha, mas o **alvo de toque**
+        // continua com 44pt: `hitSlop` estende a área sensível além do
+        // desenho. As duas coisas importam — alvo pequeno demais atrapalha
+        // quem tem dificuldade motora, desenho grande demais empurra a
+        // linha para baixo.
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        onPress={() => onMenu(item)}
+        accessibilityLabel={`Ações para ${item.content}`}
+        accessibilityRole="button"
+      >
+        <Ionicons name="pencil-outline" size={15} color={theme.colors.textSecondary} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -66,13 +75,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
-    // Vertical mais apertado que o horizontal: o cartão do Inbox é o mais
-    // repetido da tela, e 4 px a menos em cima e embaixo em cada item
-    // somam rápido numa lista de 10+. A lateral fica igual porque é onde
-    // os pills encostam. Padding só encolhe onde **não** há alvo de toque.
+    // Linha única: o item virou faixa, não cartão. `minHeight: 52` é o piso
+    // confortável para o dedo; o texto é o único que cede espaco.
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 52,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    marginBottom: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    marginBottom: theme.spacing.xs,
     ...cardShadow(),
   },
   containerUrgent: {
@@ -80,19 +91,15 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.danger,
   },
   content: {
-    fontSize: theme.type.body,
+    // O texto cede espaco; `flexShrink: 0` nos pills e no lapis impede que
+    // eles amassem quando a ideia e longa.
+    flex: 1,
+    fontSize: theme.type.callout,
+    fontWeight: '600',
     color: theme.colors.text,
-    marginBottom: 8,
-    lineHeight: 24,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
   },
   badge: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
@@ -104,7 +111,16 @@ const styles = StyleSheet.create({
     fontSize: theme.type.caption,
     fontWeight: '700',
   },
+  dueDot: {
+    flexShrink: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   iconBtn: {
+    flexShrink: 0,
     width: 28,
     height: 28,
     marginLeft: 'auto',
