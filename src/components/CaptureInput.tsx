@@ -85,6 +85,8 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
               key={opt.key}
               style={[styles.chip, active && styles.chipActive]}
               onPress={() => setDueKey(opt.key)}
+              accessibilityLabel={`Prazo: ${opt.label}`}
+              accessibilityState={{ selected: active }}
             >
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {opt.label}

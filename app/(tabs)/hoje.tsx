@@ -257,6 +257,7 @@ export default function HojeScreen() {
         {/* ZONA 3 — o Inbox despejado */}
         <View style={styles.zone}>
           <ZoneHeader icon="file-tray" title="Inbox" count={String(inboxItems.length)} accent={BRAND} />
+          <Text style={styles.zoneHint}>O lápis de cada ideia abre promover, editar e excluir.</Text>
 
           {inboxItems.length >= CLEANUP_LIMIT && (
             <View style={styles.cleanupBanner}>
@@ -411,6 +412,12 @@ const styles = StyleSheet.create({
   zoneCountText: {
     fontSize: theme.type.caption,
     fontWeight: '800',
+  },
+  zoneHint: {
+    fontSize: theme.type.caption,
+    color: theme.colors.textMuted,
+    marginBottom: theme.spacing.sm,
+    marginTop: -4,
   },
   emptyFocus: {
     flexDirection: 'row',

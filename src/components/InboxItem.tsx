@@ -21,38 +21,35 @@ function dueBadgeColors(tone: ReturnType<typeof dueLabel>['tone']): { bg: string
 
 export default function InboxItemComponent({ item, onMenu }: InboxItemProps) {
   const due = dueLabel(item.due_date);
-  const hasBadges = due.label || item.category;
   const categoryInk = (item.category && CATEGORY_TEXT[item.category]) || theme.colors.textSecondary;
   const dueColors = dueBadgeColors(due.tone);
 
   return (
     <View style={[styles.container, due.tone === 'overdue' && styles.containerUrgent]}>
       <Text style={styles.content} numberOfLines={3}>{item.content}</Text>
-      {hasBadges && (
-        <View style={styles.badges}>
-          {item.category && (
-            <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt }]}>
-              <Ionicons name={categoryIcon(item.category)} size={13} color={categoryInk} />
-              <Text style={[styles.badgeText, { color: categoryInk }]}>{item.category}</Text>
-            </View>
-          )}
-          {due.label && (
-            <View style={[styles.badge, { backgroundColor: dueColors.bg }]}>
-              <Ionicons name={dueIcon(due.tone)} size={13} color={dueColors.fg} />
-              <Text style={[styles.badgeText, { color: dueColors.fg }]}>{due.label}</Text>
-            </View>
-          )}
-        </View>
-      )}
-      <View style={styles.actions}>
-        <Text style={styles.hint}>Lápis: promover, editar ou excluir</Text>
+      {/* Uma linha só de metadados: os pills à esquerda, o lápis à direita.
+          Enquanto o item não tem prazo nem categoria, a linha continua
+          existindo para o lápis não mudar de lugar de um item para outro. */}
+      <View style={styles.badges}>
+        {item.category && (
+          <View style={[styles.badge, { backgroundColor: CATEGORY_COLORS[item.category] ?? theme.colors.surfaceAlt }]}>
+            <Ionicons name={categoryIcon(item.category)} size={13} color={categoryInk} />
+            <Text style={[styles.badgeText, { color: categoryInk }]}>{item.category}</Text>
+          </View>
+        )}
+        {due.label && (
+          <View style={[styles.badge, { backgroundColor: dueColors.bg }]}>
+            <Ionicons name={dueIcon(due.tone)} size={13} color={dueColors.fg} />
+            <Text style={[styles.badgeText, { color: dueColors.fg }]}>{due.label}</Text>
+          </View>
+        )}
         <TouchableOpacity
           style={styles.iconBtn}
           onPress={() => onMenu(item)}
           accessibilityLabel={`Ações para ${item.content}`}
           accessibilityRole="button"
         >
-          <Ionicons name="pencil-outline" size={19} color={theme.colors.textSecondary} />
+          <Ionicons name="pencil-outline" size={18} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -74,14 +71,15 @@ const styles = StyleSheet.create({
   content: {
     fontSize: theme.type.body,
     color: theme.colors.text,
-    marginBottom: 10,
+    marginBottom: 8,
     lineHeight: 24,
   },
   badges: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 12,
+    marginTop: 2,
   },
   badge: {
     flexDirection: 'row',
@@ -95,19 +93,10 @@ const styles = StyleSheet.create({
     fontSize: theme.type.caption,
     fontWeight: '700',
   },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  hint: {
-    fontSize: 11,
-    color: theme.colors.textMuted,
-    opacity: 0.8,
-  },
   iconBtn: {
     minWidth: 44,
     minHeight: 44,
+    marginLeft: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.md,
