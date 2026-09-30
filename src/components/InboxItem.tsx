@@ -1,31 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { InboxItem } from '../lib/types';
 import { dueLabel, CATEGORY_COLORS, CATEGORY_TEXT } from '../lib/date';
-import { accents, theme, cardShadow } from '../lib/theme';
-import { categoryIcon } from '../lib/icons';
+import { theme, cardShadow } from '../lib/theme';
+import { categoryIcon, dueIcon } from '../lib/icons';
 
 interface InboxItemProps {
   item: InboxItem;
-  onPromote: (id: number) => void;
-  onEdit: (item: InboxItem) => void;
-  onDelete: (id: number) => void;
+  /** Abre a folha de ações do item (a linha em si não guarda estado). */
+  onMenu: (item: InboxItem) => void;
 }
 
-export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }: InboxItemProps) {
+/** Cor do badge de prazo por estado — a cor complements o ícone, não o substitui. */
+function dueBadgeColors(tone: ReturnType<typeof dueLabel>['tone']): { bg: string; fg: string } {
+  if (tone === 'overdue') return { bg: theme.colors.dangerSoft, fg: theme.colors.danger };
+  if (tone === 'today') return { bg: theme.colors.warningSoft, fg: theme.colors.warning };
+  return { bg: theme.colors.surfaceAlt, fg: theme.colors.textSecondary };
+}
+
+export default function InboxItemComponent({ item, onMenu }: InboxItemProps) {
   const due = dueLabel(item.due_date);
   const hasBadges = due.label || item.category;
   const categoryInk = (item.category && CATEGORY_TEXT[item.category]) || theme.colors.textSecondary;
-
-  const handlePromote = (): void => {
-    void Haptics.selectionAsync();
-    onPromote(item.id);
-  };
+  const dueColors = dueBadgeColors(due.tone);
 
   return (
-    <View style={[styles.container, due.urgent && styles.containerUrgent]}>
+    <View style={[styles.container, due.tone === 'overdue' && styles.containerUrgent]}>
       <Text style={styles.content} numberOfLines={3}>{item.content}</Text>
       {hasBadges && (
         <View style={styles.badges}>
@@ -36,44 +37,22 @@ export default function InboxItemComponent({ item, onPromote, onEdit, onDelete }
             </View>
           )}
           {due.label && (
-            <View style={[styles.badge, due.urgent ? styles.badgeUrgent : styles.badgeDue]}>
-              <Ionicons
-                name="time-outline"
-                size={13}
-                color={due.urgent ? theme.colors.danger : theme.colors.primary}
-              />
-              <Text style={[styles.badgeText, due.urgent ? styles.badgeUrgentText : styles.badgeDueText]}>
-                {due.label}
-              </Text>
+            <View style={[styles.badge, { backgroundColor: dueColors.bg }]}>
+              <Ionicons name={dueIcon(due.tone)} size={13} color={dueColors.fg} />
+              <Text style={[styles.badgeText, { color: dueColors.fg }]}>{due.label}</Text>
             </View>
           )}
         </View>
       )}
       <View style={styles.actions}>
+        <Text style={styles.hint}>Lápis: promover, editar ou excluir</Text>
         <TouchableOpacity
           style={styles.iconBtn}
-          onPress={() => onEdit(item)}
-          accessibilityLabel={`Editar ${item.content}`}
+          onPress={() => onMenu(item)}
+          accessibilityLabel={`Ações para ${item.content}`}
           accessibilityRole="button"
         >
-          <Ionicons name="pencil-outline" size={18} color={theme.colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={handlePromote}
-          accessibilityLabel={`Mover ${item.content} para hoje`}
-          accessibilityRole="button"
-        >
-          <Text style={styles.primaryBtnText}>Virar prioridade</Text>
-          <Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconBtnDanger}
-          onPress={() => onDelete(item.id)}
-          accessibilityLabel={`Excluir ${item.content}`}
-          accessibilityRole="button"
-        >
-          <Ionicons name="trash-outline" size={18} color={theme.colors.danger} />
+          <Ionicons name="pencil-outline" size={19} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -112,26 +91,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: theme.radius.pill,
   },
-  badgeDue: {
-    backgroundColor: theme.colors.primarySoft,
-  },
-  badgeUrgent: {
-    backgroundColor: theme.colors.dangerSoft,
-  },
   badgeText: {
     fontSize: theme.type.caption,
     fontWeight: '700',
-  },
-  badgeDueText: {
-    color: theme.colors.primary,
-  },
-  badgeUrgentText: {
-    color: theme.colors.danger,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  hint: {
+    fontSize: 11,
+    color: theme.colors.textMuted,
+    opacity: 0.8,
   },
   iconBtn: {
     minWidth: 44,
@@ -140,29 +112,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surfaceAlt,
-  },
-  primaryBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: accents.inbox.base,
-  },
-  primaryBtnText: {
-    fontSize: theme.type.footnote,
-    fontWeight: '700',
-    color: theme.colors.onPrimary,
-  },
-  iconBtnDanger: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 44,
-    minHeight: 44,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.dangerSoft,
   },
 });

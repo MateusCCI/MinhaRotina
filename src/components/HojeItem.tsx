@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { HojeItem } from '../lib/types';
 import { dueLabel, CATEGORY_COLORS, CATEGORY_TEXT } from '../lib/date';
 import { accents, theme, cardShadow } from '../lib/theme';
-import { categoryIcon } from '../lib/icons';
+import { categoryIcon, dueIcon } from '../lib/icons';
 
 interface HojeItemProps {
   item: HojeItem;
@@ -15,8 +15,16 @@ interface HojeItemProps {
 
 const HOJE = accents.hoje;
 
+/** Cor do badge de prazo por estado — a cor complementa o ícone, não o substitui. */
+function dueBadgeColors(tone: ReturnType<typeof dueLabel>['tone']): { bg: string; fg: string } {
+  if (tone === 'overdue') return { bg: theme.colors.dangerSoft, fg: theme.colors.danger };
+  if (tone === 'today') return { bg: theme.colors.warningSoft, fg: theme.colors.warning };
+  return { bg: theme.colors.surfaceAlt, fg: theme.colors.textSecondary };
+}
+
 export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItemProps) {
   const due = dueLabel(item.due_date);
+  const dueColors = dueBadgeColors(due.tone);
 
   const handleToggle = (): void => {
     void Haptics.selectionAsync();
@@ -24,7 +32,7 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
   };
 
   return (
-    <View style={[styles.container, !item.checked && due.urgent ? styles.containerUrgent : undefined]}>
+    <View style={[styles.container, !item.checked && due.tone === 'overdue' ? styles.containerUrgent : undefined]}>
       <TouchableOpacity
         style={[styles.checkbox, item.checked ? styles.checkboxChecked : undefined]}
         onPress={handleToggle}
@@ -41,15 +49,9 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
         {(due.label || item.category) && (
           <View style={styles.badges}>
             {due.label && (
-              <View style={styles.badgeRow}>
-                <Ionicons
-                  name="time-outline"
-                  size={12}
-                  color={due.urgent ? theme.colors.danger : theme.colors.textSecondary}
-                />
-                <Text style={[styles.badgeText, due.urgent ? styles.badgeUrgent : styles.badgeCalm]}>
-                  {due.label}
-                </Text>
+              <View style={[styles.badgeRow, { backgroundColor: dueColors.bg }]}>
+                <Ionicons name={dueIcon(due.tone)} size={12} color={dueColors.fg} />
+                <Text style={[styles.badgeText, { color: dueColors.fg }]}>{due.label}</Text>
               </View>
             )}
             {item.category && (
@@ -140,12 +142,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: theme.type.caption,
     fontWeight: '700',
-  },
-  badgeUrgent: {
-    color: theme.colors.danger,
-  },
-  badgeCalm: {
-    color: theme.colors.textSecondary,
   },
   checked: {
     textDecorationLine: 'line-through',

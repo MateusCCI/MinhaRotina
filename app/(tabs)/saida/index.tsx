@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   Modal,
   TextInput,
 } from 'react-native';
@@ -16,6 +15,7 @@ import StatCard from '../../../src/components/StatCard';
 import { useSaida } from '../../../hooks/useSaida';
 import { SaidaItem } from '../../../src/lib/types';
 import { accents, theme, cardShadow } from '../../../src/lib/theme';
+import { confirmDestructive, notify } from '../../../src/lib/notify';
 
 const SAIDA = accents.saida;
 
@@ -40,11 +40,10 @@ export default function SaidaScreen() {
     try {
       const hora = await registerSaida();
       setSaiuAs(hora);
-      Alert.alert('Boa saída!', `Registrei ${hora}. Até logo.`, [
-        { text: 'OK', onPress: () => setSaiuAs(null) },
-      ]);
+      setSaiuAs(null);
+      notify('Boa saída!', `Registrei ${hora}. Até logo.`);
     } catch {
-      Alert.alert('Ops', 'Não consegui registrar a saída. Tente de novo.');
+      notify('Ops', 'Não consegui registrar a saída. Tente de novo.');
     }
   };
 
@@ -58,23 +57,19 @@ export default function SaidaScreen() {
       }
       setEditing(null);
     } catch {
-      Alert.alert('Ops', 'Não consegui salvar. Tente de novo.');
+      notify('Ops', 'Não consegui salvar. Tente de novo.');
     }
   };
 
   const handleDelete = (item: SaidaItem): void => {
-    Alert.alert('Excluir item?', `"${item.content}" sai do checklist de vez.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: () => {
-          void removeItem(item.id).catch(() =>
-            Alert.alert('Ops', 'Não consegui excluir. Tente de novo.')
-          );
-        },
+    confirmDestructive(
+      'Excluir item?',
+      `"${item.content}" sai do checklist de vez.`,
+      'Excluir',
+      () => {
+        void removeItem(item.id).catch(() => notify('Ops', 'Não consegui excluir. Tente de novo.'));
       },
-    ]);
+    );
   };
 
   const state =

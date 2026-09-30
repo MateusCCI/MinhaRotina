@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenShell from '../../../src/components/ScreenShell';
@@ -14,6 +13,7 @@ import StatCard from '../../../src/components/StatCard';
 import DatabaseSingleton from '../../../src/lib/database';
 import { setSessionUser } from '../../../src/lib/session';
 import { accents, statusColor, theme, cardShadow } from '../../../src/lib/theme';
+import { notify } from '../../../src/lib/notify';
 
 const REVISAO = accents.revisao;
 
@@ -89,24 +89,23 @@ export default function RevisaoScreen() {
       await db.setActiveUserId(null);
       setSessionUser(null);
     } catch {
-      Alert.alert('Ops', 'Não consegui trocar de perfil. Tente de novo.');
+      notify('Ops', 'Não consegui trocar de perfil. Tente de novo.');
     }
   };
 
   const handleSalvar = async (): Promise<void> => {
     if (!ajuste.trim()) {
-      Alert.alert('Quase lá', 'Escreva uma linha sobre o que ajustar na próxima semana.');
+      notify('Quase lá', 'Escreva uma linha sobre o que ajustar na próxima semana.');
       return;
     }
     try {
       const db = await DatabaseSingleton.getInstance();
       await db.saveAjuste(ajuste.trim());
       await loadAjustes();
-      Alert.alert('Registrado', 'Seu ajuste foi guardado. Até a próxima revisão.', [
-        { text: 'OK', onPress: () => setAjuste('') },
-      ]);
+      setAjuste('');
+      notify('Registrado', 'Seu ajuste foi guardado. Até a próxima revisão.');
     } catch {
-      Alert.alert('Ops', 'Não consegui salvar o ajuste. Tente de novo.');
+      notify('Ops', 'Não consegui salvar o ajuste. Tente de novo.');
     }
   };
 

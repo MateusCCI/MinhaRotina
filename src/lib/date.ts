@@ -11,14 +11,32 @@ export function addDays(days: number): string {
   return toLocalDateString(d);
 }
 
-export function dueLabel(dueDate?: string | null): { label: string | null; urgent: boolean } {
-  if (!dueDate) return { label: null, urgent: false };
+export type DueTone = 'overdue' | 'today' | 'later';
+
+export interface DueInfo {
+  label: string | null;
+  /** true quando o prazo venceu ou vence hoje. */
+  urgent: boolean;
+  /**
+   * O estado do prazo como categoria, não como cor. O ícone do badge vem
+   * daqui: cor sozinha não distingue vermelho de verde para quem tem
+   * deuteranopia (~8% dos homens), então cada tom tem um glifo próprio.
+   */
+  tone: DueTone | null;
+}
+
+export function dueLabel(dueDate?: string | null): DueInfo {
+  if (!dueDate) return { label: null, urgent: false, tone: null };
   const today = toLocalDateString(new Date());
-  if (dueDate < today) return { label: 'atrasada', urgent: true };
-  if (dueDate === today) return { label: 'vence hoje', urgent: true };
-  if (dueDate === addDays(1)) return { label: 'vence amanhã', urgent: false };
+  if (dueDate < today) return { label: 'atrasada', urgent: true, tone: 'overdue' };
+  if (dueDate === today) return { label: 'vence hoje', urgent: true, tone: 'today' };
+  if (dueDate === addDays(1)) return { label: 'vence amanhã', urgent: false, tone: 'later' };
   const [, m, d] = dueDate.split('-').map(Number);
-  return { label: `vence ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`, urgent: false };
+  return {
+    label: `vence ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`,
+    urgent: false,
+    tone: 'later',
+  };
 }
 
 /** Fundo pastel do pill de categoria (fundo claro → tinta escura da mesma matiz). */

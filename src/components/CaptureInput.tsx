@@ -101,21 +101,30 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
       <View style={styles.chips}>
         {CATEGORIES.map(cat => {
           const active = category === cat;
-          const tint = CATEGORY_COLORS[cat];
+          // O chip nasce na cor da categoria: a paleta de 6 matizes é a
+          // única informação de cor da tela, então escondê-la atrás de um
+          // toque deixa a primeira tela monocromática.
           const ink = CATEGORY_TEXT[cat] ?? theme.colors.text;
           return (
             <TouchableOpacity
               key={cat}
-              style={[styles.chip, active && { backgroundColor: tint, borderColor: tint }]}
+              style={[
+                styles.chip,
+                { backgroundColor: CATEGORY_COLORS[cat] ?? theme.colors.surfaceAlt },
+                active && { borderColor: ink, borderWidth: 2 },
+              ]}
               onPress={() => setCategory(prev => (prev === cat ? null : cat))}
               accessibilityLabel={`Categoria ${cat}`}
+              accessibilityState={{ selected: active }}
             >
               <Ionicons
                 name={categoryIcon(cat)}
                 size={15}
-                color={active ? ink : theme.colors.textSecondary}
+                color={active ? theme.colors.onPrimary : ink}
               />
-              <Text style={[styles.chipText, active && { color: ink }]}>{cat}</Text>
+              <Text style={[styles.chipText, { color: active ? theme.colors.onPrimary : ink }]}>
+                {cat}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -217,7 +226,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surfaceAlt,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },

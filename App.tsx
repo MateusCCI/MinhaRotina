@@ -6,7 +6,6 @@ import { StyleSheet, View, ActivityIndicator, Text, TouchableOpacity, Platform }
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import Inbox from './app/(tabs)/inbox';
 import Hoje from './app/(tabs)/hoje';
 import Saida from './app/(tabs)/saida';
 import Timer from './app/(tabs)/timer';
@@ -22,10 +21,7 @@ const Stack = createStackNavigator();
 
 /** Nomes de ícone usados nas abas (subconjunto do Ionicons). */
 type IconName =
-  | 'file-tray'
-  | 'file-tray-outline'
-  | 'flag'
-  | 'flag-outline'
+  | 'sunny'
   | 'exit'
   | 'exit-outline'
   | 'timer'
@@ -35,16 +31,14 @@ type IconName =
   | 'ellipse-outline';
 
 const TAB_ICONS: Record<string, IconName> = {
-  Inbox: 'file-tray-outline',
-  Hoje: 'flag-outline',
+  Hoje: 'sunny',
   Saida: 'exit-outline',
   Timer: 'timer-outline',
   Revisao: 'bar-chart-outline',
 };
 
 const TAB_ICONS_FOCUSED: Record<string, IconName> = {
-  Inbox: 'file-tray',
-  Hoje: 'flag',
+  Hoje: 'sunny',
   Saida: 'exit',
   Timer: 'timer',
   Revisao: 'bar-chart',
@@ -56,8 +50,7 @@ const TAB_ICONS_FOCUSED: Record<string, IconName> = {
  * eu estou" num relance, sem precisar ler o rótulo.
  */
 const TAB_ACCENT: Record<string, keyof typeof accents> = {
-  Inbox: 'inbox',
-  Hoje: 'hoje',
+  Hoje: 'inbox',
   Saida: 'saida',
   Timer: 'timer',
   Revisao: 'revisao',
@@ -83,7 +76,9 @@ function TabNavigator() {
           tabBarActiveTintColor: accent.base,
           tabBarInactiveTintColor: theme.colors.textMuted,
           headerShown: false,
-          tabBarBadge: route.name === 'Inbox' && inboxCount > 0 ? inboxCount : undefined,
+          // O contador é do Inbox: quantas ideias ainda esperam virar
+          // prioridade do dia. Depois da fusão, ele mora na aba Hoje.
+          tabBarBadge: route.name === 'Hoje' && inboxCount > 0 ? inboxCount : undefined,
           tabBarBadgeStyle: {
             backgroundColor: accent.base,
             color: theme.colors.onPrimary,
@@ -103,7 +98,6 @@ function TabNavigator() {
         };
       }}
     >
-      <Tab.Screen name="Inbox" component={Inbox} />
       <Tab.Screen name="Hoje" component={Hoje} />
       <Tab.Screen name="Saida" component={Saida} options={{ title: 'Saída' }} />
       <Tab.Screen name="Timer" component={Timer} />

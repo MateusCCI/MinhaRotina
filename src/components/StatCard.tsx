@@ -8,6 +8,11 @@ interface StatCardProps {
   icon: IconName;
   value: string;
   label: string;
+  /**
+   * 'positive' inverte o card (fundo branco, tinta verde): marca um alvo
+   * batido — foco cheio, dia 100% — sem precisar de mais uma cor.
+   */
+  tone?: 'default' | 'positive';
 }
 
 /**
@@ -16,16 +21,24 @@ interface StatCardProps {
  * Ícone + número + rótulo: o número responde "quanto", o rótulo "quanto
  * de quê", e o ícone dispensa ler o rótulo.
  */
-export default function StatCard({ icon, value, label }: StatCardProps) {
+export default function StatCard({ icon, value, label, tone = 'default' }: StatCardProps) {
+  const positive = tone === 'positive';
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, positive && styles.cardPositive]}>
       <View style={styles.iconRow}>
-        <Ionicons name={icon} size={13} color={theme.colors.onBandMuted} />
-        <Text style={styles.label} numberOfLines={1}>
+        <Ionicons
+          name={icon}
+          size={13}
+          color={positive ? theme.colors.success : theme.colors.onBandMuted}
+        />
+        <Text
+          style={[styles.label, positive && styles.labelPositive]}
+          numberOfLines={1}
+        >
           {label}
         </Text>
       </View>
-      <Text style={styles.value} numberOfLines={1}>
+      <Text style={[styles.value, positive && styles.valuePositive]} numberOfLines={1}>
         {value}
       </Text>
     </View>
@@ -44,6 +57,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.onBandBorder,
   },
+  cardPositive: {
+    backgroundColor: theme.colors.onBand,
+    borderColor: theme.colors.onBand,
+  },
   iconRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -55,11 +72,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.onBandMuted,
   },
+  labelPositive: {
+    color: theme.colors.textSecondary,
+  },
   value: {
     fontSize: 22,
     fontWeight: '800',
     color: theme.colors.onBand,
     letterSpacing: -0.5,
     marginTop: 6,
+  },
+  valuePositive: {
+    color: theme.colors.success,
   },
 });
