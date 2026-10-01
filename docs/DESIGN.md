@@ -143,7 +143,7 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   durações possíveis é infinita. Dois StatCards: `% do ciclo` e `termina às
   HH:MM` — o relógio grande já diz quanto falta, então repetir "restante" num
   card ao lado seria ruído. E a folha de fim de bloco (`BlocoConcluido`), que
-  só abre **no fim do ciclo** (RF07): mostra `x/3 concluídas — NN%` e oferece
+  só abre **no fim do ciclo** (RF07): mostra `x/N concluídas — NN%` e oferece
   as prioridades em aberto. Não oferece **adicionar** uma nova: o fim do bloco
   convida a continuar o que já foi escolhido, não a reabrir a lista.
   **Fim de bloco com o app fechado:** o `requestAnimationFrame` do relógio é
