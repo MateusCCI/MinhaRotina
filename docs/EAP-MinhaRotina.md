@@ -34,9 +34,9 @@ Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetiv
 |---|---|---|---|---|
 | 3.1 Setup | Projeto Expo, navegação por abas, banco local (Singleton) | Equipe | S1 | CA-PI07 |
 | 3.2 Inbox | Add/list/del <10s offline, 50 itens sem travar | Helian | S1 | CA-PI01 |
-| 3.3 Hoje | Máx. 3 prioridades + barra de progresso + botão [HOJE] | Helian | S1 | CA-PI02 |
-| 3.4 Saída | Checklist editável ≤5 + hora salva + 1 alarme local | Mateus | S2 | CA-PI03, CA-PI06 |
-| 3.5 Timer | Pomodoro 25:00 start/pause + notificação ao encerrar bloco | Mateus | S2 | CA-PI04 |
+| 3.3 Hoje | Até 3 prioridades (recomendado, sem trava) + barra de progresso + botão [HOJE] | Helian | S1 | CA-PI02 |
+| 3.4 Saída | Checklist editável sem teto + hora salva + 1 alarme local | Mateus | S2 | CA-PI03, CA-PI06 |
+| 3.5 Timer | Pomodoro de duração configurável (padrão 25:00) start/pause + notificação ao encerrar bloco | Mateus | S2 | CA-PI04 |
 | 3.6 Revisão/Noite | Humor/sono offline + conta de inbox zerado da semana | Helian | S3 | CA-PI05 |
 
 ### 4. Testes e qualidade
