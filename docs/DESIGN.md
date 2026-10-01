@@ -77,7 +77,8 @@ ambiente clara. Por isso: fundo claro quente + cards brancos — nunca o inverso
   mesma matiz; tipografia do sistema; ícones Ionicons de traço único (nunca
   emoji como ícone); cópia em português que ensina e encoraja.
 - **STORY:** o usuário abre o app e vê o dia inteiro: despeja uma ideia sem
-  filtro, promove até 3 prioridades, conclui, foca em ciclos de 25min e fecha
+  filtro, promove as prioridades que fizerem sentido no dia, conclui, foca em
+  blocos do tempo que se ajustar e fecha
   revisando a semana com carinho. Tudo isso cabe em quatro abas, e a primeira
   é o funil completo.
 - **FIRST VIEWPORT:** cada aba abre com faixa colorida (chip de ícone + rótulo
@@ -121,7 +122,7 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
 `inbox_items` e `hoje_items` já eram tabelas separadas.
 
 - **Hoje** — três zonas na mesma `ScrollView`:
-  1. `Prioridades de hoje` (0/3, família azul) no topo: os itens de hoje com
+  1. `Prioridades de hoje` (contagem livre, família azul) no topo: os itens de hoje com
      checkbox e a barra de progresso; empty tracejado explicando o próximo passo.
   2. `Captura` no meio: o campo de despejo com prazo e categoria.
   3. `Inbox` (família verde) embaixo: a lista com o lápis por linha e o
@@ -143,8 +144,8 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   HH:MM` — o relógio grande já diz quanto falta, então repetir "restante" num
   card ao lado seria ruído. E a folha de fim de bloco (`BlocoConcluido`), que
   só abre **no fim do ciclo** (RF07): mostra `x/3 concluídas — NN%` e oferece
-  as prioridades em aberto. Não oferece uma 4ª — o limite de 3 é o princípio
-  do produto, e o fim do bloco convida a continuar o que já foi escolhido.
+  as prioridades em aberto. Não oferece **adicionar** uma nova: o fim do bloco
+  convida a continuar o que já foi escolhido, não a reabrir a lista.
   **Fim de bloco com o app fechado:** o `requestAnimationFrame` do relógio é
   congelado em segundo plano, então o fim do bloco é agendado no sistema
   operacional (`avisoBloco.ts`), sempre pelo tempo **restante** e nunca pela
@@ -152,6 +153,28 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   folha, que é mais útil. Um contador de ciclo protege o agendamento contra
   corrida entre Iniciar e Pausar.
 - **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
+
+### Quantidade é sugestão, nunca trava
+
+O app **não** impõe teto de prioridades nem de itens no checklist. A literatura
+sustenta que trabalhar com menos coisa aberta ajuda — a intenção de implementação
+funciona melhor quando o plano é específico (GOLLWITZER e SHEERAN, 2006;
+CHEN et al., 2013), e o essencialismo aponta o ganho de fazer menos (MCKEOWN,
+2014). Mas nenhum desses trabalhos estabelece **3** como teto, e o número é uma
+heurística, não um constante.
+
+A diferença é de produto, não de teoria: um limite duro transforma literatura em
+parede. Quem tem um dia atípico — ou simplesmente mais coisa para resolver —
+ficaria travado exatamente no momento em que a função executiva já está
+sobrecarregada, e o app passaria a ser o obstáculo em vez do apoio. Por isso o
+app **aconselha** (aviso a partir da 4ª prioridade aberta) e **nunca impede**. A
+duração do Pomodoro segue a mesma regra: 25 min é o padrão do método, não
+imposição, e o usuário escolhe entre presets.
+
+O mesmo vale para a memória do produto: quando o limite era fixo, os cenários
+de teste descreviam comportamento — "o 4º item fica no Inbox" — em vez de
+resultado, e isso é sintoma de requisito escrito como lema em vez de
+requisito de usuário.
 
 ### Revelação progressiva: um lápis, e ele edita tudo
 

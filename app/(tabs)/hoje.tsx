@@ -25,7 +25,15 @@ import { categoryIcon } from '../../src/lib/icons';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../../src/lib/date';
 
 const CLEANUP_LIMIT = 5;
-const MAX_FOCUS = 3;
+
+/**
+ * Quantidade **aconselhada**, não permitida. A literatura sustenta que
+ * trabalhar com poucas prioridades ajuda (MCKEOWN, 2014; GOLLWITZER e
+ * SHEERAN, 2006) — mas nenhum estudo estabelece 3 como teto. Tratar a
+ * sugestão como limite transformava literatura em parede: um dia atípico
+ * deixava de caber no app. A tela recomenda e a pessoa decide.
+ */
+const FOCO_RECOMENDADO = 3;
 
 /** A tela é uma, mas as duas zonas têm identidade própria. */
 const BRAND = accents.inbox;
@@ -102,7 +110,6 @@ export default function HojeScreen() {
   const loading = inboxLoading || hojeLoading;
   const done = hojeItems.filter(i => i.checked).length;
   const pct = hojeItems.length > 0 ? Math.round((done / hojeItems.length) * 100) : 0;
-  const focusFull = hojeItems.length >= MAX_FOCUS;
   const ready = !loading && (inboxItems.length > 0 || hojeItems.length > 0);
 
   const state =
@@ -124,16 +131,21 @@ export default function HojeScreen() {
 
   const handlePromote = useCallback(async (id: number) => {
     try {
-      const moved = await promoteToHoje(id);
-      if (!moved) {
-        notify('Limite de foco', `Máximo ${MAX_FOCUS} prioridades. Conclua ou remova uma antes de trazer outra.`);
-        return;
-      }
+      await promoteToHoje(id);
       await fetchHoje();
+      // O aviso vem **depois** de o item entrar, nunca no lugar dele: quem
+      // promoveu fez o que queria e só então recebe o conselho. Perguntar
+      // antes seria devolver a decisão que acabamos de devolver à pessoa.
+      if (hojeItems.length + 1 > FOCO_RECOMENDADO) {
+        notify(
+          'Uma sugestão',
+          `Mais de ${FOCO_RECOMENDADO} coisas abertas costumam virar sobrecarga. Se ajudar, deixe as menos urgentes para amanhã.`
+        );
+      }
     } catch {
       notify('Ops', 'Não consegui mover para o dia. Tente de novo.');
     }
-  }, [promoteToHoje, fetchHoje]);
+  }, [promoteToHoje, fetchHoje, hojeItems.length]);
 
   const handleDelete = useCallback(async (id: number) => {
     try {
@@ -188,9 +200,10 @@ export default function HojeScreen() {
         {
           key: 'promote',
           label: 'Virar prioridade de hoje',
-          description: focusFull
-            ? `O foco já está cheio (${MAX_FOCUS}/${MAX_FOCUS}). Conclua ou remova uma antes.`
-            : 'Sai do Inbox e entra no topo da tela como tarefa do dia.',
+          description:
+            hojeItems.length >= FOCO_RECOMENDADO
+              ? `Sai do Inbox e entra no topo da tela. A partir de ${FOCO_RECOMENDADO} abertas o app sugere aliviar — mas não impede.`
+              : 'Sai do Inbox e entra no topo da tela como tarefa do dia.',
           icon: 'arrow-up-circle',
           onPress: () => handlePromote(menuFor.id),
         },
@@ -223,7 +236,7 @@ export default function HojeScreen() {
       stats={
         ready ? (
           <>
-            <StatCard icon="flag" value={`${done}/${hojeItems.length}`} label="prioridades" tone={focusFull ? 'positive' : 'default'} />
+            <StatCard icon="flag" value={`${done}/${hojeItems.length}`} label="prioridades" tone={done === hojeItems.length && hojeItems.length > 0 ? 'positive' : 'default'} />
             <StatCard icon="file-tray" value={String(inboxItems.length)} label="no inbox" />
             <StatCard icon="checkmark-done" value={`${pct}%`} label="concluído" tone={pct >= 100 ? 'positive' : 'default'} />
           </>
@@ -233,7 +246,7 @@ export default function HojeScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* ZONA 1 — as 3 prioridades do dia, no topo da tela */}
         <View style={styles.zone}>
-          <ZoneHeader icon="flag" title="Prioridades de hoje" count={`${hojeItems.length}/${MAX_FOCUS}`} accent={FOCUS} />
+          <ZoneHeader icon="flag" title="Prioridades de hoje" count={String(hojeItems.length)} accent={FOCUS} />
 
           {hojeItems.length === 0 ? (
             <View style={styles.emptyFocus}>

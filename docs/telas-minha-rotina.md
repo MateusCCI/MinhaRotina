@@ -88,7 +88,7 @@
 ```
 
 **Interações:**
-- Checklist ≤5 itens editáveis
+- Checklist livre, quantos itens o trajeto pedir (itens editáveis)
 - 1 toque por item (✓ grande)
 - Alarme local configura hora de sair -15min
 - Campo "Saí às" = registro manual de horário

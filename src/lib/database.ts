@@ -456,10 +456,12 @@ class DatabaseSingleton {
   async insertHojeItem(inboxId: number): Promise<number> {
     const traceId = this.generateTraceId();
     try {
-      const current = await this.getHojeItems();
-      if (current.length >= 3) {
-        throw new Error('MAX_ITEMS');
-      }
+      // Sem teto de quantidade. A versão anterior recusava a partir da 4ª
+      // prioridade com `throw new Error('MAX_ITEMS')`, o que transformava uma
+      // sugestão da literatura em parede: quem tem um dia atípico — ou
+      // simplesmente mais coisa para fazer — ficava travado justamente quando
+      // a função executiva já estava sobrecarregada. O app aconselha e deixa
+      // a decisão com quem usa.
       const source = await this.db!.getFirstAsync<InboxItem>(
         'SELECT * FROM inbox_items WHERE id = ?',
         [inboxId]

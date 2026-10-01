@@ -56,17 +56,19 @@ pill em cima do texto.
 **Esperado:** o item **some do Inbox e aparece na zona "Prioridades de
 hoje"**, no topo da tela, com o texto e os mesmos pills. **Falha aqui é
 bloqueante: é o bug de perda de dado.** O contador de prioridades sobe para
-1/3 e o badge da aba mostra quantas ideias ainda esperam.
+1/1 e o badge da aba mostra quantas ideias ainda esperam.
 
-### 6 — Limite de 3
-**Passos:** promover 3 itens; tentar promover um 4º pelo lápis.
-**Esperado:** a folha **avisa em texto** que o foco já está cheio (3/3) antes
-de você decidir, e ao confirmar aparece o aviso "Limite de foco". O 4º item
-**fica no Inbox**, sem sumir.
+### 6 — Quantidade de prioridades é sugestão, não limite
+**Passos:** promover 3 itens; promover um 4º, um 5º e um 6º pelo lápis.
+**Esperado:** **todos entram**, sem trava e sem aviso de "limite". A partir da
+4ª aparece um aviso de que mais de 3 coisas abertas costumam virar sobrecarga,
+com sugestão de empurrar as menos urgentes — mas o item **entra mesmo assim**,
+porque a decisão é de quem usa. A folha do lápis diz que o app "sugere aliviar
+— mas não impede".
 
 ### 7 — Concluir
 **Passos:** marcar o checkbox de uma prioridade.
-**Esperado:** risca o texto, o contador vira 1/3, o cartão de concluído mostra
+**Esperado:** risca o texto, o contador vira 1/1, o cartão de concluído mostra
 a % e a barra muda de cor (vermelho → âmbar → verde, em 34% e 67%).
 
 ### 8 — Editar e excluir
