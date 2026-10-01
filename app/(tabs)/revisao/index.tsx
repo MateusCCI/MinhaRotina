@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import ScreenShell from '../../../src/components/ScreenShell';
 import StatCard from '../../../src/components/StatCard';
 import DatabaseSingleton from '../../../src/lib/database';
@@ -26,26 +28,26 @@ export default function RevisaoScreen() {
     completosHoje: 0,
   });
   const [loading, setLoading] = useState(true);
+  /**
+   * Falha de leitura é estado próprio. Antes o `catch` zerava os números, e
+   * a tela passava a afirmar "0/7 dias zerados" — um dado inventado, pior que
+   * uma tela em branco.
+   */
+  const [erro, setErro] = useState(false);
   const [ajuste, setAjuste] = useState('');
   const [userName, setUserName] = useState<string | null>(null);
   const [ajustesRecentes, setAjustesRecentes] = useState<{ id: number; texto: string; created_at: string }[]>([]);
 
-  useEffect(() => {
-    loadStats();
-    loadAjustes();
-    loadUser();
-  }, []);
-
-  const loadAjustes = async (): Promise<void> => {
+  const loadAjustes = useCallback(async (): Promise<void> => {
     try {
       const db = await DatabaseSingleton.getInstance();
       setAjustesRecentes(await db.getRecentAjustes());
     } catch (error) {
       console.error('Erro ao buscar ajustes:', error);
     }
-  };
+  }, []);
 
-  const loadStats = async (): Promise<void> => {
+  const loadStats = useCallback(async (): Promise<void> => {
     try {
       const db = await DatabaseSingleton.getInstance();
       const weekly = await db.getWeeklyStats();
@@ -58,19 +60,16 @@ export default function RevisaoScreen() {
         totalHoje: hojeItems.length,
         completosHoje: hojeItems.filter(i => i.checked).length,
       }));
-    } catch {
-      setStats(prev => ({ ...prev, inboxZerado: 0 }));
+      setErro(false);
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+      setErro(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const progresso = stats.totalHoje > 0
-    ? Math.round((stats.completosHoje / Math.max(stats.totalHoje, 1)) * 100)
-    : 0;
-  const corProgresso = statusColor(progresso);
-
-  const loadUser = async (): Promise<void> => {
+  const loadUser = useCallback(async (): Promise<void> => {
     try {
       const db = await DatabaseSingleton.getInstance();
       const id = await db.getActiveUserId();
@@ -81,7 +80,30 @@ export default function RevisaoScreen() {
     } catch (error) {
       console.error('Erro ao buscar usuário:', error);
     }
-  };
+  }, []);
+
+  /**
+   * As abas do React Navigation ficam montadas: sem recarregar no foco, a
+   * Revisão continuava exibindo os números de quando o app foi aberto.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      void loadStats();
+      void loadAjustes();
+      void loadUser();
+    }, [loadStats, loadAjustes, loadUser])
+  );
+
+  const recarregar = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    await Promise.all([loadStats(), loadAjustes()]);
+  }, [loadStats, loadAjustes]);
+
+  const progresso = stats.totalHoje > 0
+    ? Math.round((stats.completosHoje / Math.max(stats.totalHoje, 1)) * 100)
+    : 0;
+  const corProgresso = statusColor(progresso);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -109,12 +131,19 @@ export default function RevisaoScreen() {
     }
   };
 
-  const estado =
-    progresso >= 100
-      ? 'Dia completo. Orgulhe-se.'
-      : progresso >= 67
-        ? 'Muito bem — reta final.'
-        : progresso > 0
+  /**
+ * Enquanto não houve leitura bem-sucedida, o texto de estado não cita
+ * progresso: "Comece por uma prioridade" seria uma afirmação sobre um dia
+ * que a tela ainda não consultou.
+ */
+const estado =
+    loading || erro
+      ? 'Lendo o seu dia…'
+      : progresso >= 100
+        ? 'Dia completo. Orgulhe-se.'
+        : progresso >= 67
+          ? 'Muito bem — reta final.'
+          : progresso > 0
           ? 'Começo feito, continue no seu ritmo.'
           : 'Um dia de cada vez. Comece por uma prioridade.';
 
@@ -126,15 +155,42 @@ export default function RevisaoScreen() {
       headline="Olhe para trás"
       state={estado}
       stats={
-        <>
-          <StatCard icon="file-tray" value={`${stats.inboxZerado}/7`} label="dias zerados" />
-          <StatCard icon="exit" value={String(stats.totalSaidas)} label="saídas" />
-          <StatCard icon="time-outline" value={stats.mediaSaida} label="horário médio" />
-        </>
+        // Sem número inventado: os cards só aparecem depois de uma leitura
+        // que deu certo. Durante o carregamento e no erro, `0/7` era lido
+        // como "nenhum dia zerado" quando na verdade nada tinha sido lido.
+        loading || erro ? undefined : (
+          <>
+            <StatCard icon="file-tray" value={`${stats.inboxZerado}/7`} label="dias zerados" />
+            <StatCard icon="exit" value={String(stats.totalSaidas)} label="saídas" />
+            <StatCard icon="time-outline" value={stats.mediaSaida} label="horário médio" />
+          </>
+        )
       }
-      loading={loading}
+      loading={loading && !erro}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => void recarregar()}
+            tintColor={REVISAO.base}
+          />
+        }
+      >
+        {erro ? (
+          <View style={styles.erroCard}>
+            <Ionicons name="cloud-offline-outline" size={22} color={REVISAO.base} />
+            <Text style={styles.erroTitulo}>Não consegui ler seu dia</Text>
+            <Text style={styles.erroTexto}>
+              Preferimos mostrar isto a exibir números inventados. Puxe para baixo para tentar de novo.
+            </Text>
+            <TouchableOpacity style={styles.btnTentar} onPress={() => void recarregar()}>
+              <Text style={styles.btnTentarText}>Tentar de novo</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
         <View style={styles.heroCard}>
           <Text style={styles.heroPct} accessibilityLabel={`Progresso de hoje ${progresso} por cento`}>
             <Text style={{ color: corProgresso }}>{progresso}%</Text>
@@ -227,6 +283,8 @@ export default function RevisaoScreen() {
             </TouchableOpacity>
           </View>
         </View>
+          </>
+        )}
       </ScrollView>
     </ScreenShell>
   );
@@ -238,6 +296,40 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.lg,
     paddingBottom: 24,
     gap: 16,
+  },
+  erroCard: {
+    alignItems: 'center',
+    gap: 8,
+    padding: theme.spacing.xl,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...cardShadow(),
+  },
+  erroTitulo: {
+    fontSize: theme.type.callout,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  erroTexto: {
+    fontSize: theme.type.footnote,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+  },
+  btnTentar: {
+    marginTop: 8,
+    minHeight: 48,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.md,
+    backgroundColor: REVISAO.base,
+  },
+  btnTentarText: {
+    color: theme.colors.onPrimary,
+    fontSize: theme.type.callout,
+    fontWeight: '700',
   },
   heroCard: {
     backgroundColor: theme.colors.surface,

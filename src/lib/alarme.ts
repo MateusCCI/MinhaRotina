@@ -65,6 +65,10 @@ export async function agendarAlarme(
   const notif = await notifications();
   await notif.cancelScheduledNotificationAsync(IDENTIFICADOR).catch(() => undefined);
   await notif.scheduleNotificationAsync({
+    // O `identifier` precisa ser explícito: sem ele a biblioteca sorteia um
+    // UUID, e o cancelamento logo acima (por IDENTIFICADOR) vira no-op —
+    // cada reagendamento empilhava mais um alarme.
+    identifier: IDENTIFICADOR,
     content: { title: titulo, body: corpo },
     trigger: { type: notif.SchedulableTriggerInputTypes.DATE, date: em },
   });

@@ -143,6 +143,16 @@ export default function HojeScreen() {
     }
   }, [deleteItem]);
 
+  const handleRemoveFromHoje = useCallback(async (id: number) => {
+    // Passada direto ao item, a função lançava em erro e a falha virava
+    // rejeição não tratada — a tela sumia com o item sem aviso nenhum.
+    try {
+      await removeFromHoje(id);
+    } catch {
+      notify('Ops', 'Não consegui tirar do dia. Tente de novo.');
+    }
+  }, [removeFromHoje]);
+
   const handleCapture = useCallback(async (content: string, meta: CaptureMeta) => {
     try {
       await addItem(content, meta.dueDate, meta.category);
@@ -241,7 +251,7 @@ export default function HojeScreen() {
                   key={item.id}
                   item={item}
                   onToggle={handleToggle}
-                  onDelete={removeFromHoje}
+                  onDelete={handleRemoveFromHoje}
                 />
               ))}
               <View style={styles.progressCard}>

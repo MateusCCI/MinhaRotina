@@ -90,24 +90,37 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
   }, [persist]);
 
   const start = useCallback(async () => {
+    // Tocar duas vezes não pode abrir dois ciclos: o segundo `start` sobre a
+    // mesma base criava dois `requestAnimationFrame` competindo.
+    if (state.running) return;
+    // Ciclo já cumprido não recomeça. Sem esta guarda, "Continuar" com o
+    // relógio em 00:00 rodava um ciclo de duração zero, o `tick` fechava na
+    // hora e a folha de conclusão abria sozinha.
+    if (baseRef.current >= totalRef.current) return;
+
     const now = Date.now();
     // Retoma de onde parou. A versão anterior gravava sempre 0, então
     // "Continuar" depois de pausar voltava do zero.
     baseRef.current = state.elapsed;
     startRef.current = now;
     firedRef.current = false;
+    stopRaf();
     setState(prev => ({ ...prev, running: true }));
-    await persist(state.elapsed, true, now);
+    // O quadro é agendado **antes** da gravação: se a pessoa pausar durante o
+    // `await` abaixo, precisa haver um loop vivo para `stopRaf` derrubar.
+    // Agendando depois, o foco continuava rodando depois de "Pausar".
     rafRef.current = requestAnimationFrame(tick);
-  }, [state.elapsed, tick, persist]);
+    await persist(state.elapsed, true, now);
+  }, [state.elapsed, state.running, tick, persist]);
 
   const pause = useCallback(async () => {
     if (!state.running) return;
+    // Derruba o loop antes de medir: nada mais pode atualizar o relógio.
+    stopRaf();
     const finalElapsed = baseRef.current + (Date.now() - startRef.current);
     baseRef.current = finalElapsed;
     startRef.current = 0;
     setState({ elapsed: finalElapsed, remaining: Math.max(0, totalRef.current - finalElapsed), running: false });
-    stopRaf();
     await persist(finalElapsed, false, null);
   }, [state.running, persist]);
 

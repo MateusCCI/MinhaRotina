@@ -48,6 +48,13 @@ export const theme = {
     successSoft: 'rgba(21,128,61,0.12)',
     danger: '#DC2626',
     dangerSoft: 'rgba(220,38,38,0.08)',
+    /**
+     * Mesma matiz do `danger`, escurecida para **texto** sobre fundo claro.
+     * `danger` sozinho dá 4.41:1 sobre `dangerSoft` — abaixo dos 4.5:1 da
+     * WCAG AA. O vermelho do ícone pode continuar sendo o sinal; a palavra
+     * que precisa ser lida é que exige o tom mais escuro.
+     */
+    dangerText: '#B91C1C',
     warning: '#B45309',
     warningSoft: 'rgba(180,83,9,0.10)',
 

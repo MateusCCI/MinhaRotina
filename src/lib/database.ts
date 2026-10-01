@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { InboxItem, HojeItem, SaidaItem } from './types';
+import { toLocalDateString, utcDayStart } from './date';
 
 class DatabaseSingleton {
   private static instance: DatabaseSingleton | null = null;
@@ -160,19 +161,23 @@ class DatabaseSingleton {
   private async resetHojeForNewDay(): Promise<void> {
     const traceId = this.generateTraceId();
     try {
+      // Limite calculado em JS: "ontem" é o dia local da pessoa, não o dia
+      // UTC. Entre 21h e meia-noite o dia UTC já é o de amanhã, e o reset
+      // apagava a lista na hora errada.
+      const inicioHoje = utcDayStart();
       await this.db!.withTransactionAsync(async () => {
         await this.db!.runAsync(
           `INSERT INTO inbox_items (content, due_date, category)
            SELECT h.content, h.due_date, h.category
            FROM hoje_items h
-           WHERE date(h.created_at) < date('now') AND h.checked = 0`
+           WHERE h.created_at < ? AND h.checked = 0`,
+          [inicioHoje]
         );
-        await this.db!.runAsync(
-          `DELETE FROM hoje_items WHERE date(created_at) < date('now')`
-        );
+        await this.db!.runAsync('DELETE FROM hoje_items WHERE created_at < ?', [inicioHoje]);
         await this.db!.runAsync(
           `UPDATE saida_items SET checked = 0, checked_at = NULL
-           WHERE checked = 1 AND date(checked_at) < date('now')`
+           WHERE checked = 1 AND checked_at < ?`,
+          [inicioHoje]
         );
       });
       console.log(`[S1][TRACE:${traceId}] Reset diário do Hoje concluído`);
@@ -280,7 +285,10 @@ class DatabaseSingleton {
     const traceId = this.generateTraceId();
     try {
       const result = await this.db!.getAllAsync<{ saiu_at: string }>(
-        `SELECT saiu_at FROM saida_log WHERE date(saiu_at) = date('now') ORDER BY saiu_at DESC`
+        `SELECT saiu_at FROM saida_log
+         WHERE saiu_at >= ? AND saiu_at < ?
+         ORDER BY saiu_at DESC`,
+        [utcDayStart(), utcDayStart(1)]
       );
       console.log(`[S1][TRACE:${traceId}] Saídas hoje: ${result.length}`);
       return result.map(r => r.saiu_at);
@@ -429,8 +437,9 @@ class DatabaseSingleton {
       const result = await this.db!.getAllAsync<HojeItem>(
         `SELECT id, inbox_id, content, due_date, category, created_at, checked
          FROM hoje_items
-         WHERE date(created_at) = date('now')
-         ORDER BY created_at ASC`
+         WHERE created_at >= ? AND created_at < ?
+         ORDER BY created_at ASC`,
+        [utcDayStart(), utcDayStart(1)]
       );
       const normalized = result.map(row => ({
         ...row,
@@ -484,16 +493,21 @@ class DatabaseSingleton {
   async toggleHojeItem(id: number): Promise<void> {
     const traceId = this.generateTraceId();
     try {
-      const item = await this.db!.getFirstAsync<HojeItem>(
-        'SELECT * FROM hoje_items WHERE id = ?',
-        [id]
-      );
-      const newChecked = item ? (item.checked ? 0 : 1) : 0;
-      await this.db!.runAsync(
-        'UPDATE hoje_items SET checked = ? WHERE id = ?',
-        [newChecked, id]
-      );
-      console.log(`[S1][TRACE:${traceId}] Checkbox toggled: id=${id}, checked=${newChecked === 1}`);
+      // Ler e gravar dentro da mesma transação. Fora dela, dois toques
+      // rápidos liam o mesmo `checked` e escreviam o mesmo valor novo: o
+      // segundo toque era engolido e a tela acabava discordando do banco.
+      await this.db!.withTransactionAsync(async () => {
+        const item = await this.db!.getFirstAsync<{ checked: number }>(
+          'SELECT checked FROM hoje_items WHERE id = ?',
+          [id]
+        );
+        if (!item) return;
+        await this.db!.runAsync('UPDATE hoje_items SET checked = ? WHERE id = ?', [
+          item.checked ? 0 : 1,
+          id,
+        ]);
+      });
+      console.log(`[S1][TRACE:${traceId}] Checkbox toggled: id=${id}`);
     } catch (error) {
       console.error(`[S1][TRACE:${traceId}] Erro ao toggle checkbox:`, error);
       throw error;
@@ -531,7 +545,7 @@ class DatabaseSingleton {
         started_at: number | null;
       }>('SELECT * FROM timer_state WHERE prefix = ? AND day = ?', [
         prefix,
-        new Date().toISOString().slice(0, 10),
+        toLocalDateString(new Date()),
       ]);
       if (!row) return null;
       return {
@@ -555,7 +569,9 @@ class DatabaseSingleton {
   ): Promise<void> {
     const traceId = this.generateTraceId();
     try {
-      const day = new Date().toISOString().slice(0, 10);
+      // Dia local, não UTC: o estado do timer vale para o dia da pessoa, e
+      // entre 21h e meia-noite o dia UTC já é o de amanhã.
+      const day = toLocalDateString(new Date());
       await this.db!.runAsync(
         `INSERT INTO timer_state (prefix, day, elapsed_ms, running, started_at)
          VALUES (?, ?, ?, ?, ?)

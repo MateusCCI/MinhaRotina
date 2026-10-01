@@ -5,6 +5,24 @@ export function toLocalDateString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Início do dia **local**, gravado no mesmo formato que o SQLite usa em
+ * `CURRENT_TIMESTAMP` ("YYYY-MM-DD HH:MM:SS") e sempre em UTC.
+ *
+ * Por que passar o limite como parâmetro em vez de usar `date('now')` ou
+ * `date(col, 'localtime')` no SQL: o SQLite do navegador (wa-sqlite) roda
+ * sem acesso ao fuso do sistema, então `localtime` ali voltaria a ser UTC —
+ * e o bug reaparecia só no web, que é onde dá para testar sem aparelho. Com
+ * os dois lados em UTC, a comparação de strings já é a ordem do tempo, e o
+ * mesmo código vale para web e Android.
+ */
+export function utcDayStart(offsetDays = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 export function addDays(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,14 @@ export default function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Campos com `returnKeyType="next"` precisam de ref para levar o foco ao
+   * próximo: sem isso a tecla só fechava o teclado e a pessoa recomeçava a
+   * procurar o campo à mão.
+   */
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+
   const switchMode = (next: Mode): void => {
     setMode(next);
     setError(null);
@@ -46,6 +54,9 @@ export default function AuthScreen() {
   };
 
   const handleLogin = async (): Promise<void> => {
+    // O botão desabilita sozinho, mas `onSubmitEditing` do teclado não passa
+    // por isso: sem a guarda, Enter no campo de senha criava duas sessões.
+    if (busy) return;
     const mail = normalizeEmail(email);
     if (!isValidEmail(mail)) {
       setError('Confira o e-mail — parece estar incompleto.');
@@ -78,6 +89,7 @@ export default function AuthScreen() {
   };
 
   const handleRegister = async (): Promise<void> => {
+    if (busy) return;
     const trimmedName = name.trim();
     const mail = normalizeEmail(email);
     if (trimmedName.length < 2) {
@@ -152,6 +164,7 @@ export default function AuthScreen() {
                 maxLength={30}
                 autoCapitalize="words"
                 accessibilityLabel="Seu nome"
+                onSubmitEditing={() => emailRef.current?.focus()}
               />
             </>
           )}
@@ -168,6 +181,8 @@ export default function AuthScreen() {
             autoCorrect={false}
             returnKeyType="next"
             accessibilityLabel="Seu e-mail"
+            ref={emailRef}
+            onSubmitEditing={() => passwordRef.current?.focus()}
           />
 
           <Text style={styles.label}>Senha</Text>
@@ -184,6 +199,7 @@ export default function AuthScreen() {
               autoCorrect={false}
               returnKeyType="done"
               accessibilityLabel="Sua senha"
+              ref={passwordRef}
             />
             <TouchableOpacity
               style={styles.eye}
@@ -218,7 +234,13 @@ export default function AuthScreen() {
           )}
 
           {error && (
-            <View style={styles.errorBox}>
+            <View
+              style={styles.errorBox}
+              // Sem isto o erro aparecia em silêncio para quem navega por
+              // leitor de tela: o foco continuava no campo e nada era lido.
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+            >
               <Ionicons name="alert-circle-outline" size={18} color={theme.colors.danger} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
@@ -341,7 +363,7 @@ const styles = StyleSheet.create({
   errorText: {
     flex: 1,
     fontSize: theme.type.footnote,
-    color: theme.colors.danger,
+    color: theme.colors.dangerText,
     lineHeight: 20,
   },
   cta: {
