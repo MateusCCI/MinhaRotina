@@ -27,17 +27,17 @@ Gente de 18 a 45 anos com rotina picada (estudante, CLT, autonomo) que esquece o
 
 Problema (antes): confere as coisas no quarto e lembra na escada, lista de 20 itens que trava, prazo curto perdido no meio de anotacao espalhada, app pedindo conta e servidor ou em ingles.
 
-Mudanca (depois): anotar no Inbox em segundos, Hoje com no maximo 3 escolhidas na mao e barra de progresso com cor e percentual, botao HOJE que leva em 1 toque, checklist de saida com ate 5 itens, timer de 25 min que so avisa no fim do bloco. Tudo com os dados guardados no celular.
+Mudanca (depois): anotar no Inbox em segundos, Hoje com ate 3 escolhidas na mao (recomendado, sem trava) e barra de progresso com cor e percentual, botao HOJE que leva em 1 toque, checklist de saida com os itens que o trajeto pedir, timer de duracao ajustavel (25 min por padrao) que so avisa no fim do bloco. Tudo com os dados guardados no celular.
 
 Base: GTD (ALLEN, 2015), de tirar tudo da cabeca e jogar num lugar so; intencao de implementacao (GOLLWITZER e SHEERAN, 2006); lembretes simples (JONES e outros, 2021). Viabilidade: Expo + expo-sqlite, custo zero, 2 pessoas, 6 semanas.
 
 6. OBJETIVOS
 
-OE1 (semanas 1-2): entregar Inbox + Hoje (anotar, listar, apagar e levar ate 3 para o Hoje) abrindo pelo QR em 1 Android. Prova: demo funcionando.
+OE1 (semanas 1-2): entregar Inbox + Hoje (anotar, listar, apagar e levar o que for util para o Hoje (ate 3 recomendados, sem trava)) abrindo pelo QR em 1 Android. Prova: demo funcionando.
 
-OE2 (semanas 3-4): entregar Saida (checklist de ate 5 + hora + 1 alarme) + timer de 25 min com iniciar e pausar. Prova: fluxo da manha testado.
+OE2 (semanas 3-4): entregar Saida (checklist livre + hora + 1 alarme) + timer de duracao ajustavel com iniciar e pausar. Prova: fluxo da manha testado.
 
-OE3 (semanas 5-6): entregar aviso de fim de bloco + barra de progresso + Revisao (conta dias com inbox zerado) + DER com 5 tabelas + slide + 10 casos de teste passando. Congelar o codigo 3 dias antes da banca.
+OE3 (semanas 5-6): entregar aviso de fim de bloco + barra de progresso + Revisao (conta dias com inbox zerado) + DER com 9 tabelas + slide + 10 casos de teste passando. Congelar o codigo 3 dias antes da banca.
 
 7. O QUE VAI SER ENTREGUE
 

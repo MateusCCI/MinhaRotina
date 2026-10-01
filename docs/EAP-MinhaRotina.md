@@ -26,18 +26,18 @@ Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetiv
 | Pacote | Entrega | Responsável | Sprint |
 |---|---|---|---|
 | 2.1 Requisitos | Lista de RFs + regras por tela | Equipe | S1 |
-| 2.2 DER | Diagrama com 5 tabelas (SQLite) | Mateus | S3 |
-| 2.3 Protótipo de telas | `telas-minha-rotina.md` + `.html` navegável | Equipe | S1 |
+| 2.2 DER | Diagrama com 9 tabelas (SQLite) — `DER-MinhaRotina.md` | Mateus | S3 |
+| 2.3 Protótipo de telas | `telas-minha-rotina.md` + `.html` navegável (M1, superado pela implementação) | Equipe | S1 |
 
 ### 3. Aplicativo mobile (Expo + TypeScript + SQLite, 100% offline)
 | Pacote | Entrega | Responsável | Sprint | Aceite |
 |---|---|---|---|---|
 | 3.1 Setup | Projeto Expo, navegação por abas, banco local (Singleton) | Equipe | S1 | CA-PI07 |
 | 3.2 Inbox | Add/list/del <10s offline, 50 itens sem travar | Helian | S1 | CA-PI01 |
-| 3.3 Hoje | Até 3 prioridades (recomendado, sem trava) + barra de progresso + botão [HOJE] | Helian | S1 | CA-PI02 |
+| 3.3 Hoje | Aba própria com Inbox + captura + até 3 prioridades recomendadas (sem trava) + barra de progresso | Helian | S1 | CA-PI02 |
 | 3.4 Saída | Checklist editável sem teto + hora salva + 1 alarme local | Mateus | S2 | CA-PI03, CA-PI06 |
 | 3.5 Timer | Pomodoro de duração configurável (padrão 25:00) start/pause + notificação ao encerrar bloco | Mateus | S2 | CA-PI04 |
-| 3.6 Revisão/Noite | Humor/sono offline + conta de inbox zerado da semana | Helian | S3 | CA-PI05 |
+| 3.6 Revisão | Resumo da semana (dias com inbox zerado, saídas, horário médio) + ajuste escrito + perfil | Helian | S3 | CA-PI05 |
 
 ### 4. Testes e qualidade
 | Pacote | Entrega | Responsável | Sprint |
