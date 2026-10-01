@@ -101,6 +101,7 @@ Duas decisões de modelagem que valem explicação:
 | [`docs/TESTES-MANUAIS.md`](docs/TESTES-MANUAIS.md) | 15 cenários de validação manual |
 | [`docs/telas-minha-rotina.md`](docs/telas-minha-rotina.md) | Desenho das telas, primeira versão |
 | [`docs/telas-minha-rotina.html`](docs/telas-minha-rotina.html) | Protótipo navegável da primeira versão |
+| [`docs/figura-telas.png`](docs/figura-telas.png) | As 4 telas do app, como aparecem no relatório |
 
 As duas últimas peças são o protótipo feito antes do código (M1). O app
 final mudou em dois pontos depois: Inbox e Hoje viraram uma tela só, e a paleta
