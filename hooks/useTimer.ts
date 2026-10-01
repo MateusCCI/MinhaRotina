@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import DatabaseSingleton from '../src/lib/database';
+import { agendarAvisoFimBloco, cancelarAvisoFimBloco } from '../src/lib/avisoBloco';
 
 export interface TimerState {
   elapsed: number;
@@ -50,6 +51,18 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
+  /**
+   * Contador de ciclo. Cada mudança de estado (iniciar, pausar, zerar, trocar
+   * a duração) o incrementa, e uma sincronização de aviso só vale se o
+   * contador continuar o mesmo quando ela termina.
+   *
+   * Sem isso há uma corrida real: "Iniciar" agenda a notificação depois do
+   * `await` da gravação, e um "Pausar" disparado nesse intervalo cancela o
+   * aviso — que o "Iniciar" pendente logo em seguida agenda de volta,
+   * deixando uma notificação órfã para um bloco congelado.
+   */
+  const cicloRef = useRef(0);
+
   const stopRaf = (): void => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
@@ -66,6 +79,26 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     }
   }, [prefix]);
 
+  /**
+   * Espelha o estado do cronômetro no sistema operacional. O `requestAnimationFrame`
+   * é congelado quando o app vai para segundo plano, então sem isto fechar o app
+   * no meio do bloco significava não ser avisado de que o foco acabou.
+   *
+   * Sempre agenda/cancela pelo tempo **restante**, nunca pela duração total:
+   * quem retoma um bloco pausado aos 8 de 25 precisa do aviso aos 17.
+   */
+  const sincronizarAviso = useCallback(
+    async (correndo: boolean, restanteMs: number) => {
+      if (!correndo) {
+        await cancelarAvisoFimBloco(prefix);
+        return;
+      }
+      const duracaoMin = Math.round(totalRef.current / 60000);
+      await agendarAvisoFimBloco(prefix, restanteMs, duracaoMin);
+    },
+    [prefix]
+  );
+
   const tick = useCallback(() => {
     const elapsed = baseRef.current + (Date.now() - startRef.current);
     const remaining = Math.max(0, totalRef.current - elapsed);
@@ -80,6 +113,9 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
         startRef.current = 0;
         setState({ elapsed, remaining: 0, running: false });
         void persist(elapsed, false, null);
+        // O aviso agendado já cumpriu o papel dele (ou foi o que disparou); o
+        // que importa é não deixar um aviso órfão para um ciclo que acabou.
+        void cancelarAvisoFimBloco(prefix);
         onCompleteRef.current?.();
       }
       return;
@@ -87,7 +123,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
 
     setState({ elapsed, remaining, running: true });
     rafRef.current = requestAnimationFrame(tick);
-  }, [persist]);
+  }, [persist, prefix]);
 
   const start = useCallback(async () => {
     // Tocar duas vezes não pode abrir dois ciclos: o segundo `start` sobre a
@@ -98,6 +134,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     // hora e a folha de conclusão abria sozinha.
     if (baseRef.current >= totalRef.current) return;
 
+    const ciclo = ++cicloRef.current;
     const now = Date.now();
     // Retoma de onde parou. A versão anterior gravava sempre 0, então
     // "Continuar" depois de pausar voltava do zero.
@@ -111,10 +148,13 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     // Agendando depois, o foco continuava rodando depois de "Pausar".
     rafRef.current = requestAnimationFrame(tick);
     await persist(state.elapsed, true, now);
-  }, [state.elapsed, state.running, tick, persist]);
+    if (ciclo !== cicloRef.current) return;
+    await sincronizarAviso(true, totalRef.current - state.elapsed);
+  }, [state.elapsed, state.running, tick, persist, sincronizarAviso]);
 
   const pause = useCallback(async () => {
     if (!state.running) return;
+    const ciclo = ++cicloRef.current;
     // Derruba o loop antes de medir: nada mais pode atualizar o relógio.
     stopRaf();
     const finalElapsed = baseRef.current + (Date.now() - startRef.current);
@@ -122,9 +162,14 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     startRef.current = 0;
     setState({ elapsed: finalElapsed, remaining: Math.max(0, totalRef.current - finalElapsed), running: false });
     await persist(finalElapsed, false, null);
-  }, [state.running, persist]);
+    if (ciclo !== cicloRef.current) return;
+    // Pausar sem cancelar deixaria o aviso de sistema disparando para um bloco
+    // que a pessoa acabou de congelar.
+    await sincronizarAviso(false, 0);
+  }, [state.running, persist, sincronizarAviso]);
 
   const reset = useCallback(async () => {
+    const ciclo = ++cicloRef.current;
     baseRef.current = 0;
     startRef.current = 0;
     // Zerar NÃO é terminar o bloco: antes daqui chamava `onComplete`, então
@@ -132,13 +177,16 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     firedRef.current = true;
     setState({ elapsed: 0, remaining: totalRef.current, running: false });
     stopRaf();
+    await persist(0, false, null).catch(() => undefined);
+    if (ciclo !== cicloRef.current) return;
+    await sincronizarAviso(false, 0);
     try {
       const db = await DatabaseSingleton.getInstance();
       await db.clearTimerState(prefix);
     } catch (error) {
       console.error('Erro ao zerar timer:', error);
     }
-  }, [prefix, persist]);
+  }, [prefix, persist, sincronizarAviso]);
 
   /**
    * Troca a duração do bloco. Zera o ciclo em andamento: mudar a régua no
@@ -148,6 +196,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
    */
   const setTotalMs = useCallback(
     async (nextTotalMs: number) => {
+      const ciclo = ++cicloRef.current;
       totalRef.current = nextTotalMs;
       baseRef.current = 0;
       startRef.current = 0;
@@ -160,8 +209,12 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
       } catch (error) {
         console.error('Erro ao ajustar duração do timer:', error);
       }
+      if (ciclo !== cicloRef.current) return;
+      // O ciclo foi zerado: um aviso pendente passaria a apontar para um bloco
+      // que não existe mais.
+      await sincronizarAviso(false, 0);
     },
-    [prefix]
+    [prefix, sincronizarAviso]
   );
 
   useEffect(() => {
@@ -180,6 +233,11 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
         });
         if (saved.running) {
           rafRef.current = requestAnimationFrame(tick);
+          // Reconfirma o aviso de sistema: o app foi fechado com o bloco em
+          // andamento, e o aviso agendado pode ter sido descartado pelo
+          // sistema ao reiniciar. Reagendar pelo restante correto é seguro
+          // porque o identificador é estável.
+          void sincronizarAviso(true, Math.max(0, totalRef.current - elapsed));
         }
       })
       .catch(error => console.error('Erro ao carregar timer:', error));
@@ -187,7 +245,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
       cancelled = true;
       stopRaf();
     };
-  }, [prefix, tick]);
+  }, [prefix, tick, sincronizarAviso]);
 
   return { ...state, totalMs: total, start, pause, reset, setTotalMs };
 }

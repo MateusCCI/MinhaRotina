@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { prepararNotificacoes, semNotificacaoDeSistema } from './notificacoes';
 
 export const ALARME_MINUTOS = 15;
 const CHANNEL_ID = 'minha-rotina-saida';
@@ -36,7 +36,7 @@ export function horarioAlarme(hora: string, minutosAntes = ALARME_MINUTOS): stri
 
 export function unsupportedPlatform(): boolean {
   // Não há alarme de sistema no navegador; a UI da Saída avisa isso.
-  return Platform.OS === 'web';
+  return semNotificacaoDeSistema();
 }
 
 /**
@@ -87,16 +87,7 @@ export async function cancelarAlarme(): Promise<void> {
  * notificação é silenciada pelo sistema. No iOS a permissão é pedida na hora.
  */
 async function notifications(): Promise<typeof Notifications> {
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Lembrete de saída',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-    });
-  }
-  const { status } = await Notifications.getPermissionsAsync();
-  if (status !== 'granted') {
-    await Notifications.requestPermissionsAsync();
-  }
-  return Notifications;
+  const notif = await prepararNotificacoes({ id: CHANNEL_ID, nome: 'Lembrete de saída' });
+  if (!notif) throw new Error('Notificações indisponíveis');
+  return notif;
 }

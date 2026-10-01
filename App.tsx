@@ -15,9 +15,31 @@ import DatabaseSingleton from './src/lib/database';
 import { accents, theme } from './src/lib/theme';
 import { subscribeInboxCount } from './src/lib/inboxCount';
 import { getSessionUser, setSessionUser, subscribeSession } from './src/lib/session';
+import { semNotificacaoDeSistema } from './src/lib/notificacoes';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+/**
+ * Com o app aberto, o aviso de fim de bloco **não** vira notificação: a folha
+ * de conclusão dentro do app já informa o quanto do dia saiu e oferece a
+ * próxima prioridade, que é informação melhor que uma faixa do sistema.
+ * A notificação fica reservada para quando o app está em segundo plano — que
+ * é justamente o caso em que a folha não existe.
+ *
+ * Registrado no escopo do módulo para valer uma vez só, antes de qualquer tela.
+ */
+if (!semNotificacaoDeSistema()) {
+  const Notifications = require('expo-notifications');
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: false,
+      shouldShowList: false,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 /** Nomes de ícone usados nas abas (subconjunto do Ionicons). */
 type IconName =
