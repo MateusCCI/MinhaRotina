@@ -30,6 +30,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# Documentos do Word ficam fora do repositorio: sao artefatos de
+# entrega, nao codigo, e o modelo da ABNT sozinho ocupa 5,5 MB de
+# historico binario que nao versiona.
+*.docx
 # Arquivos temporarios do LibreOffice ao editar .docx
 .~lock.*
 
