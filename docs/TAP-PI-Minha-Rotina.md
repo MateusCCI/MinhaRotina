@@ -27,13 +27,13 @@ Gente de 18 a 45 anos com rotina picada (estudante, CLT, autonomo) que esquece o
 
 Problema (antes): confere as coisas no quarto e lembra na escada, lista de 20 itens que trava, prazo curto perdido no meio de anotacao espalhada, app pedindo conta e servidor ou em ingles.
 
-Mudanca (depois): anotar no Inbox em segundos, Hoje com ate 3 escolhidas na mao (recomendado, sem trava) e barra de progresso com cor e percentual, botao HOJE que leva em 1 toque, checklist de saida com os itens que o trajeto pedir, timer de duracao ajustavel (25 min por padrao) que so avisa no fim do bloco. Tudo com os dados guardados no celular.
+Mudanca (depois): anotar no Inbox em segundos, Hoje com ate 3 escolhidas na mao e barra de progresso com cor e percentual, botao HOJE que leva em 1 toque, checklist de saida com os itens que o trajeto pedir, timer de duracao ajustavel (25 min por padrao) que so avisa no fim do bloco. Tudo com os dados guardados no celular.
 
 Base: GTD (ALLEN, 2015), de tirar tudo da cabeca e jogar num lugar so; intencao de implementacao (GOLLWITZER e SHEERAN, 2006); lembretes simples (JONES e outros, 2021). Viabilidade: Expo + expo-sqlite, custo zero, 2 pessoas, 6 semanas.
 
 6. OBJETIVOS
 
-OE1 (semanas 1-2): entregar Inbox + Hoje (anotar, listar, apagar e levar o que for util para o Hoje (ate 3 recomendados, sem trava)) abrindo pelo QR em 1 Android. Prova: demo funcionando.
+OE1 (semanas 1-2): entregar Inbox + Hoje (anotar, listar, apagar e levar ate 3 para o Hoje) abrindo pelo QR em 1 Android. Prova: demo funcionando.
 
 OE2 (semanas 3-4): entregar Saida (checklist livre + hora + 1 alarme) + timer de duracao ajustavel com iniciar e pausar. Prova: fluxo da manha testado.
 

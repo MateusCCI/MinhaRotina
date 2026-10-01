@@ -23,17 +23,16 @@ import { accents, statusColor, theme, cardShadow } from '../../src/lib/theme';
 import { notify } from '../../src/lib/notify';
 import { categoryIcon } from '../../src/lib/icons';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_TEXT, DUE_OPTIONS } from '../../src/lib/date';
-
-const CLEANUP_LIMIT = 5;
+import { LIMITE_FOCO_DIA, LIMITE_LIMPEZA_INBOX } from '../../src/lib/limites';
+import LimiteFoco from '../../src/components/LimiteFoco';
 
 /**
- * Quantidade **aconselhada**, não permitida. A literatura sustenta que
- * trabalhar com poucas prioridades ajuda (MCKEOWN, 2014; GOLLWITZER e
- * SHEERAN, 2006) — mas nenhum estudo estabelece 3 como teto. Tratar a
- * sugestão como limite transformava literatura em parede: um dia atípico
- * deixava de caber no app. A tela recomenda e a pessoa decide.
+ * O limite vem de `src/lib/limites.ts`, junto do `LIMITE_FOCO_DIA` que o
+ * banco aplica. Declarar o número aqui também foi o que deixou a tela e a
+ * camada de escrita discordando uma da outra.
  */
-const FOCO_RECOMENDADO = 3;
+const FOCO_RECOMENDADO = LIMITE_FOCO_DIA;
+const CLEANUP_LIMIT = LIMITE_LIMPEZA_INBOX;
 
 /** A tela é uma, mas as duas zonas têm identidade própria. */
 const BRAND = accents.inbox;
@@ -104,6 +103,8 @@ export default function HojeScreen() {
     useHoje();
 
   const [menuFor, setMenuFor] = useState<InboxItem | null>(null);
+  /** Item do Inbox que bateu no limite de foco, esperando decisão. */
+  const [travado, setTravado] = useState<InboxItem | null>(null);
   const [editing, setEditing] = useState<EditState | null>(null);
 
   const now = useMemo(() => new Date(), []);
@@ -129,23 +130,41 @@ export default function HojeScreen() {
     }
   }, [toggleItem]);
 
-  const handlePromote = useCallback(async (id: number) => {
-    try {
-      await promoteToHoje(id);
-      await fetchHoje();
-      // O aviso vem **depois** de o item entrar, nunca no lugar dele: quem
-      // promoveu fez o que queria e só então recebe o conselho. Perguntar
-      // antes seria devolver a decisão que acabamos de devolver à pessoa.
-      if (hojeItems.length + 1 > FOCO_RECOMENDADO) {
-        notify(
-          'Uma sugestão',
-          `Mais de ${FOCO_RECOMENDADO} coisas abertas costumam virar sobrecarga. Se ajudar, deixe as menos urgentes para amanhã.`
-        );
+  const handlePromote = useCallback(
+    async (id: number, item?: InboxItem) => {
+      try {
+        const movido = await promoteToHoje(id);
+        if (!movido) {
+          // Chegou no limite do dia. Não é erro: é o instante de oferecer as
+          // duas saídas que continuam fazendo sentido.
+          if (item) setTravado(item);
+          return;
+        }
+        await fetchHoje();
+      } catch {
+        notify('Ops', 'Não consegui mover para o dia. Tente de novo.');
       }
-    } catch {
-      notify('Ops', 'Não consegui mover para o dia. Tente de novo.');
-    }
-  }, [promoteToHoje, fetchHoje, hojeItems.length]);
+    },
+    [promoteToHoje, fetchHoje],
+  );
+
+  /** Troca: sai a prioridade escolhida e entra a que estava no Inbox. */
+  const handleTrocar = useCallback(
+    async (removerId: number) => {
+      const alvo = travado;
+      setTravado(null);
+      if (!alvo) return;
+      try {
+        await removeFromHoje(removerId);
+        const movido = await promoteToHoje(alvo.id);
+        if (!movido) notify('Ops', 'O dia voltou a encher. Tente de novo.');
+        await fetchHoje();
+      } catch {
+        notify('Ops', 'Não consegui fazer a troca. Tente de novo.');
+      }
+    },
+    [travado, removeFromHoje, promoteToHoje, fetchHoje],
+  );
 
   const handleDelete = useCallback(async (id: number) => {
     try {
@@ -202,10 +221,10 @@ export default function HojeScreen() {
           label: 'Virar prioridade de hoje',
           description:
             hojeItems.length >= FOCO_RECOMENDADO
-              ? `Sai do Inbox e entra no topo da tela. A partir de ${FOCO_RECOMENDADO} abertas o app sugere aliviar — mas não impede.`
+              ? `O dia já tem ${FOCO_RECOMENDADO} prioridades. Você pode trocar uma delas por esta, ou deixar esta para amanhã.`
               : 'Sai do Inbox e entra no topo da tela como tarefa do dia.',
           icon: 'arrow-up-circle',
-          onPress: () => handlePromote(menuFor.id),
+          onPress: () => handlePromote(menuFor.id, menuFor),
         },
         {
           key: 'edit',
@@ -246,7 +265,7 @@ export default function HojeScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* ZONA 1 — as 3 prioridades do dia, no topo da tela */}
         <View style={styles.zone}>
-          <ZoneHeader icon="flag" title="Prioridades de hoje" count={String(hojeItems.length)} accent={FOCUS} />
+          <ZoneHeader icon="flag" title="Prioridades de hoje" count={`${hojeItems.length}/${FOCO_RECOMENDADO}`} accent={FOCUS} />
 
           {hojeItems.length === 0 ? (
             <View style={styles.emptyFocus}>
@@ -319,6 +338,15 @@ export default function HojeScreen() {
         title={menuFor?.content}
         actions={menuActions}
         onClose={() => setMenuFor(null)}
+      />
+
+      <LimiteFoco
+        visible={travado !== null}
+        candidato={travado?.content ?? ''}
+        abertas={hojeItems}
+        onTrocar={id => void handleTrocar(id)}
+        onAmanha={() => setTravado(null)}
+        onFechar={() => setTravado(null)}
       />
 
       <Modal

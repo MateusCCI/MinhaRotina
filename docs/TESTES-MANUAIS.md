@@ -58,13 +58,14 @@ hoje"**, no topo da tela, com o texto e os mesmos pills. **Falha aqui é
 bloqueante: é o bug de perda de dado.** O contador de prioridades sobe para
 1/1 e o badge da aba mostra quantas ideias ainda esperam.
 
-### 6 — Quantidade de prioridades é sugestão, não limite
-**Passos:** promover 3 itens; promover um 4º, um 5º e um 6º pelo lápis.
-**Esperado:** **todos entram**, sem trava e sem aviso de "limite". A partir da
-4ª aparece um aviso de que mais de 3 coisas abertas costumam virar sobrecarga,
-com sugestão de empurrar as menos urgentes — mas o item **entra mesmo assim**,
-porque a decisão é de quem usa. A folha do lápis diz que o app "sugere aliviar
-— mas não impede".
+### 6 — Limite de 3 prioridades, com saída
+**Passos:** promover 3 itens; tentar promover um 4º pelo lápis.
+**Esperado:** o 4º **não entra**, e abre a folha "O dia já tem 3 prioridades" —
+que explica que mais de 3 coisas abertas costumam virar sobrecarga e oferece
+**duas** saídas: *Trocar por uma que já está aqui* (lista as 3; a escolhida sai
+e a nova entra) ou *Deixar para amanhã* (o item fica no Inbox e volta amanhã).
+**Nunca pode haver beco sem saída** — a pessoa sempre tem caminho adiante. Em
+nenhum caminho o item do Inbox desaparece.
 
 ### 7 — Concluir
 **Passos:** marcar o checkbox de uma prioridade.

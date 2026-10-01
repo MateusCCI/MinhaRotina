@@ -143,7 +143,7 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   durações possíveis é infinita. Dois StatCards: `% do ciclo` e `termina às
   HH:MM` — o relógio grande já diz quanto falta, então repetir "restante" num
   card ao lado seria ruído. E a folha de fim de bloco (`BlocoConcluido`), que
-  só abre **no fim do ciclo** (RF07): mostra `x/N concluídas — NN%` e oferece
+  só abre **no fim do ciclo** (RF07): mostra `x/3 concluídas — NN%` e oferece
   as prioridades em aberto. Não oferece **adicionar** uma nova: o fim do bloco
   convida a continuar o que já foi escolhido, não a reabrir a lista.
   **Fim de bloco com o app fechado:** o `requestAnimationFrame` do relógio é
@@ -154,27 +154,31 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   corrida entre Iniciar e Pausar.
 - **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
 
-### Quantidade é sugestão, nunca trava
+### Limite que explica e oferece saída
 
-O app **não** impõe teto de prioridades nem de itens no checklist. A literatura
-sustenta que trabalhar com menos coisa aberta ajuda — a intenção de implementação
-funciona melhor quando o plano é específico (GOLLWITZER e SHEERAN, 2006;
-CHEN et al., 2013), e o essencialismo aponta o ganho de fazer menos (MCKEOWN,
-2014). Mas nenhum desses trabalhos estabelece **3** como teto, e o número é uma
-heurística, não um constante.
+O dia aceita **3 prioridades**, e esse limite é regra, não sugestão: o produto
+assume que a restrição faz parte do método (MCKEOWN, 2014 — fazer menos para
+realizar mais). O que a literatura **não** diz é que 3 seja um número mágico,
+e o relatório não afirma que seja.
 
-A diferença é de produto, não de teoria: um limite duro transforma literatura em
-parede. Quem tem um dia atípico — ou simplesmente mais coisa para resolver —
-ficaria travado exatamente no momento em que a função executiva já está
-sobrecarregada, e o app passaria a ser o obstáculo em vez do apoio. Por isso o
-app **aconselha** (aviso a partir da 4ª prioridade aberta) e **nunca impede**. A
-duração do Pomodoro segue a mesma regra: 25 min é o padrão do método, não
-imposição, e o usuário escolhe entre presets.
+O que importa é o limite não virar beco. Recusar a 4ª prioridade com um "não é
+possível" e pronto deixa a pessoa numa impasse: ou desiste da tarefa, ou
+ignora o app. Por isso a recusa vem acompanhada da folha `LimiteFoco`, que
 
-O mesmo vale para a memória do produto: quando o limite era fixo, os cenários
-de teste descreviam comportamento — "o 4º item fica no Inbox" — em vez de
-resultado, e isso é sintoma de requisito escrito como lema em vez de
-requisito de usuário.
+1. explica o porquê ("mais de 3 coisas abertas costumam virar sobrecarga"), e
+2. oferece as **duas** saídas que continuam fazendo sentido — *trocar* uma das
+   abertas ou *deixar a nova para amanhã*.
+
+As duas são decisões corretas, e quem conhece o próprio dia sabe melhor que o
+software qual delas é. Isso também evita o pior modo de falha conhecido: o app
+funcionar enquanto esconde problema.
+
+O número vive em `src/lib/limites.ts`, importado pela tela e pelo
+`insertHojeItem`. Declarar o 3 nos dois lugares foi o que deixou a camada de
+escrita e a interface discordando uma da outra sem nenhum teste acusar.
+
+A duração do Pomodoro segue o mesmo espírito em sentido inverso: 25 min é o
+padrão do método, não imposição, e por isso **é configurável**.
 
 ### Revelação progressiva: um lápis, e ele edita tudo
 

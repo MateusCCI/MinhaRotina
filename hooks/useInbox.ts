@@ -95,6 +95,12 @@ export function useInbox() {
       }
       return true;
     } catch (error) {
+      // `false` significa "chegou no limite do dia", não "falhou". A tela usa
+      // essa distinção para abrir o convite a trocar ou adiar, em vez de
+      // mostrar erro genérico.
+      if (error instanceof Error && error.message === 'MAX_ITEMS') {
+        return false;
+      }
       console.error('Erro ao promover item:', error);
       throw error;
     }

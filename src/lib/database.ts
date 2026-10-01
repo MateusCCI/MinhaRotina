@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import { InboxItem, HojeItem, SaidaItem } from './types';
 import { toLocalDateString, utcDayStart } from './date';
+import { LIMITE_FOCO_DIA } from './limites';
 
 class DatabaseSingleton {
   private static instance: DatabaseSingleton | null = null;
@@ -456,12 +457,15 @@ class DatabaseSingleton {
   async insertHojeItem(inboxId: number): Promise<number> {
     const traceId = this.generateTraceId();
     try {
-      // Sem teto de quantidade. A versão anterior recusava a partir da 4ª
-      // prioridade com `throw new Error('MAX_ITEMS')`, o que transformava uma
-      // sugestão da literatura em parede: quem tem um dia atípico — ou
-      // simplesmente mais coisa para fazer — ficava travado justamente quando
-      // a função executiva já estava sobrecarregada. O app aconselha e deixa
-      // a decisão com quem usa.
+      // Limite de 3 prioridades por dia, como combinado no TAP. O registro
+      // acontece aqui, e não só na tela: é a camada que todo caminho de
+      // escrita passa, então a regra não depende de o chamador lembrar de
+      // checar. A tela trata o MAX_ITEMS oferecendo trocar ou deixar para
+      // amanhã — nunca um beco sem saída.
+      const current = await this.getHojeItems();
+      if (current.length >= LIMITE_FOCO_DIA) {
+        throw new Error('MAX_ITEMS');
+      }
       const source = await this.db!.getFirstAsync<InboxItem>(
         'SELECT * FROM inbox_items WHERE id = ?',
         [inboxId]
