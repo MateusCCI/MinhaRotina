@@ -180,7 +180,7 @@ const estado =
       >
         {erro ? (
           <View style={styles.erroCard}>
-            <Ionicons name="cloud-offline-outline" size={22} color={REVISAO.base} />
+            <Ionicons name="refresh-circle-outline" size={22} color={REVISAO.base} />
             <Text style={styles.erroTitulo}>Não consegui ler seu dia</Text>
             <Text style={styles.erroTexto}>
               Preferimos mostrar isto a exibir números inventados. Puxe para baixo para tentar de novo.

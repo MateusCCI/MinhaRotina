@@ -177,9 +177,9 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <View style={styles.loader}>
-          <Text style={styles.errorTitle}>Banco preso em outra aba</Text>
+          <Text style={styles.errorTitle}>Fechar as outras abas</Text>
           <Text style={styles.errorText}>
-            O navegador só deixa uma aba usar o banco por vez. Feche as outras abas
+            Este banco só pode estar aberto em uma aba por vez. Feche as outras abas
             deste endereço e toque em recarregar.
           </Text>
           <TouchableOpacity style={styles.retryBtn} onPress={handleRetry}>

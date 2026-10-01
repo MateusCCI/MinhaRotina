@@ -239,8 +239,8 @@ export default function SaidaScreen() {
 
           {unsupportedPlatform() && alarme && (
             <Text style={styles.alarmWarn}>
-              No navegador o lembrete fica salvo, mas quem avisa é o app aberto — no celular ele
-              avisa mesmo com o app fechado.
+              O horário fica salvo neste aparelho. Para receber o aviso do sistema, abra o app
+              no celular.
             </Text>
           )}
         </View>
