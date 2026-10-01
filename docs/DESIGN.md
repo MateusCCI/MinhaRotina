@@ -136,11 +136,21 @@ Cinco abas viraram quatro. Isso é mudança de tela, não de banco:
   em que dispara, então a contagem de pendências vai congelada no momento do
   agendamento. A condição real exigiria tarefa de background, fora do escopo
   — e o rodapé do card diz isso para o usuário.
-- **Timer** — Pomodoro de 25 min com dois StatCards (ciclo e restante) e a
-  folha de fim de bloco (`BlocoConcluido`), que só abre **no fim do ciclo**
-  (RF07): mostra `x/3 concluídas — NN%` e oferece as prioridades em aberto.
-  Não oferece uma 4ª — o limite de 3 é o princípio do produto, e o fim do
-  bloco convida a continuar o que já foi escolhido.
+- **Timer** — Pomodoro com **duração configurável** (presets de 5/15/25/45 min,
+  padrão 25 por ser o valor canônico do método), persistida na tabela `meta`.
+  Presets, e não campo numérico: digitar é barreira de execução e a lista de
+  durações possíveis é infinita. Dois StatCards: `% do ciclo` e `termina às
+  HH:MM` — o relógio grande já diz quanto falta, então repetir "restante" num
+  card ao lado seria ruído. E a folha de fim de bloco (`BlocoConcluido`), que
+  só abre **no fim do ciclo** (RF07): mostra `x/3 concluídas — NN%` e oferece
+  as prioridades em aberto. Não oferece uma 4ª — o limite de 3 é o princípio
+  do produto, e o fim do bloco convida a continuar o que já foi escolhido.
+  **Fim de bloco com o app fechado:** o `requestAnimationFrame` do relógio é
+  congelado em segundo plano, então o fim do bloco é agendado no sistema
+  operacional (`avisoBloco.ts`), sempre pelo tempo **restante** e nunca pela
+  duração total. Com o app aberto a notificação é suprimida — quem informa é a
+  folha, que é mais útil. Um contador de ciclo protege o agendamento contra
+  corrida entre Iniciar e Pausar.
 - **Revisão** — hero do % do dia, resumo da semana, ajuste escrito, perfil.
 
 ### Revelação progressiva: um lápis, e ele edita tudo

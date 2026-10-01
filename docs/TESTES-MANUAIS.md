@@ -1,8 +1,10 @@
 # Testes manuais — Minha Rotina (base do M3)
 
-**Atualizado em 29/09/2026** para a estrutura de **4 abas** (Hoje = Inbox +
-prioridades fundidos, Saída, Timer, Revisão). Os cenários de Inbox e Hoje
-foram reescritos; os demais só mudaram de aba.
+**Atualizado em 01/10/2026**: 4 abas (Hoje = Inbox + prioridades fundidos, Saída,
+Timer, Revisão), **duração do bloco configurável** e **aviso de fim de bloco com
+o app em segundo plano**. Os cenários 16–21 cobrem os defeitos corrigidos em
+01/10 — alarme de saída empilhado, "hoje" em UTC, corrida do toggle, `0/7`
+inventado na Revisão, contraste do erro no login e ciclo de 3 segundos no Timer.
 
 ## Como executar
 
@@ -112,14 +114,14 @@ leia de novo. Tem que estar perto de 00:24:00. Se perder minutos em segundos,
 o relógio voltou a ser quadrático.
 
 ### 12 — Aviso de fim de bloco (RF07)
-**Passos:** deixar um ciclo de 25 min terminar. Para não esperar, dá para
-esperar de verdade ou Reduce Motion; **não há atalho de teste** — se quiser
-acelerar, troque `TOTAL_MS` temporariamente em `app/(tabs)/timer/index.tsx`.
-**Esperado:** abre uma folha com "Bloco de 25 minutos concluído", o progresso
-do dia no formato `x/3 concluídas — NN%` e as prioridades em aberto para
-escolher. Se as 3 estiverem concluídas, a folha pede pausa em vez de oferecer
-trabalho. O aviso **não** oferece adicionar uma 4ª prioridade, e **não
-aparece durante o ciclo** — só no fim.
+**Passos:** escolher **5 minutos** na engrenagem da aba Timer (ver cenário 22)
+e deixar o ciclo terminar.
+**Esperado:** abre uma folha com "Bloco de 5 minutos concluído" — o texto
+acompanha a duração escolhida —, o progresso do dia no formato `x/3
+concluídas — NN%` e as prioridades em aberto para escolher. Se as 3 estiverem
+concluídas, a folha pede pausa em vez de oferecer trabalho. O aviso **não**
+oferece adicionar uma 4ª prioridade, e **não aparece durante o ciclo** — só
+no fim. O aviso de sistema correspondente está no cenário 23.
 
 ### 13 — Avisos no navegador (bug de 29/09)
 **Passos:** no **navegador**, provocar qualquer aviso: promover com foco cheio,
@@ -144,13 +146,76 @@ tela Saída avisa isso.
 **Esperado:** o ajuste aparece em "Ajustes anteriores"; *Trocar* volta ao login;
 os números da faixa batem com a tela do dia.
 
-## Critério de aceite
+### 16 — Alarme de saída não se acumula (bug de 01/10)
+**Passos:** aba Saída → *Programar lembrete* → escolher 15 min. **Repita três
+vezes**, mudando o horário. Depois vá na área de notificações do sistema.
+**Esperado:** existe **um só** lembrete de saída, no horário escolhido por
+último. Antes, cada reagendamento adicionava um alarme porque a notificação
+recebia um identificador sorteado pela biblioteca e o cancelamento procurava
+outro — "Desligar lembrete" não desligava nada. Depois de *Desligar lembrete*,
+**zero** lembretes na área de notificações.
 
-Todos os cenários com ✅, **sem erro vermelho no console** e sem crash.
-Falha no **5** é bloqueante (perda de dado). Falha no **11** significa que o
-relógio voltou a correr acelerado. Falha no **13** significa que a feedback de
-erro voltou a ser silencioso — o app *parece* funcionar enquanto esconde
-problema, que é o pior tipo de falha.
+### 17 — Itens da noite não somem do Hoje (bug de 01/10)
+**Passos:** entre **21h e meia-noite**, capturar um item pelo campo do Hoje.
+Espere alguns minutos e volte para a aba Hoje. Compare com o Inbox.
+**Esperado:** o item continua na lista de prioridades **e** não aparece
+duplicado no Inbox. Antes, o "hoje" era o dia UTC: num fuso UTC-3 um item
+criado às 20h locais (23h UTC) deixava de aparecer no Hoje a partir das 21h,
+e o reset diário o devolvia ao Inbox como se fosse de ontem.
+
+### 18 — Toques rápidos na caixa de seleção (bug de 01/10)
+**Passos:** toque duas vezes, **muito rápido**, no quadrado de um item do
+Hoje. Toque de novo para desfazer.
+**Esperado:** o quadrado e a lista **sempre concordam** com o que está salvo, e
+cada toque visível produz uma mudança. Antes, dois toques alternavam o mesmo
+valor duas vezes e o segundo era engolido, e a tela mantinha um estado
+paralelo ao banco.
+
+### 19 — Remover item do Hoje (bug de 01/10)
+**Passos:** em um item do Hoje, abrir as ações e escolher remover.
+**Esperado:** o item some **e** aparece um aviso se a remoção falhar. Antes, a
+função era passada diretamente ao item e a falha virava rejeição sem
+tratamento: o item sumia da tela sem nenhum aviso.
+
+### 20 — Revisão não inventa número (bug de 01/10)
+**Passos:** aba Revisão. Depois: forçar falha de leitura (com o app aberto,
+fechar o servidor de desenvolvimento e recarregar a tela).
+**Esperado:** **não** aparece `0/7 dias zerados` nem `0 saídas` antes da
+leitura terminar nem quando ela falha — no lugar da faixa surge o painel
+"Não consegui ler seu dia" com **Tentar de novo**. Antes, o `catch` zerava os
+números e a tela afirmava que nenhum dia tinha sido zerado. Ao voltar para a
+aba (ou puxar para baixo), os números recarregam: as abas do React Navigation
+ficam montadas e a tela exibia os números de quando o app foi aberto.
+
+### 21 — Timer: ciclo de 3 segundos e "Continuar" em 00:00 (bug de 01/10)
+**Passos:** iniciar o bloco; **pausar**; **retomar**; repetir. Deixe o ciclo
+terminar e, com o relógio em `00:00`, toque em *Continuar*.
+**Esperado:** o relógio avança em **tempo real** e o ciclo não reinicia sozinho.
+Antes, dois toques em Iniciar criavam dois laços de animação competindo e o
+bloco fechava em segundos; e *Continuar* em `00:00` rodava um ciclo de duração
+zero que reabria sozinho a folha de conclusão.
+
+### 22 — Duração do bloco configurável
+**Passos:** aba Timer → engrenagem ao lado do texto de ajuda → escolher **5**,
+**15**, **45** e **25**.
+**Esperado:** o relógio mostra a duração escolhida, a barra de progresso
+acompanha, a faixa passa a exibir "termina às HH:MM" e o título da folha de
+conclusão acompanha ("Bloco de 5 minutos concluído"). **Reabra o app:** a
+duração continua a mesma. Ao trocar a duração com um ciclo em andamento, o
+bloco **zera** de propósito — o que é preferível a exibir progresso medido
+numa régua que mudou.
+
+### 23 — Aviso de fim de bloco com o app fechado
+**Passos:** **no aparelho**, configure um bloco de **5** minutos, toque em
+*Começar* e **feche o app** (não minimizes: feche). Espere o bloco terminar.
+**Esperado:** chega **uma** notificação do sistema ("Bloco de 5 min concluído").
+Com o app aberto, **não** chega notificação — quem informa é a folha de
+conclusão dentro do app, que mostra o quanto do dia saiu e oferece a próxima
+prioridade. Teste também **pausar**: o aviso agendado é cancelado e nada
+dispara no fim. **Esta parte só dá para confirmar no aparelho**; no navegador
+não há notificação de sistema e o aviso vale só dentro do app.
+
+## Critério de aceite
 
 ## O que estes testes não pegam
 
