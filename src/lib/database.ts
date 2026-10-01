@@ -584,6 +584,36 @@ class DatabaseSingleton {
     }
   }
 
+  // Preferências (tabela key/value)
+  async getMeta(key: string): Promise<string | null> {
+    const traceId = this.generateTraceId();
+    try {
+      const row = await this.db!.getFirstAsync<{ value: string | null }>(
+        'SELECT value FROM meta WHERE key = ?',
+        [key]
+      );
+      return row?.value ?? null;
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao ler preferência ${key}:`, error);
+      throw error;
+    }
+  }
+
+  async setMeta(key: string, value: string): Promise<void> {
+    const traceId = this.generateTraceId();
+    try {
+      await this.db!.runAsync(
+        `INSERT INTO meta (key, value) VALUES (?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+        [key, value]
+      );
+      console.log(`[S1][TRACE:${traceId}] Preferência salva: ${key}`);
+    } catch (error) {
+      console.error(`[S1][TRACE:${traceId}] Erro ao salvar preferência ${key}:`, error);
+      throw error;
+    }
+  }
+
   // Auth local (perfis + sessão)
   async createUser(name: string): Promise<number> {
     const result = await this.db!.runAsync(

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTimer, formatMs } from '../../../hooks/useTimer';
@@ -6,11 +6,13 @@ import ScreenShell from '../../../src/components/ScreenShell';
 import ProgressBar from '../../../src/components/ProgressBar';
 import StatCard from '../../../src/components/StatCard';
 import BlocoConcluido from '../../../src/components/BlocoConcluido';
+import ConfigurarBloco, { DURACAO_PADRAO_MIN } from '../../../src/components/ConfigurarBloco';
 import { useHoje } from '../../../hooks/useHoje';
 import { accents, statusColor, theme, cardShadow } from '../../../src/lib/theme';
 import { notify } from '../../../src/lib/notify';
+import DatabaseSingleton from '../../../src/lib/database';
 
-const TOTAL_MS = 25 * 60 * 1000;
+const CHAVE_DURACAO = 'timer.duracaoMin';
 const TIMER = accents.timer;
 
 export default function TimerScreen() {
@@ -19,6 +21,28 @@ export default function TimerScreen() {
   const { items: hojeItems, toggleItem } = useHoje();
 
   const [blocoAberto, setBlocoAberto] = useState(false);
+  const [configAberta, setConfigAberta] = useState(false);
+  /**
+   * A duração mora no banco (`meta`), não no estado: é uma preferência que
+   * precisa sobreviver ao fechamento do app. O 25 é o valor canônico do
+   * método e também o fallback se o banco falhar.
+   */
+  const [duracaoMin, setDuracaoMin] = useState(DURACAO_PADRAO_MIN);
+
+  useEffect(() => {
+    let cancelado = false;
+    DatabaseSingleton.getInstance()
+      .then(db => db.getMeta(CHAVE_DURACAO))
+      .then(valor => {
+        if (cancelado || !valor) return;
+        const min = Number(valor);
+        if (Number.isFinite(min) && min > 0) setDuracaoMin(min);
+      })
+      .catch(error => console.error('Erro ao ler duração do bloco:', error));
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   /** RF07: o aviso só acontece no fim do bloco, e uma vez só. */
   const handleComplete = useCallback(() => {
@@ -27,13 +51,41 @@ export default function TimerScreen() {
 
   const timer = useTimer({
     prefix: 'pomodoro',
-    totalMs: TOTAL_MS,
+    totalMs: duracaoMin * 60 * 1000,
     onComplete: handleComplete,
   });
 
-  const progress = TOTAL_MS > 0 ? ((TOTAL_MS - timer.remaining) / TOTAL_MS) * 100 : 0;
+  const handleEscolherDuracao = useCallback(
+    (min: number) => {
+      setConfigAberta(false);
+      setDuracaoMin(min);
+      void timer.setTotalMs(min * 60 * 1000);
+      DatabaseSingleton.getInstance()
+        .then(db => db.setMeta(CHAVE_DURACAO, String(min)))
+        .catch(error => {
+          console.error('Erro ao salvar duração do bloco:', error);
+          notify('Ops', 'A duração vale só nesta sessão.');
+        });
+    },
+    [timer]
+  );
+
+  // O progresso precisa usar a duração em uso, não a de quando a tela
+  // montou — senão a barra mentia depois de trocar a preferência.
+  const progress =
+    timer.totalMs > 0 ? ((timer.totalMs - timer.remaining) / timer.totalMs) * 100 : 0;
   const progressColor = statusColor(progress);
   const pct = Math.round(progress);
+
+  /**
+   * Horário de término: o relógio grande já diz quanto falta, então repetir
+   * "restante" num card ao lado é ruído. Isto responde a pergunta diferente
+   * — "a que horas eu saio daqui?" — que é a que planeja o resto do dia.
+   */
+  const fimDoBloco = new Date(Date.now() + timer.remaining).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   const done = hojeItems.filter(i => i.checked).length;
   const dayPct = hojeItems.length > 0 ? Math.round((done / hojeItems.length) * 100) : 0;
@@ -59,11 +111,11 @@ export default function TimerScreen() {
       icon="flame"
       label="Timer"
       headline="Foco"
-      state="25 minutos de cada vez, sem culpa"
+      state={`${duracaoMin} minutos de cada vez, sem culpa`}
       stats={
         <>
           <StatCard icon="flame" value={`${pct}%`} label="do ciclo" />
-          <StatCard icon="timer-outline" value={formatMs(timer.remaining)} label="restante" />
+          <StatCard icon="flag" value={fimDoBloco} label="termina às" />
         </>
       }
     >
@@ -81,12 +133,21 @@ export default function TimerScreen() {
             ))}
           </View>
           <View style={styles.hintRow}>
-            <Ionicons
+          <Ionicons
               name={timer.running ? 'flame' : 'time-outline'}
               size={15}
               color={theme.colors.textSecondary}
             />
             <Text style={styles.hint}>{hint}</Text>
+            <TouchableOpacity
+              style={styles.ajustar}
+              onPress={() => setConfigAberta(true)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={`Ajustar duração do bloco. Bloco de ${duracaoMin} minutos`}
+            >
+              <Ionicons name="settings-outline" size={17} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -137,12 +198,20 @@ export default function TimerScreen() {
 
       <BlocoConcluido
         visible={blocoAberto}
+        duracaoMin={duracaoMin}
         concluidas={done}
         total={hojeItems.length}
         pct={dayPct}
         proximas={proximas}
         onEscolher={handleEscolher}
         onClose={() => setBlocoAberto(false)}
+      />
+
+      <ConfigurarBloco
+        visible={configAberta}
+        selectedMin={duracaoMin}
+        onSelect={handleEscolherDuracao}
+        onClose={() => setConfigAberta(false)}
       />
     </ScreenShell>
   );
@@ -194,6 +263,13 @@ const styles = StyleSheet.create({
     fontSize: theme.type.footnote,
     color: theme.colors.textSecondary,
     textAlign: 'center',
+    flex: 1,
+  },
+  ajustar: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttons: {
     flexDirection: 'row',

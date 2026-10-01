@@ -30,7 +30,15 @@ interface UseTimerOptions {
  */
 export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTimerOptions) {
   const [state, setState] = useState<TimerState>({ elapsed: 0, remaining: totalMs, running: false });
-  const total = totalMs;
+  /**
+   * A duração mora numa ref, e não direto no estado. Motivo: `total` entrava
+   * nas dependências do `tick` e do efeito de hidratação, então trocar a
+   * preferência reidratava do banco e podia iniciar **duas** RAFs competindo
+   * (ciclo de 3 segundos). Quem muda a duração em uso chama `setTotalMs`, que
+   * zera o ciclo de propósito.
+   */
+  const totalRef = useRef(totalMs);
+  const total = totalRef.current;
   const rafRef = useRef<number | null>(null);
   /** Tempo consumido antes do segmento atual. */
   const baseRef = useRef(0);
@@ -60,7 +68,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
 
   const tick = useCallback(() => {
     const elapsed = baseRef.current + (Date.now() - startRef.current);
-    const remaining = Math.max(0, total - elapsed);
+    const remaining = Math.max(0, totalRef.current - elapsed);
 
     if (remaining === 0) {
       // O raf precisa parar aqui: mantendo o loop, o `onComplete` disparava a
@@ -79,7 +87,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
 
     setState({ elapsed, remaining, running: true });
     rafRef.current = requestAnimationFrame(tick);
-  }, [total, persist]);
+  }, [persist]);
 
   const start = useCallback(async () => {
     const now = Date.now();
@@ -98,10 +106,10 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     const finalElapsed = baseRef.current + (Date.now() - startRef.current);
     baseRef.current = finalElapsed;
     startRef.current = 0;
-    setState({ elapsed: finalElapsed, remaining: Math.max(0, total - finalElapsed), running: false });
+    setState({ elapsed: finalElapsed, remaining: Math.max(0, totalRef.current - finalElapsed), running: false });
     stopRaf();
     await persist(finalElapsed, false, null);
-  }, [state.running, total, persist]);
+  }, [state.running, persist]);
 
   const reset = useCallback(async () => {
     baseRef.current = 0;
@@ -109,7 +117,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     // Zerar NÃO é terminar o bloco: antes daqui chamava `onComplete`, então
     // apertar "Zerar" disparava o aviso de fim de bloco.
     firedRef.current = true;
-    setState({ elapsed: 0, remaining: total, running: false });
+    setState({ elapsed: 0, remaining: totalRef.current, running: false });
     stopRaf();
     try {
       const db = await DatabaseSingleton.getInstance();
@@ -117,7 +125,31 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
     } catch (error) {
       console.error('Erro ao zerar timer:', error);
     }
-  }, [prefix, total]);
+  }, [prefix, persist]);
+
+  /**
+   * Troca a duração do bloco. Zera o ciclo em andamento: mudar a régua no
+   * meio do caminho só faria sentido se o app mentisse sobre o progresso já
+   * percorrido. Também apaga o estado salvo, senão a próxima abertura
+   * reidrataria o ciclo antigo com a régua nova.
+   */
+  const setTotalMs = useCallback(
+    async (nextTotalMs: number) => {
+      totalRef.current = nextTotalMs;
+      baseRef.current = 0;
+      startRef.current = 0;
+      firedRef.current = true;
+      stopRaf();
+      setState({ elapsed: 0, remaining: nextTotalMs, running: false });
+      try {
+        const db = await DatabaseSingleton.getInstance();
+        await db.clearTimerState(prefix);
+      } catch (error) {
+        console.error('Erro ao ajustar duração do timer:', error);
+      }
+    },
+    [prefix]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -130,7 +162,7 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
         const elapsed = baseRef.current + (Date.now() - startRef.current);
         setState({
           elapsed,
-          remaining: Math.max(0, total - elapsed),
+          remaining: Math.max(0, totalRef.current - elapsed),
           running: saved.running,
         });
         if (saved.running) {
@@ -142,9 +174,9 @@ export function useTimer({ prefix, totalMs = 25 * 60 * 1000, onComplete }: UseTi
       cancelled = true;
       stopRaf();
     };
-  }, [prefix, total, tick]);
+  }, [prefix, tick]);
 
-  return { ...state, start, pause, reset };
+  return { ...state, totalMs: total, start, pause, reset, setTotalMs };
 }
 
 export function formatMs(ms: number): string {

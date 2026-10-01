@@ -8,6 +8,9 @@ import { HojeItem } from '../lib/types';
 
 interface BlocoConcluidoProps {
   visible: boolean;
+  /** Duração configurada do bloco; o texto do título acompanha, senão a tela
+   *  mente sobre o que acabou de ser cumprido quando o bloco não é de 25. */
+  duracaoMin: number;
   /** `x/3 concluídas — NN%`, o resumo que o texto do projeto promete. */
   concluidas: number;
   total: number;
@@ -30,6 +33,7 @@ interface BlocoConcluidoProps {
  */
 export default function BlocoConcluido({
   visible,
+  duracaoMin,
   concluidas,
   total,
   pct,
@@ -49,7 +53,7 @@ export default function BlocoConcluido({
           <View style={styles.heroIcon}>
             <Ionicons name="checkmark-done" size={30} color={theme.colors.success} />
           </View>
-          <Text style={styles.heroTitle}>Bloco de 25 minutos concluído</Text>
+          <Text style={styles.heroTitle}>Bloco de {duracaoMin} minutos concluído</Text>
           <Text style={styles.heroProgress}>
             {concluidas}/{total} concluídas — {pct}%
           </Text>

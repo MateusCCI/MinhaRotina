@@ -30,6 +30,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# Arquivos temporarios do LibreOffice ao editar .docx
+.~lock.*
+
 # Pastas de trabalho local, fora do repositório.
 # lixeira/ guarda material descartado (instaladores, rascunhos antigos);
 /lixeira/
