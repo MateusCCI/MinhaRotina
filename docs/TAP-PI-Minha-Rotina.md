@@ -39,13 +39,39 @@ OE2 (semanas 3-4): entregar Saida (checklist livre + hora + 1 alarme) + timer de
 
 OE3 (semanas 5-6): entregar aviso de fim de bloco + barra de progresso + Revisao (conta dias com inbox zerado) + DER com 9 tabelas + slide + 10 casos de teste passando. Congelar o codigo 3 dias antes da banca.
 
-7. O QUE VAI SER ENTREGUE
+7. ESCOPO DO PRODUTO — TERÁ
 
-App instalado por QR ou APK, DER + EAP, 10 testes manuais passando, slide de 10 min e demo de 10 min sem travar. Depois da para continuar no TCC 2.
+Escopo fechado do aplicativo:
 
-8. O QUE FICOU DE FORA
+- Conta local com e-mail e senha (hash SHA-256 com salt de 16 bytes), sem internet e sem servidor.
+- Captura em inbox único em menos de 10 s, com prazo e categoria opcionais.
+- Até 3 prioridades por dia, escolhidas manualmente. Ao atingir o limite, o app explica o motivo e oferece trocar uma das abertas ou deixar a nova para amanhã.
+- Barra de progresso com cor dinâmica por faixa.
+- Checklist de saída editável, sem teto de itens, na ordem do trajeto.
+- Registro do horário de saída e lembrete agendado 15 min antes.
+- Pomodoro com duração configurável (5, 15, 25 ou 45 min), pausa sem perder o estado e aviso de fim de bloco.
+- Revisão semanal: dias com inbox zerado, saídas registradas, horário médio e ajuste escrito.
+- Persistência local em SQLite, 9 tabelas, sem consultar rede em nenhuma etapa.
+- Quatro abas (Hoje, Saída, Timer, Revisão), em português, tema claro e alvos de toque de 44 pt ou mais.
 
-Sem servidor e sem sincronizar entre aparelhos; sem IA e sem sugerir tarefa sozinha; sem gamificacao, sem geofencing, sem versao para iOS e sem coletar dado de ninguem. Ideia nova vai para a lista do TCC 2.
+Entregáveis do projeto: app instalado por QR ou APK, DER, EAP, 23 casos de teste manual, slide de 10 min e demo de 10 min sem travar.
+
+8. ESCOPO DO PRODUTO — NÃO TERÁ
+
+Fica registrado para o escopo não crescer durante o projeto:
+
+- Servidor, backend ou sincronização entre aparelhos.
+- Dependência de internet em qualquer etapa: o app não consulta rede.
+- Sugestão automática de tarefa por IA; a escolha é sempre da pessoa.
+- Gamificação, pontos, medalhas ou recompensas.
+- Geofencing ou aviso por localização.
+- Notificação de sistema no navegador: no web o aviso vale apenas com o app aberto.
+- Exportação de dados, compartilhamento entre usuários e integração com nuvem.
+- Recuperação de senha por e-mail: a conta é local e não há back-end para enviar nada.
+- Versão para iOS validada e integração com wearable.
+- Outros idiomas além do português.
+
+Ideia nova vai para a lista do TCC 2.
 
 9. RESTRICOES
 
