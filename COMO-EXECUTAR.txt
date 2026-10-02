@@ -5,7 +5,13 @@ NA NAVEGADOR
 ------------
     ./iniciar.sh
 
-Equivale a:  npx expo start --web
+O ./iniciar.sh funciona de qualquer pasta, porque ele mesmo entra no
+projeto. O comando direto abaixo precisa do cd:
+
+Equivale a:
+
+    cd /media/pam/Ext4Arquivos/Projetos/10-Projetos/10.05-MinhaRotina
+    npx expo start --web
 
 Depois de subir, acesse:  http://localhost:8081
 
@@ -13,6 +19,11 @@ Depois de subir, acesse:  http://localhost:8081
 NO CELULAR (QR do Expo Go)
 --------------------------
     ./iniciar.sh fone
+
+Equivale a:
+
+    cd /media/pam/Ext4Arquivos/Projetos/10-Projetos/10.05-MinhaRotina
+    npx expo start
 
 Leia o QR code com o app Expo Go. Se o celular não conectar pelo Wi-Fi da
 rede, use hotspot invertido ou rode com --tunnel.
@@ -24,6 +35,11 @@ Emulador ou aparelho Android conectado:
 QUANDO A TELA FICAR BRANCA NO NAVEGADOR
 ---------------------------------------
     ./iniciar.sh --limpar
+
+Equivale a:
+
+    cd /media/pam/Ext4Arquivos/Projetos/10-Projetos/10.05-MinhaRotina
+    npx expo start --web --clear
 
 Limpa o cache do Metro. Se ainda assim ficar branca, recarregue forçado
 duas vezes (Ctrl+Shift+R).
