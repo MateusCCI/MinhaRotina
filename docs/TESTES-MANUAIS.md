@@ -9,9 +9,16 @@ inventado na Revisão, contraste do erro no login e ciclo de 3 segundos no Timer
 ## Como executar
 
 ```bash
-npx expo start --web --clear   # navegador (uma aba só)
-npx expo start                 # Expo Go (hotspot invertido ou --tunnel)
+./iniciar.sh                    # navegador (uma aba só)
+./iniciar.sh fone               # Expo Go (hotspot invertido ou --tunnel)
+./iniciar.sh android            # emulador ou aparelho conectado
+./iniciar.sh --limpar           # limpa o cache (tela branca no navegador)
+./iniciar.sh --fundo            # segundo plano, log em /tmp/minharotina-dev.log
 ```
+
+Equivale a `npx expo start --web --clear` e `npx expo start`. O script avisa
+quando a porta 8081 já está ocupada, que é quase sempre uma instância antiga
+deste mesmo servidor.
 
 - **Web:** o SQLite fica em OPFS e **só uma aba por vez** usa o banco. Feche
   as outras abas deste endereço. Se a tela ficar branca depois de uma
