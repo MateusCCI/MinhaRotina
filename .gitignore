@@ -34,6 +34,10 @@ yarn-error.*
 # entrega, nao codigo, e o modelo da ABNT sozinho ocupa 5,5 MB de
 # historico binario que nao versiona.
 *.docx
+# Backup que a ferramenta `nota` cria ao lado do arquivo: termina em
+# .bak, nao em .docx, entao a regra acima nao pegava e ele vazou
+# para o repositorio.
+*.bak
 # Arquivos temporarios do LibreOffice ao editar .docx
 .~lock.*
 
