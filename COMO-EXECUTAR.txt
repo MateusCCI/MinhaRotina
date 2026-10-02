@@ -1,0 +1,57 @@
+COMO EXECUTAR O MINHA ROTINA
+=============================
+
+NA NAVEGADOR
+------------
+    ./iniciar.sh
+
+Equivale a:  npx expo start --web
+
+Depois de subir, acesse:  http://localhost:8081
+
+
+NO CELULAR (QR do Expo Go)
+--------------------------
+    ./iniciar.sh fone
+
+Leia o QR code com o app Expo Go. Se o celular não conectar pelo Wi-Fi da
+rede, use hotspot invertido ou rode com --tunnel.
+
+Emulador ou aparelho Android conectado:
+    ./iniciar.sh android
+
+
+QUANDO A TELA FICAR BRANCA NO NAVEGADOR
+---------------------------------------
+    ./iniciar.sh --limpar
+
+Limpa o cache do Metro. Se ainda assim ficar branca, recarregue forçado
+duas vezes (Ctrl+Shift+R).
+
+
+PARAR O SERVIDOR
+----------------
+    Ctrl+C                    (modo normal)
+
+    pkill -f 'expo start'     (se ficou em segundo plano)
+
+
+EM SEGUNDO PLANO
+----------------
+    ./iniciar.sh --fundo
+
+Log em:  /tmp/minharotina-dev.log
+Acompanhe com:  tail -f /tmp/minharotina-dev.log
+
+
+AVISOS IMPORTANTES
+------------------
+- No navegador, use UMA aba por vez. O SQLite fica em OPFS e só uma aba
+  pode usar o banco; com duas, a segunda mostra "Fechar as outras abas".
+
+- O aviso de sistema (notificação) só funciona no celular. No navegador o
+  aviso de fim de bloco vale apenas com o app aberto.
+
+- Não abra o .docx do relatório para editar e salvar: o editor reescreve o
+  XML interno e pode perder um parágrafo. Para mudar texto no relatório,
+  use a ferramenta nota.
