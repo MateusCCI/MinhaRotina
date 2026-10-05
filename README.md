@@ -8,6 +8,11 @@ notas e em três ou quatro apps, e no fim esquece o que tinha que levar ao sair
 de casa e perde prazo curto no meio da anotação espalhada. O Minha Rotina junta
 tudo num app só, em português, com os dados no próprio aparelho.
 
+## ONDE ESTAMOS
+
+Se você chegou até aqui e quer saber o que fazer a seguir, leia
+**[ONDE-ESTAMOS.md](ONDE-ESTAMOS.md)** primeiro.
+
 ## O que ele faz
 
 Quatro abas, e o dia inteiro acontece na primeira:
