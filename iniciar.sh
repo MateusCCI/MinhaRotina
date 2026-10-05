@@ -9,6 +9,7 @@
 #   ./iniciar.sh --limpar        limpa o cache antes (use quando a tela
 #                                ficar branca no navegador)
 #   ./iniciar.sh --fundo         roda em segundo plano, log em /tmp
+#   ./iniciar.sh --porta 8090    usa outra porta (pode ja haver algo na 8081)
 #
 # Para parar:
 #   Ctrl+C                       (modo normal)
@@ -24,15 +25,22 @@ cd "$(dirname "$(readlink -f "$0")")"
 ALVO="web"
 LIMPAR=0
 FUNDO=0
-PORTA_PADRAO=8081
+PORTA_PADRAO="${EXPO_PORT:-8081}"
+PORTA_ALVO="$PORTA_PADRAO"
 
-for arg in "$@"; do
-  case "$arg" in
-    web|android|fone) ALVO="$arg" ;;
-    --limpar)        LIMPAR=1 ;;
-    --fundo)         FUNDO=1 ;;
-    -h|--help)       sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "opção desconhecida: $arg" >&2; sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+# while + shift, e não `for arg in "$@"`: num for, o shift mexe nos posicionais
+# mas o for já capturou a lista, e o "${2}" pega o argumento errado.
+uso() { sed -n '3,16p' "$0" | sed 's/^# \{0,1\}//'; }
+while [ $# -gt 0 ]; do
+  case "$1" in
+    web|android|fone) ALVO="$1"; shift ;;
+    --limpar)        LIMPAR=1; shift ;;
+    --fundo)         FUNDO=1; shift ;;
+    --porta)
+      if [ -z "${2:-}" ]; then echo "--porta precisa de um número" >&2; uso; exit 1; fi
+      PORTA_ALVO="$2"; shift 2 ;;
+    -h|--help)       uso; exit 0 ;;
+    *) echo "opção desconhecida: $1" >&2; uso; exit 1 ;;
   esac
 done
 
@@ -56,16 +64,18 @@ fi
 # '"$p"' aqui seria expansão do shell — que com 'set -u' aborta o script e,
 # sem ele, vira string vazia, que casa com qualquer linha.
 if command -v ss >/dev/null 2>&1 \
-   && ss -ltn 2>/dev/null | awk '{print $4}' | cut -d: -f2 | grep -qxF "${PORTA_PADRAO}"; then
+   && ss -ltn 2>/dev/null | awk '{print $4}' | cut -d: -f2 | grep -qxF "${PORTA_ALVO}"; then
   echo
-  echo "ATENÇÃO: a porta ${PORTA_PADRAO} já está em uso."
-  echo "Se for uma instância antiga deste projeto, pare com:"
-  echo "    pkill -f 'expo start'"
+  echo "ATENÇÃO: a porta ${PORTA_ALVO} já está em uso por outro processo."
+  echo "Isso NÃO é o Minha Rotina. Escolha uma das duas saídas:"
+  echo "  a) usar outra porta:   ./iniciar.sh ${ALVO} --porta 8090"
+  echo "  b) liberar a ${PORTA_PADRAO} (só se for deste projeto):"
+  echo "     pkill -f 'expo start'"
   echo
 fi
 
 # --- Comando --------------------------------------------------------------
-CMD=(npx expo start)
+CMD=(npx expo start --port "$PORTA_ALVO")
 [ "$LIMPAR" -eq 1 ] && CMD+=(--clear)
 case "$ALVO" in
   web)     CMD+=(--web) ;;
@@ -95,12 +105,37 @@ if [ "$FUNDO" -eq 1 ]; then
     nohup "${CMD[@]}" > "$LOG" 2>&1 &
   fi
   PID=$!
-  echo "Servidor iniciado em segundo plano (PID ${PID})."
-  echo "Log:      ${LOG}"
-  echo "Acompanhe com:  tail -f ${LOG}"
-  echo "Web:      http://localhost:${PORTA_PADRAO}"
-  echo "Parar:    kill ${PID}   (ou: pkill -f 'expo start')"
-  exit 0
+  # Sem TTY o Expo não pergunta nada: se a porta estiver ocupada, ele imprime
+  # "Skipping dev server" e sai — e o processoExists mas não serve nada.
+  # Confiar no PID é exatamente o que fez este script anunciar sucesso com o
+  # servidor desligado.
+  echo "aguardando o Metro subir..."
+  for i in $(seq 1 30); do
+    if grep -q "Waiting on http" "$LOG" 2>/dev/null; then
+      echo "Servidor no ar (PID ${PID})."
+      echo "Log:      ${LOG}"
+      echo "Acompanhe com:  tail -f ${LOG}"
+      echo "Web:      http://localhost:${PORTA_ALVO}"
+      echo "Parar:    kill ${PID}   (ou: pkill -f 'expo start')"
+      exit 0
+    fi
+    if ! kill -0 "$PID" 2>/dev/null; then
+      echo ""
+      echo "ERRO: o servidor não subiu. O que ele disse:"
+      echo "-----------------------------------------"
+      cat "$LOG"
+      echo "-----------------------------------------"
+      echo ""
+      echo "Causa provável: porta ${PORTA_ALVO} ocupada. Tente:"
+      echo "    ./iniciar.sh ${ALVO} --porta 8090"
+      exit 1
+    fi
+    sleep 1
+  done
+  echo ""
+  echo "ERRO: 30s sem resposta do Metro. Log em ${LOG}"
+  tail -5 "$LOG"
+  exit 1
 fi
 
 # --- Modo normal (foreground) --------------------------------------------
