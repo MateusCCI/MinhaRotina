@@ -144,6 +144,7 @@ export default function TimerScreen() {
               onPress={() => setConfigAberta(true)}
               hitSlop={10}
               accessibilityRole="button"
+              testID="timer-ajustar-duracao"
               accessibilityLabel={`Ajustar duração do bloco. Bloco de ${duracaoMin} minutos`}
             >
               <Ionicons name="settings-outline" size={17} color={theme.colors.textSecondary} />
@@ -156,6 +157,7 @@ export default function TimerScreen() {
             <TouchableOpacity
               style={styles.btnStart}
               onPress={timer.start}
+              testID="timer-iniciar"
               accessibilityLabel="Iniciar foco"
             >
               <Ionicons name="play" size={20} color={theme.colors.onPrimary} />
@@ -165,6 +167,7 @@ export default function TimerScreen() {
             <TouchableOpacity
               style={styles.btnPause}
               onPress={timer.pause}
+              testID="timer-pausar"
               accessibilityLabel="Pausar foco"
             >
               <Ionicons name="pause" size={20} color={theme.colors.onPrimary} />
@@ -174,6 +177,7 @@ export default function TimerScreen() {
           <TouchableOpacity
             style={styles.btnReset}
             onPress={timer.reset}
+            testID="timer-zerar"
             accessibilityLabel="Zerar timer"
           >
             <Ionicons name="refresh-outline" size={20} color={theme.colors.textSecondary} />

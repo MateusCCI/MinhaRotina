@@ -81,7 +81,8 @@ export default function ConfigurarBloco({
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onSelect(op.min);
                 }}
-                accessibilityRole="radio"
+                testID={`duracao-opcao-${op.min}`}
+                  accessibilityRole="radio"
                 accessibilityState={{ selected: ativo }}
                 accessibilityLabel={`${op.min} minutos. ${op.quando}`}
               >

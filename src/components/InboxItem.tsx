@@ -62,6 +62,7 @@ export default function InboxItemComponent({ item, onMenu }: InboxItemProps) {
         // linha para baixo.
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         onPress={() => onMenu(item)}
+        testID={`inbox-acoes-${item.id}`}
         accessibilityLabel={`Ações para ${item.content}`}
         accessibilityRole="button"
       >

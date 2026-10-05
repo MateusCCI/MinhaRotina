@@ -36,6 +36,7 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
       <TouchableOpacity
         style={[styles.checkbox, item.checked ? styles.checkboxChecked : undefined]}
         onPress={handleToggle}
+        testID={`hoje-check-${item.id}`}
         accessibilityLabel={item.checked ? 'Desmarcar' : 'Concluir'}
         accessibilityRole="checkbox"
         accessible
@@ -77,6 +78,7 @@ export default function HojeItemComponent({ item, onToggle, onDelete }: HojeItem
       <TouchableOpacity
         style={styles.deleteBtn}
         onPress={() => onDelete(item.id)}
+        testID={`hoje-remover-${item.id}`}
         accessibilityLabel="Remover do hoje"
         accessibilityRole="button"
       >

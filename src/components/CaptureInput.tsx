@@ -53,6 +53,7 @@ export default function CaptureInput({ onCapture }: CaptureInputProps) {
           value={text}
           onChangeText={setText}
           onSubmitEditing={handleSubmit}
+          testID="captura-campo"
           placeholder="Despeje aqui, sem filtro…"
           placeholderTextColor={theme.colors.textMuted}
           returnKeyType="done"

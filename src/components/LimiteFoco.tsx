@@ -89,6 +89,7 @@ export default function LimiteFoco({
             <TouchableOpacity
               style={styles.opcao}
               onPress={() => setTrocando(true)}
+              testID="limite-trocar"
               accessibilityRole="button"
             >
               <Ionicons name="swap-horizontal" size={19} color={FOCO.base} />
@@ -104,6 +105,7 @@ export default function LimiteFoco({
             <TouchableOpacity
               style={styles.opcao}
               onPress={onAmanha}
+              testID="limite-amanha"
               accessibilityRole="button"
             >
               <Ionicons name="calendar-outline" size={19} color={FOCO.base} />
@@ -138,6 +140,7 @@ export default function LimiteFoco({
                   style={styles.linha}
                   onPress={() => escolherTroca(item.id)}
                   accessibilityRole="button"
+                  testID={`limite-trocar-${item.id}`}
                   accessibilityLabel={`Trocar por esta: ${item.content}`}
                 >
                   <Ionicons name="close-circle-outline" size={20} color={theme.colors.textSecondary} />

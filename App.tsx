@@ -88,6 +88,10 @@ function TabNavigator() {
       screenOptions={({ route }) => {
         const accent = accents[TAB_ACCENT[route.name] ?? 'inbox'];
         return {
+          // Sem testID a aba é um <div> de texto: Playwright acerta o rótulo,
+          // que não é clicável, e o clique vai para a aba vizinha por cima.
+          tabBarTestID: `aba-${route.name}`,
+          tabBarAccessibilityLabel: `Aba ${route.name}`,
           tabBarIcon: ({ focused, size, color }) => (
             <Ionicons
               name={focused ? TAB_ICONS_FOCUSED[route.name] : TAB_ICONS[route.name] ?? 'ellipse-outline'}

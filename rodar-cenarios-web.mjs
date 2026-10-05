@@ -103,14 +103,32 @@ async function novoPerfil(n) {
   return marca;
 }
 
+/** Clica por testID, e nao por rotulo: no React Native Web o <Text> vira
+ *  <div> e o texto acaba nao sendo clicavel. */
 async function irParaAba(nome) {
-  const aba = page.getByText(nome, { exact: true }).first();
-  await aba.click();
+  await page.getByTestId(`aba-${nome}`).click();
   await page.waitForTimeout(1500);
 }
 
+/** Fecha qualquer folha (Modal) que tenha ficado aberta. Sem isso, um Modal
+ *  residual de um cenário anterior cobre o clock e o texto some da árvore
+ *  visível — o cenário seguinte falha sem causa aparente. */
+async function fecharFolhas() {
+  for (let i = 0; i < 3; i++) {
+    const voltar = page.getByText('Pronto');
+    const voltar2 = page.getByText('Voltar');
+    const agora = page.getByText('Agora não');
+    if (await agora.count()) { await agora.first().click(); await page.waitForTimeout(500); }
+    else if (await voltar.count()) { await voltar.first().click(); await page.waitForTimeout(500); }
+    else if (await voltar2.count()) { await voltar2.first().click(); await page.waitForTimeout(500); }
+    else break;
+  }
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(400);
+}
+
 async function capturar(texto) {
-  const campo = page.getByPlaceholder('Despeje aqui, sem filtro').first();
+  const campo = page.getByTestId('captura-campo').first();
   await campo.waitFor({ timeout: 30000 });
   await campo.fill(texto);
   await campo.press('Enter');
@@ -140,11 +158,12 @@ console.log('Cenário 17 — item da noite não some do Hoje');
 }
 
 /* ---------------------------------------------------------------- 18 */
+await fecharFolhas();
 console.log('Cenário 18 — toques rápidos no checkbox');
 {
   await irParaAba('Hoje');
   await page.waitForTimeout(800);
-  const alvos = page.getByLabel('Concluir');
+  const alvos = page.locator('[data-testid^="hoje-check-"]');
   const quantos = await alvos.count();
   if (quantos === 0) {
     fail('18', 'nenhuma prioridade na lista para testar');
@@ -161,37 +180,37 @@ console.log('Cenário 18 — toques rápidos no checkbox');
 }
 
 /* ---------------------------------------------------------------- 22 */
+await fecharFolhas();
 console.log('Cenário 22 — duração configurável');
 {
   await irParaAba('Timer');
-  await page.getByLabel(/Ajustar duração do bloco/).click();
+  await page.getByTestId('timer-ajustar-duracao').click();
   await page.waitForTimeout(1500);
-  // exato: '5 minutos' como substring casa dentro de '25 minutos', que e o
-  // texto do cabecalho e nao a opcao.
-  const opcao5 = page.getByText('5 minutos', { exact: true }).first();
+  const opcao5 = page.getByTestId('duracao-opcao-5').first();
   const opcoes = await opcao5.count();
   if (opcoes > 0) {
-    await opcao5.click({ force: true });
+    await opcao5.click();
     await page.waitForTimeout(1500);
-    const relogio = await page.locator('text=/^0[0-9]:[0-9]{2}$/').first().textContent().catch(() => null);
+    const relogio = await page.locator('text=/^\d{2}:\d{2}:\d{2}$/').first().textContent().catch(() => null);
     const termina = await page.getByText('termina às').count();
-    if (relogio && relogio.startsWith('05')) ok('22', `relógio em ${relogio} após escolher 5 min; card "termina às" presente: ${termina > 0}`);
-    else fail('22', `relógio ficou "${relogio}" (esperava começar em 05:xx)`);
+    if (relogio && relogio.startsWith('00:05')) ok('22', `relógio em ${relogio} após escolher 5 min; card "termina às" presente: ${termina > 0}`);
+    else fail('22', `relógio ficou "${relogio}" (esperava começar em 00:05:00)`);
   } else {
     fail('22', 'folha de duração não abriu');
   }
 }
 
 /* ---------------------------------------------------------------- 21 */
+await fecharFolhas();
 console.log('Cenário 21 — Timer: pausar/retomar sem acelerar');
 {
   const relogio = page.locator('text=/^\\d{2}:\\d{2}:\\d{2}$/').first();
-  await page.getByLabel('Iniciar foco').click();
+  await page.getByTestId('timer-iniciar').click();
   await page.waitForTimeout(3000);
   const t1 = await relogio.textContent();
   await page.waitForTimeout(6000);
   const t2 = await relogio.textContent();
-  await page.getByLabel('Pausar foco').click();
+  await page.getByTestId('timer-pausar').click();
   await page.waitForTimeout(2000);
   const t3 = await relogio.textContent();
   await page.waitForTimeout(4000);
@@ -210,13 +229,14 @@ console.log('Cenário 21 — Timer: pausar/retomar sem acelerar');
 }
 
 /* ---------------------------------------------------------------- 6 */
+await fecharFolhas();
 console.log('Cenário 6 — limite de 3 com saída (trocar ou adiar)');
 {
   await irParaAba('Hoje');
   await page.waitForTimeout(600);
   for (const t of ['Prior A', 'Prior B', 'Prior C', 'Prior D']) await capturar(t);
   for (const t of ['Prior A', 'Prior B', 'Prior C']) {
-    const lapis = page.getByLabel(`Ações para ${t}`);
+    const lapis = page.locator('[data-testid^="inbox-acoes-"]');
     if (await lapis.count()) {
       await lapis.first().click();
       await page.waitForTimeout(500);
@@ -224,15 +244,15 @@ console.log('Cenário 6 — limite de 3 com saída (trocar ou adiar)');
       await page.waitForTimeout(900);
     }
   }
-  const lapisD = page.getByLabel('Ações para Prior D');
+  const lapisD = page.locator('[data-testid^="inbox-acoes-"]').last();
   if (await lapisD.count()) {
-    await lapisD.first().click();
+    await lapisD.click();
     await page.waitForTimeout(500);
     await page.getByText('Virar prioridade de hoje').first().click();
     await page.waitForTimeout(1000);
     const folha = await page.getByText(/O dia já tem 3 prioridades/).count();
-    const trocar = await page.getByText('Trocar por uma que já está aqui').count();
-    const amanha = await page.getByText('Deixar para amanhã').count();
+    const trocar = await page.getByTestId('limite-trocar').count();
+    const amanha = await page.getByTestId('limite-amanha').count();
     if (folha > 0 && trocar > 0 && amanha > 0) {
       ok('6', `folha do limite abriu com as duas saídas (trocar: ${trocar > 0}, adiar: ${amanha > 0})`);
     } else {
@@ -244,6 +264,7 @@ console.log('Cenário 6 — limite de 3 com saída (trocar ou adiar)');
 }
 
 /* ---------------------------------------------------------------- 20 */
+await fecharFolhas();
 console.log('Cenário 20 — Revisão não inventa número');
 {
   await page.getByText('Revisão').first().click();
@@ -264,7 +285,7 @@ console.log('Cenário 19 — remover do Hoje sem sumir em silêncio');
 {
   await page.getByText('Hoje').first().click();
   await page.waitForTimeout(1500);
-  const remover = page.getByLabel('Remover do hoje');
+  const remover = page.locator('[data-testid^="hoje-remover-"]');
   const quantos = await remover.count();
   if (quantos === 0) {
     fail('19', 'nenhuma prioridade do dia para remover');
