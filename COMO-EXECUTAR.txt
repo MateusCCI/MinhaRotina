@@ -20,6 +20,25 @@ NO CELULAR (QR do Expo Go)
 --------------------------
     ./iniciar.sh fone
 
+IMPORTANTE: rode num TERMINAL DE VERDADE. Se a saida for piped
+(| head), guardada em arquivo ou launched com --fundo, o Expo NAO
+desenha o QR — e o unico endereco que ele imprime e "localhost", que no
+celular aponta para o proprio celular e nunca funciona. Foi essa a
+origem de "tentei varias vezes e nao deu". O script imprime o
+endereco exp:// correto mesmo sem QR.
+
+O celular precisa estar NO MESMO Wi-Fi do computador.
+
+Se o Wi-Fi tiver isolamento de cliente (APIs de hotel, rede
+corporativa, faculdade), o celular chega mas o QR nao abre: use
+hotspot inverso (o celular vira o roteador, o computador conecta nele)
+ou rode com tunel:
+
+    npx expo start --tunnel
+
+Rota de reserva se nada funcionar na hora da banca: app ja instalado +
+video de 60s (Risco 1 do TAP).
+
 Equivale a:
 
     cd /media/pam/Ext4Arquivos/Projetos/10-Projetos/10.05-MinhaRotina

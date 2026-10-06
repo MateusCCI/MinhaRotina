@@ -148,6 +148,18 @@ echo
 
 if [ "$ALVO" = "fone" ]; then
   echo "Leia o QR com o app Expo Go (Android) ou o app Expo Go (iOS)."
+  echo "O celular precisa estar NO MESMO Wi-Fi deste computador."
+  echo
+  # URL que o QR codifica, calculada aqui: sem TTY o Expo não desenha o QR,
+  # e o único endereço que ele imprime é "localhost" — que, no celular,
+  # aponta para o próprio celular e nunca funciona. Era essa a origem de
+  # "tentei várias vezes e não deu".
+  IP=$(ip -4 addr show scope global 2>/dev/null | awk '/inet /{split($2,a,"/"); print a[1]; exit}')
+  if [ -n "$IP" ]; then
+    echo "Sem QR no terminal, digite no Expo Go:"
+    echo "    exp://${IP}:${PORTA_ALVO}"
+    echo "Celular e computador precisam estar na mesma rede."
+  fi
   echo
 fi
 
