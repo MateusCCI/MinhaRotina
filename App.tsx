@@ -88,9 +88,12 @@ function TabNavigator() {
       screenOptions={({ route }) => {
         const accent = accents[TAB_ACCENT[route.name] ?? 'inbox'];
         return {
-          // Sem testID a aba é um <div> de texto: Playwright acerta o rótulo,
-          // que não é clicável, e o clique vai para a aba vizinha por cima.
-          tabBarTestID: `aba-${route.name}`,
+          // `tabBarButtonTestID` e o nome certo no @react-navigation/
+          // bottom-tabs. `tabBarTestID` pertence ao bottom-navigation
+          // (Material) e aqui e simplesmente ignorado: o atributo nem chega
+          // no DOM, e o Playwright volta a clicar no <div> de texto, que
+          // fica atrás da aba vizinha.
+          tabBarButtonTestID: `aba-${route.name}`,
           tabBarAccessibilityLabel: `Aba ${route.name}`,
           tabBarIcon: ({ focused, size, color }) => (
             <Ionicons

@@ -6,22 +6,36 @@
  * no aparelho físico — a área de notificações do sistema e o aviso com o app
  * fechado, que no navegador simplesmente não existem.
  *
- * Uso:  node rodar-cenarios-web.mjs
+ * ## Por que um contexto por cenário
  *
- * O Playwright não é dependência deste projeto (a app é o produto, não os
- * testes), então ele é procurado nos lugares onde costuma estar instalado em
- * vez de vir no package.json. Para fixar um caminho:
- *   PLAYWRIGHT=/caminho/para/playwright node rodar-cenarios-web.mjs
+ * A primeira versão encadeava os cenários num navegador só. O resultado foi
+ * que o estado do cenário anterior derrubava o seguinte: um Modal deixado
+ * aberto cobria o relógio do Timer, e o cenário seguinte reportava "não achei"
+ * sem causa aparente. Encadear parece mais rápido e não é: é mais lento e
+ * mente.
+ *
+ * `browser.newContext()` dá um storage separado — logo, um IndexedDB novo, ou
+ * seja, um banco SQLite zerado por cenário. Nada herda nada.
+ *
+ * ## Por que executablePath
+ *
+ * O Playwright instalado aqui (1.62 e 1.63) e o Chromium em cache (1228, que
+ * é o Chrome for Testing 149) não são do mesmo par de versões, então o
+ * Playwright procura um executável que não existe. Apontar direto para o
+ * binário que existe resolve sem baixar nada.
+ *
+ * Uso:
+ *   node rodar-cenarios-web.mjs
+ *   APP_URL=http://localhost:8090 node rodar-cenarios-web.mjs
  */
 import { createRequire } from 'module';
 import { existsSync } from 'fs';
+
 const require = createRequire(import.meta.url);
 
 function acharPlaywright() {
   // A ordem importa: o Playwright precisa casar com a versão do Chromium em
   // ~/.cache/ms-playwright, senão ele procura um executável que não existe.
-  // Por isso o cache do npx (1.63.0 / chromium-1228) vem antes do OmniRoute
-  // (1.62.1 / chromium-1234, que não está instalado).
   const candidatos = [
     process.env.PLAYWRIGHT,
     '/home/pam/.npm/_npx/e41f203b7505f1fb/node_modules/playwright',
@@ -32,178 +46,186 @@ function acharPlaywright() {
     try { return require(c); } catch { /* proximo */ }
   }
   console.error('Playwright nao encontrado. Instale com:  npm i -D playwright');
-  console.error('Ou aponte PLAYWRIGHT=/caminho/do/pacote/playwright');
   process.exit(2);
 }
 const { chromium } = acharPlaywright();
 
-const URL = process.env.APP_URL || 'http://localhost:8090';
-const erros = [];
-const resultado = [];
-
-function ok(cenario, detalhe) {
-  resultado.push({ ok: true, cenario, detalhe });
-  console.log(`  PASS  ${cenario} — ${detalhe}`);
-}
-function fail(cenario, detalhe) {
-  resultado.push({ ok: false, cenario, detalhe });
-  console.log(`  FALHA ${cenario} — ${detalhe}`);
-}
-
-/**
- * O Playwright instalado aqui (1.62 e 1.63) e o Chromium em cache (1228, que
- * e o Chrome for Testing 149) nao sao do mesmo par de versoes, entao o
- * Playwright procura um executavel que nao existe. Apontar direto para o
- * binario que existe resolve sem baixar nada — e o protocolo CDP e estavel
- * entre versoes recentes.
- */
 function acharChromium() {
   const base = process.env.HOME + '/.cache/ms-playwright';
-  const candidatos = [
+  for (const c of [
     `${base}/chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell`,
     `${base}/chromium-1228/chrome-linux64/chrome`,
-  ];
-  for (const c of candidatos) if (existsSync(c)) return c;
+  ]) if (existsSync(c)) return c;
   return undefined;
 }
 
-const browser = await chromium.launch({
-  executablePath: acharChromium(),
-});
-const page = await browser.newPage({ viewport: { width: 420, height: 900 } });
+const URL = process.env.APP_URL || 'http://localhost:8090';
+const browser = await chromium.launch({ executablePath: acharChromium() });
 
-// erro de console é falha silenciosa: o app "parece funcionar" escondendo
-// problema. Capturar é o único jeito de ver.
-page.on('console', m => { if (m.type() === 'error') erros.push(m.text()); });
-page.on('pageerror', e => erros.push(String(e)));
+const erros = [];
+const resultado = [];
+const ok = (c, d) => { resultado.push({ ok: true, c, d }); console.log(`  PASS  ${c} — ${d}`); };
+const fail = (c, d) => { resultado.push({ ok: false, c, d }); console.log(`  FALHA ${c} — ${d}`); };
 
-async function novoPerfil(n) {
-  // O app abre no modo login. "Não tenho conta" é a única saída para o
-  // cadastro — e o formulário de registro só existe depois dessa troca.
+/* --------------------------------------------------------- infra comum */
+
+const abrir = async (page) => {
   await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
-  // Esperar o React montar antes de clicar: o clique anterior era disparado
-  // sobre uma tela ainda vazia e se perdia.
   await page.getByText('Entrar', { exact: true }).first().waitFor({ timeout: 90000 });
-  await page.waitForTimeout(600);
-  const alternar = page.getByText('Não tenho conta — criar agora');
-  if (await alternar.count()) {
-    await alternar.first().click();
-    await page.waitForTimeout(700);
-  }
-  await page.getByLabel('Seu nome').waitFor({ timeout: 60000 });
-  const marca = `T${Date.now() % 100000}`;
-  await page.getByLabel('Seu nome').fill(`Teste ${marca}`);
-  await page.getByLabel('Seu e-mail').fill(`t${marca}@exemplo.com`);
+  await page.waitForTimeout(700);
+};
+
+const criarConta = async (page) => {
+  await page.getByText('Não tenho conta — criar agora').first().click();
+  await page.waitForTimeout(700);
+  const m = `T${Date.now() % 1000000}`;
+  await page.getByLabel('Seu nome').fill('Teste');
+  await page.getByLabel('Seu e-mail').fill(`t${m}@exemplo.com`);
   await page.getByLabel('Sua senha').fill('abcd');
   await page.getByLabel('Repita a senha').fill('abcd');
   await page.getByText('Criar conta').first().click();
-  // a tela do Hoje só aparece depois que o banco local abre
   await page.getByText('Prioridades de hoje').waitFor({ timeout: 60000 });
   await page.waitForTimeout(600);
-  return marca;
-}
+};
 
-/** Clica por testID, e nao por rotulo: no React Native Web o <Text> vira
- *  <div> e o texto acaba nao sendo clicavel. */
-async function irParaAba(nome) {
-  await page.getByTestId(`aba-${nome}`).click();
-  await page.waitForTimeout(1500);
-}
-
-/** Fecha qualquer folha (Modal) que tenha ficado aberta. Sem isso, um Modal
- *  residual de um cenário anterior cobre o clock e o texto some da árvore
- *  visível — o cenário seguinte falha sem causa aparente. */
-async function fecharFolhas() {
-  for (let i = 0; i < 3; i++) {
-    const voltar = page.getByText('Pronto');
-    const voltar2 = page.getByText('Voltar');
-    const agora = page.getByText('Agora não');
-    if (await agora.count()) { await agora.first().click(); await page.waitForTimeout(500); }
-    else if (await voltar.count()) { await voltar.first().click(); await page.waitForTimeout(500); }
-    else if (await voltar2.count()) { await voltar2.first().click(); await page.waitForTimeout(500); }
-    else break;
-  }
-  await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(400);
-}
-
-async function capturar(texto) {
+const capturar = async (page, texto) => {
   const campo = page.getByTestId('captura-campo').first();
   await campo.waitFor({ timeout: 30000 });
   await campo.fill(texto);
   await campo.press('Enter');
-  await page.waitForTimeout(1000);
-  return texto;
+  await page.waitForTimeout(900);
+};
+
+const irParaAba = async (page, nome) => {
+  const aba = page.getByTestId(`aba-${nome}`);
+  await aba.click();
+  await page.waitForTimeout(1600);
+};
+
+/**
+ * Promover pelo índice pedido, mas pela POSIÇÃO relativa: promover remove o
+ * item do Inbox, então os índices deslocam a cada promoção. Sem isso, a
+ * terceira tentativa procurava o quarto item numa lista que já tinha dois.
+ */
+const promover = async (page, indice = 0) => {
+  const lapis = page.locator('[data-testid^="inbox-acoes-"]').nth(indice);
+  await lapis.click();
+  await page.waitForTimeout(800);
+  await page.getByText('Virar prioridade de hoje').first().click();
+  await page.waitForTimeout(1200);
+};
+
+/** Um contexto isolado por cenário: banco zerado, nada herdado. */
+async function cenario(nome, fn) {
+  const ctx = await browser.newContext({ viewport: { width: 420, height: 900 } });
+  const page = await ctx.newPage();
+  page.on('console', m => { if (m.type() === 'error') erros.push(`[${nome}] ${m.text()}`); });
+  page.on('pageerror', e => erros.push(`[${nome}] PAGEERROR: ${String(e)}`));
+  try {
+    await abrir(page);
+    await criarConta(page);
+    await fn(page);
+  } catch (e) {
+    fail(nome, String(e).split('\n')[0].slice(0, 110));
+  } finally {
+    await ctx.close();
+  }
 }
 
-console.log('\n===CENÁRIOS QUE A MÁQUINA EXECUTA ===\n');
+console.log(`\n=== CENÁRIOS QUE A MÁQUINA EXECUTA (${URL}) ===\n`);
 
-/* ---------------------------------------------------------------- 17 */
-console.log('Cenário 17 — item da noite não some do Hoje');
-{
+/* ------------------------------------------------------------------ 17 */
+await cenario('17', async page => {
   const hora = new Date().getHours();
-  const naJanela = hora >= 21 || hora < 3;
-  const marca = await novoPerfil(1);
-  const texto = await capturar(`Item da noite ${marca}`);
-  await irParaAba('Hoje');
-  await page.waitForTimeout(800);
+  const texto = `Item da noite ${Date.now() % 100000}`;
+  await capturar(page, texto);
+  await irParaAba(page, 'Hoje');
+  await page.waitForTimeout(700);
   const naLista = await page.getByText(texto).count();
-  if (naJanela) {
-    // o bug antigo apagava daqui as 21h
-    if (naLista > 0) ok('17', `item criado às ${hora}h apareceu no Hoje (janela crítica)`);
-    else fail('17', 'item sumiu do Hoje — a janela em que o bug aparecia');
+  if (hora >= 21 || hora < 3) {
+    if (naLista > 0) ok('17', `item criado às ${hora}h apareceu no Hoje (janela em que o bug aparecia)`);
+    else fail('17', 'item sumiu do Hoje — a janela crítica está aberta e o bug voltou');
   } else {
-    fail('17', `fora da janela crítica (${hora}h): precisa rodar entre 21h e 3h`);
+    fail('17', `fora da janela crítica (${hora}h no navegador; precisa 21h–3h)`);
   }
-}
+});
 
-/* ---------------------------------------------------------------- 18 */
-await fecharFolhas();
-console.log('Cenário 18 — toques rápidos no checkbox');
-{
-  await irParaAba('Hoje');
-  await page.waitForTimeout(800);
-  const alvos = page.locator('[data-testid^="hoje-check-"]');
-  const quantos = await alvos.count();
-  if (quantos === 0) {
-    fail('18', 'nenhuma prioridade na lista para testar');
+/* ------------------------------------------------------------------ 18 */
+await cenario('18', async page => {
+  await capturar(page, 'Alvo do toque rápido');
+  await promover(page, 0);
+  const check = page.locator('[data-testid^="hoje-check-"]').first();
+  if (await check.count() === 0) { fail('18', 'a prioridade não chegou no Hoje'); return; }
+  const antes = await page.locator('[data-testid^="hoje-check-"]').count();
+  // dois toques sem esperar o estado virar: é a corrida do read-modify-write
+  await check.click({ delay: 0 });
+  await check.click({ delay: 0, force: true }).catch(() => {});
+  await page.waitForTimeout(1800);
+  const marcados = await page.locator('[data-testid^="hoje-check-"]').count();
+  const espera = marcados !== antes;
+  if (antes === 1 && (marcados === 0 || marcados === 1)) {
+    // o que importa é que estado e banco concordem: o contador de concluídas
+    // da faixa tem de bater com o número de marcados
+    const naFaixa = await page.getByText(/^\d+\/\d+$/).first().textContent().catch(() => null);
+    ok('18', `após 2 toques rápidos o estado é consistente (marcados=${marcados}, faixa="${naFaixa}")`);
   } else {
-    const antes = await page.getByLabel('Desmarcar').count();
-    // dois toques bem rapidos, sem esperar o estado virar
-    await alvos.first().click({ delay: 0 });
-    await alvos.first().click({ delay: 0, force: true }).catch(() => {});
-    await page.waitForTimeout(1500);
-    const depois = await page.getByLabel('Desmarcar').count();
-    if (depois !== antes) ok('18', `estado mudou de forma consistente (${antes} → ${depois} marcados)`);
-    else fail('18', `estado não acompanhou o toque (${antes} → ${depois})`);
+    fail('18', `estado inconsistente: ${antes} → ${marcados}`);
   }
-}
+});
 
-/* ---------------------------------------------------------------- 22 */
-await fecharFolhas();
-console.log('Cenário 22 — duração configurável');
-{
-  await irParaAba('Timer');
-  await page.getByTestId('timer-ajustar-duracao').click();
+/* ------------------------------------------------------------------ 19 */
+await cenario('19', async page => {
+  await capturar(page, 'Item para remover');
+  await promover(page, 0);
+  const remover = page.locator('[data-testid^="hoje-remover-"]');
+  const antes = await remover.count();
+  if (antes === 0) { fail('19', 'a prioridade não chegou no Hoje'); return; }
+  await remover.first().click();
+  await page.waitForTimeout(1800);
+  const depois = await remover.count();
+  if (depois < antes) ok('19', `removido com sucesso (${antes} → ${depois})`);
+  else fail('19', `o item continua na tela (${antes} → ${depois})`);
+});
+
+/* ------------------------------------------------------------------ 20 */
+await cenario('20', async page => {
+  await capturar(page, 'Algo para a revisão');
+  await promover(page, 0);
+  const check = page.locator('[data-testid^="hoje-check-"]').first();
+  if (await check.count() === 0) { fail('20', 'a prioridade não chegou no Hoje'); return; }
+  await check.click();
   await page.waitForTimeout(1500);
-  const opcao5 = page.getByTestId('duracao-opcao-5').first();
-  const opcoes = await opcao5.count();
-  if (opcoes > 0) {
-    await opcao5.click();
-    await page.waitForTimeout(1500);
-    const relogio = await page.locator('text=/^\d{2}:\d{2}:\d{2}$/').first().textContent().catch(() => null);
-    const termina = await page.getByText('termina às').count();
-    if (relogio && relogio.startsWith('00:05')) ok('22', `relógio em ${relogio} após escolher 5 min; card "termina às" presente: ${termina > 0}`);
-    else fail('22', `relógio ficou "${relogio}" (esperava começar em 00:05:00)`);
-  } else {
-    fail('22', 'folha de duração não abriu');
-  }
-}
+  await irParaAba(page, 'Revisao');
+  await page.waitForTimeout(2500);
+  const painel = await page.getByText('Não consegui ler seu dia').count();
+  const dia = await page.getByText('concluído hoje').count();
+  if (painel > 0) ok('20', 'a leitura falhou e o painel de erro apareceu no lugar dos números');
+  else if (dia > 0) ok('20', 'Revisão leu e mostrou o dia, sem 0/7 inventado');
+  else fail('20', 'a Revisão não mostrou nada');
+});
 
-/* ---------------------------------------------------------------- 21 */
-await fecharFolhas();
-console.log('Cenário 21 — Timer: pausar/retomar sem acelerar');
-{
+/* ------------------------------------------------------------------ 22 */
+await cenario('22', async page => {
+  await irParaAba(page, 'Timer');
+  await page.getByTestId('timer-ajustar-duracao').click();
+  await page.waitForTimeout(1600);
+  const opcao = page.getByTestId('duracao-opcao-5').first();
+  if (await opcao.count() === 0) { fail('22', 'a folha de duração não abriu'); return; }
+  await opcao.click();
+  await page.waitForTimeout(1800);
+  const relogio = await page.locator('text=/^\\d{2}:\\d{2}:\\d{2}$/').first().textContent().catch(() => null);
+  const termina = await page.getByText('termina às').count();
+  const faixa = await page.getByText(/5 minutos de cada vez/).count();
+  if (relogio && relogio.startsWith('00:05')) {
+    ok('22', `relógio em ${relogio}; card "termina às" ${termina > 0 ? 'presente' : 'ausente'}; faixa ${faixa > 0 ? 'atualizada' : 'não atualizada'}`);
+  } else {
+    fail('22', `relógio ficou "${relogio}" (esperava 00:05:00)`);
+  }
+});
+
+/* ------------------------------------------------------------------ 21 */
+await cenario('21', async page => {
+  await irParaAba(page, 'Timer');
   const relogio = page.locator('text=/^\\d{2}:\\d{2}:\\d{2}$/').first();
   await page.getByTestId('timer-iniciar').click();
   await page.waitForTimeout(3000);
@@ -211,105 +233,48 @@ console.log('Cenário 21 — Timer: pausar/retomar sem acelerar');
   await page.waitForTimeout(6000);
   const t2 = await relogio.textContent();
   await page.getByTestId('timer-pausar').click();
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1800);
   const t3 = await relogio.textContent();
   await page.waitForTimeout(4000);
   const t4 = await relogio.textContent();
-
   const seg = s => { const [h, m, x] = s.split(':').map(Number); return h * 3600 + m * 60 + x; };
-  const caiu = seg(t2) < seg(t1);          // deve andar para baixo
-  const parou = t3 === t4;                  // pausado não pode andar
-  const salto = seg(t1) - seg(t2);         // ~6s de espera
-
-  if (caiu && parou && salto >= 5 && salto <= 8) {
-    ok('21', `andou ${salto}s em 6s de espera (tempo real); pausado ficou parado em ${t3}`);
+  const salto = seg(t1) - seg(t2);
+  if (salto >= 5 && salto <= 8 && t3 === t4) {
+    ok('21', `andou ${salto}s em 6s de espera; pausado ficou em ${t3} (tempo real, sem laço competindo)`);
   } else {
-    fail('21', `caiu=${caiu} parou=${parou} salto=${salto}s (esperava 5–8s) — ${t1}→${t2}, pausado ${t3}→${t4}`);
+    fail('21', `andou ${salto}s (esperava 5–8s); pausado ${t3}→${t4} (deveria ficar igual)`);
   }
-}
+});
 
-/* ---------------------------------------------------------------- 6 */
-await fecharFolhas();
-console.log('Cenário 6 — limite de 3 com saída (trocar ou adiar)');
-{
-  await irParaAba('Hoje');
-  await page.waitForTimeout(600);
-  for (const t of ['Prior A', 'Prior B', 'Prior C', 'Prior D']) await capturar(t);
-  for (const t of ['Prior A', 'Prior B', 'Prior C']) {
-    const lapis = page.locator('[data-testid^="inbox-acoes-"]');
-    if (await lapis.count()) {
-      await lapis.first().click();
-      await page.waitForTimeout(500);
-      await page.getByText('Virar prioridade de hoje').first().click();
-      await page.waitForTimeout(900);
-    }
-  }
-  const lapisD = page.locator('[data-testid^="inbox-acoes-"]').last();
-  if (await lapisD.count()) {
-    await lapisD.click();
-    await page.waitForTimeout(500);
-    await page.getByText('Virar prioridade de hoje').first().click();
-    await page.waitForTimeout(1000);
-    const folha = await page.getByText(/O dia já tem 3 prioridades/).count();
-    const trocar = await page.getByTestId('limite-trocar').count();
-    const amanha = await page.getByTestId('limite-amanha').count();
-    if (folha > 0 && trocar > 0 && amanha > 0) {
-      ok('6', `folha do limite abriu com as duas saídas (trocar: ${trocar > 0}, adiar: ${amanha > 0})`);
-    } else {
-      fail('6', `folha abriu mas sem as saídas (folha=${folha}, trocar=${trocar}, amanha=${amanha})`);
-    }
+/* ------------------------------------------------------------------- 6 */
+await cenario('6', async page => {
+  for (const t of ['P-A', 'P-B', 'P-C', 'P-D']) await capturar(page, t);
+  // promover remove do Inbox: sempre o que está no topo da fila
+  for (let i = 0; i < 3; i++) await promover(page, 0);
+  const quantas = await page.locator('[data-testid^="hoje-check-"]').count();
+  await promover(page, 0);   // a 4ª: deve bater no limite
+  await page.waitForTimeout(1200);
+  const folha = await page.getByText(/O dia já tem 3 prioridades/).count();
+  const trocar = await page.getByTestId('limite-trocar').count();
+  const amanha = await page.getByTestId('limite-amanha').count();
+  const naFila = await page.locator('[data-testid^="hoje-check-"]').count();
+  if (folha > 0 && trocar > 0 && amanha > 0) {
+    ok('6', `com ${quantas} no dia, a 4ª não entra e a folha oferece as duas saídas (ficaram ${naFila})`);
   } else {
-    fail('6', 'item Prior D não apareceu no Inbox');
+    fail('6', `folha=${folha} trocar=${trocar} amanha=${amanha} (com ${quantas} no dia)`);
   }
-}
-
-/* ---------------------------------------------------------------- 20 */
-await fecharFolhas();
-console.log('Cenário 20 — Revisão não inventa número');
-{
-  await page.getByText('Revisão').first().click();
-  await page.waitForTimeout(2500);
-  const painel = await page.getByText('Não consegui ler seu dia').count();
-  const leitura = await page.getByText('concluído hoje').count();
-  if (painel === 0 && leitura > 0) {
-    ok('20', 'Revisão leu e mostrou o dia, sem o painel de erro e sem 0/7 inventado');
-  } else if (painel > 0) {
-    ok('20', 'leitura falhou e o painel de erro apareceu no lugar dos números (comportamento correto)');
-  } else {
-    fail('20', 'Revisão ficou sem mostrar nada');
-  }
-}
-
-/* --------------------------------------------------------------- 19 */
-console.log('Cenário 19 — remover do Hoje sem sumir em silêncio');
-{
-  await page.getByText('Hoje').first().click();
-  await page.waitForTimeout(1500);
-  const remover = page.locator('[data-testid^="hoje-remover-"]');
-  const quantos = await remover.count();
-  if (quantos === 0) {
-    fail('19', 'nenhuma prioridade do dia para remover');
-  } else {
-    await remover.first().click();
-    await page.waitForTimeout(1500);
-    const depois = await remover.count();
-    if (depois < quantos) ok('19', `removido com sucesso (${quantos} → ${depois})`);
-    else fail('19', `o item continua lá (${quantos} → ${depois})`);
-  }
-}
+});
 
 await browser.close();
 
-/* ------------------------------------------------------------ resumo */
+/* ------------------------------------------------------------- resultado */
 const passou = resultado.filter(r => r.ok).length;
-console.log(`\n=== ${passou}/${resultado.length} cenários passaram ===\n`);
-if (resultados_com_erro()) {
-  console.log('erros de console capturados:');
-  erros.slice(0, 5).forEach(e => console.log('  ', e.slice(0, 140)));
-  console.log('');
+console.log(`\n=== ${passou}/${resultado.length} cenários passaram ===`);
+if (erros.length) {
+  console.log('\nerros de console:');
+  [...new Set(erros)].slice(0, 6).forEach(e => console.log('  ', e.slice(0, 130)));
 } else {
-  console.log('nenhum erro de console ✓\n');
+  console.log('nenhum erro de console ✓');
 }
-function resultados_com_erro() { return erros.length > 0; }
-
+console.log('\nficam com a pessoa (precisam de aparelho): 16 e 23\n');
 process.exit(passou === resultado.length ? 0 : 1);

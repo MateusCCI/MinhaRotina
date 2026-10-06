@@ -464,7 +464,13 @@ class DatabaseSingleton {
       // amanhã — nunca um beco sem saída.
       const current = await this.getHojeItems();
       if (current.length >= LIMITE_FOCO_DIA) {
-        throw new Error('MAX_ITEMS');
+        // Sinal de controle, não falha: é o caminho previsto de uma regra de
+        // produto. O `catch` abaixo separa os dois casos para não sujar o
+        // console de vermelho — que, no critério de aceite deste projeto, é
+        // justamente o que denuncia defeito.
+        const limite = new Error('MAX_ITEMS');
+        limite.name = 'LimiteDeFoco';
+        throw limite;
       }
       const source = await this.db!.getFirstAsync<InboxItem>(
         'SELECT * FROM inbox_items WHERE id = ?',
@@ -480,7 +486,12 @@ class DatabaseSingleton {
       console.log(`[S1][TRACE:${traceId}] Item promovido: id=${result.lastInsertRowId}`);
       return result.lastInsertRowId as number;
     } catch (error) {
-      console.error(`[S1][TRACE:${traceId}] Erro ao promover item:`, error);
+      if (error instanceof Error && error.name === 'LimiteDeFoco') {
+        // Comportamento esperado: registrar em info, não como erro.
+        console.log(`[S1][TRACE:${traceId}] Limite de foco: ${LIMITE_FOCO_DIA} prioridades já abertas`);
+      } else {
+        console.error(`[S1][TRACE:${traceId}] Erro ao promover item:`, error);
+      }
       throw error;
     }
   }
