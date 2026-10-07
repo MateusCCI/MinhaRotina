@@ -1,5 +1,4 @@
-import * as Notifications from 'expo-notifications';
-import { prepararNotificacoes, semNotificacaoDeSistema } from './notificacoes';
+import { prepararNotificacoes, semNotificacaoDeSistema, moduloNotificacoes } from './notificacoes';
 
 const CHANNEL_ID = 'minha-rotina-bloco';
 
@@ -60,9 +59,10 @@ export async function agendarAvisoFimBloco(
 /** Cancela o aviso pendente. Idempotente: nada agendado não é erro. */
 export async function cancelarAvisoFimBloco(prefix: string): Promise<void> {
   if (semNotificacaoDeSistema()) return;
+  const Notifications = moduloNotificacoes();
+  if (!Notifications) return;
   try {
-    const notif = await Notifications;
-    await notif.cancelScheduledNotificationAsync(identificador(prefix)).catch(() => undefined);
+    await Notifications.cancelScheduledNotificationAsync(identificador(prefix)).catch(() => undefined);
   } catch (error) {
     console.error('Erro ao cancelar aviso de fim de bloco:', error);
   }

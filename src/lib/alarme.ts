@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { prepararNotificacoes, semNotificacaoDeSistema } from './notificacoes';
 
 export const ALARME_MINUTOS = 15;
@@ -63,6 +62,7 @@ export async function agendarAlarme(
       : `Checklist conferido. Saída às ${hora} — pode ir tranquilo.`;
 
   const notif = await notifications();
+  if (!notif) return null;
   await notif.cancelScheduledNotificationAsync(IDENTIFICADOR).catch(() => undefined);
   await notif.scheduleNotificationAsync({
     // O `identifier` precisa ser explícito: sem ele a biblioteca sorteia um
@@ -79,6 +79,7 @@ export async function agendarAlarme(
 export async function cancelarAlarme(): Promise<void> {
   if (unsupportedPlatform()) return;
   const notif = await notifications();
+  if (!notif) return;
   await notif.cancelScheduledNotificationAsync(IDENTIFICADOR).catch(() => undefined);
 }
 
@@ -86,8 +87,10 @@ export async function cancelarAlarme(): Promise<void> {
  * No Android é preciso declarar o canal antes de agendar, senão a
  * notificação é silenciada pelo sistema. No iOS a permissão é pedida na hora.
  */
-async function notifications(): Promise<typeof Notifications> {
-  const notif = await prepararNotificacoes({ id: CHANNEL_ID, nome: 'Lembrete de saída' });
-  if (!notif) throw new Error('Notificações indisponíveis');
-  return notif;
+/**
+ * `null` quando o módulo nativo não existe no build — o app segue funcionando,
+ * só sem lembrete de sistema. Antes isso era uma exceção, que derrubava a tela.
+ */
+async function notifications() {
+  return prepararNotificacoes({ id: CHANNEL_ID, nome: 'Lembrete de saída' });
 }

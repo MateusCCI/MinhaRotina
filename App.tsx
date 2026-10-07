@@ -15,7 +15,7 @@ import DatabaseSingleton from './src/lib/database';
 import { accents, theme } from './src/lib/theme';
 import { subscribeInboxCount } from './src/lib/inboxCount';
 import { getSessionUser, setSessionUser, subscribeSession } from './src/lib/session';
-import { semNotificacaoDeSistema } from './src/lib/notificacoes';
+import { semNotificacaoDeSistema, moduloNotificacoes } from './src/lib/notificacoes';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -28,10 +28,13 @@ const Stack = createStackNavigator();
  * é justamente o caso em que a folha não existe.
  *
  * Registrado no escopo do módulo para valer uma vez só, antes de qualquer tela.
+ * O carregamento é protegido: `expo-notifications` é nativo e não existe em
+ * todo build (Expo Go pode não trazi-lo). Um `require` cru aqui derrubava o app
+ * inteiro ANTES da primeira tela renderizar.
  */
-if (!semNotificacaoDeSistema()) {
-  const Notifications = require('expo-notifications');
-  Notifications.setNotificationHandler({
+const notifications = semNotificacaoDeSistema() ? null : moduloNotificacoes();
+if (notifications) {
+  notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: false,
       shouldShowList: false,

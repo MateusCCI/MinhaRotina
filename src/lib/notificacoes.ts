@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+// Só o TIPO vem deste import: `import type` desaparece na compilação e não
+// puxa o módulo nativo em tempo de execução.
+import type * as ExpoNotifications from 'expo-notifications';
 
 /**
  * Infraestrutura de notificações compartilhada.
@@ -16,6 +18,31 @@ export function semNotificacaoDeSistema(): boolean {
 }
 
 /**
+ * Carrega o módulo de notificações sob demanda, devolvendo `null` se ele não
+ * existir no build.
+ *
+ * Isto não é defensiva paranoia: o `expo-notifications` é um módulo **nativo**,
+ * e ele não está em todo lugar. Um import no topo do arquivo resolve o módulo
+ * na hora em que o arquivo é importado — então, se o módulo faltar, o erro
+ * acontece **antes** de qualquer tela renderizar, e o app inteiro morre com
+ * uma tela branca em vez de rodar sem notificação.
+ *
+ * Foi exatamente o que aconteceu no aparelho: `require('expo-notifications')`
+ * no topo de `App.tsx` derrubou a aplicação na abertura. A pergunta certa não é
+ * "o módulo existe?" e sim "o que o app faz quando não existe?" — e a resposta
+ * é: ele abre, e apenas o aviso fica indisponível.
+ */
+export function moduloNotificacoes(): typeof ExpoNotifications | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('expo-notifications') as typeof ExpoNotifications;
+  } catch (error) {
+    console.warn('[notificacoes] módulo nativo indisponível neste build:', error);
+    return null;
+  }
+}
+
+/**
  * Garante canal (Android) e permissão (iOS/Android) e devolve o módulo das
  * notificações.
  *
@@ -23,13 +50,16 @@ export function semNotificacaoDeSistema(): boolean {
  * canal inexistente entrega a notificação silenciada pelo sistema — parece
  * que o app não avisou, quando na verdade avisou sem som.
  *
- * Devolve `null` quando a permissão foi negada, para o chamador não tratar
- * como sucesso algo que o sistema não vai exibir.
+ * Devolve `null` quando a permissão foi negada **ou o módulo não existe**,
+ * para o chamador não tratar como sucesso algo que o sistema não vai exibir.
  */
 export async function prepararNotificacoes(
   canal?: { id: string; nome: string }
-): Promise<typeof Notifications | null> {
+): Promise<typeof ExpoNotifications | null> {
   if (semNotificacaoDeSistema()) return null;
+
+  const Notifications = moduloNotificacoes();
+  if (!Notifications) return null;
 
   if (Platform.OS === 'android' && canal) {
     await Notifications.setNotificationChannelAsync(canal.id, {
