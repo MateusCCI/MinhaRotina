@@ -114,7 +114,7 @@ virou uma família de cor por aba.
 
 ## Autores
 
-- **Mateus** — telas de Saída e Timer, banco SQLite e DER
+- **Mateus** — telas de Saída e Timer, banco SQLite e arquitetura
 - **Helian** — telas de Inbox, Hoje e Revisão, e os testes
 - Orientador: Prof. Sosthenes Carlos Ferreira do Nascimento
 

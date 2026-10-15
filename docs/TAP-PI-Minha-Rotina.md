@@ -9,7 +9,7 @@ Termo de Abertura do Projeto Integrador Minha Rotina. Vale o que esta escrito aq
 Nome do projeto: Minha Rotina - app de organizacao de rotina
 Grupo responsavel: Dupla Minha Rotina
 Professor responsavel: Sosthenes Carlos Ferreira do Nascimento
-Equipe do projeto: Mateus (Saida + Timer + SQLite + DER) + Helian (Inbox + Hoje + Revisao + testes)
+Equipe do projeto: Mateus (Saida + Timer + SQLite + arquitetura) + Helian (Inbox + Hoje + Revisao + testes)
 
 2. DISCIPLINAS VINCULADAS
 
@@ -37,7 +37,7 @@ OE1 (semanas 1-2): entregar Inbox + Hoje (anotar, listar, apagar e levar ate 3 p
 
 OE2 (semanas 3-4): entregar Saida (checklist livre + hora + 1 alarme) + timer de duracao ajustavel com iniciar e pausar. Prova: fluxo da manha testado.
 
-OE3 (semanas 5-6): entregar aviso de fim de bloco + barra de progresso + Revisao (conta dias com inbox zerado) + DER com 9 tabelas + slide + 10 casos de teste passando. Congelar o codigo 3 dias antes da banca.
+OE3 (semanas 5-6): entregar aviso de fim de bloco + barra de progresso + Revisao (conta dias com inbox zerado) + slide + 23 casos de teste automatizados passando. Congelar o codigo 3 dias antes da banca.
 
 7. ESCOPO DO PRODUTO — TERÁ
 
@@ -54,7 +54,7 @@ Escopo fechado do aplicativo:
 - Persistência local em SQLite, 9 tabelas, sem consultar rede em nenhuma etapa.
 - Quatro abas (Hoje, Saída, Timer, Revisão), em português, tema claro e alvos de toque de 44 pt ou mais.
 
-Entregáveis do projeto: app instalado por QR ou APK, DER, EAP, 23 casos de teste manual, slide de 10 min e demo de 10 min sem travar.
+Entregáveis do projeto: app instalado por QR ou APK, EAP, 23 casos de teste manual, slide de 10 min e demo de 10 min sem travar.
 
 8. ESCOPO DO PRODUTO — NÃO TERÁ
 
@@ -89,16 +89,16 @@ Risco 4: Faltar arquivo na vespera. Chance baixa, efeito alto. O que fazer: chec
 
 11. QUEM FAZ O QUE
 
-Mateus: Saida + Timer + SQLite + DER + arquitetura.
+Mateus: Saida + Timer + SQLite + arquitetura.
 Helian: Inbox + Hoje + Revisao + testes + EAP.
 Prof. Sosthenes: orientacao + aceite.
-Banca (4 materias): avalia demo + DER + testes.
+Banca (3 materias): avalia demo + testes.
 
 12. CRONOGRAMA (6 semanas ate a banca)
 
 Setup + Inbox + Hoje: 2 semanas (S1-S2).
 Saida + Timer: 2 semanas (S3-S4).
-Revisao + DER + slide + testes: 2 semanas (S5-S6).
+Revisao + slide + testes: 2 semanas (S5-S6).
 Congelamento + demo: 3 dias (banca).
 
 13. CRITERIOS DE ACEITE

@@ -26,7 +26,6 @@ Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetiv
 | Pacote | Entrega | Responsável | Sprint |
 |---|---|---|---|
 | 2.1 Requisitos | Lista de RFs + regras por tela | Equipe | S1 |
-| 2.2 DER | Diagrama com 9 tabelas (SQLite) — `DER-MinhaRotina.md` | Mateus | S3 |
 | 2.3 Protótipo de telas | `telas-minha-rotina.md` + `.html` navegável (M1, superado pela implementação) | Equipe | S1 |
 
 ### 3. Aplicativo mobile (Expo + TypeScript + SQLite, 100% offline)
@@ -58,5 +57,5 @@ Decomposição orientada a entregas. Base: `TAP-PI-Minha-Rotina.md` §6 (objetiv
 |---|---|
 | M1 (fim S1-S2) | Inbox + Hoje rodando via QR em 1 Android (demo viva) |
 | M2 (fim S3-S4) | Saída + Pomodoro com fluxo da manhã testado |
-| M3 (fim S5-S6) | Revisão + DER + slide + 10 testes aprovados |
+| M3 (fim S5-S6) | Revisão + slide + 23 testes automatizados |
 | Banca | Demo de 10 min sem crash + arguição |

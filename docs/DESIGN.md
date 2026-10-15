@@ -191,7 +191,7 @@ mesma linha. Quem cede espaço é o texto (`flex: 1`); pills e lápis têm
 
 **O prazo é só ícone** — um círculo de 24 px com o glifo, não a palavra. Isso
 não é economia de pixels, é o resultado de medir: o pill "vence hoje" custava
-96 px, quase o texto inteiro da tarefa, e até "Revisar o DER" truncava para
+96 px, quase o texto inteiro da tarefa, e ate "Revisar o checklist" truncava para
 "Revisar o ...". Uma lista em que não se lê o que a lista contém não é densa,
 é cega. A cor continua dizendo a urgência, o glifo continua dizendo o estado
 e as palavras ficaram no `accessibilityLabel` (com `accessible`, senão o

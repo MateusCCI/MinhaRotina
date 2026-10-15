@@ -37,7 +37,6 @@ ONDE ESTÁ CADA COISA
     COMO-EXECUTAR.txt      comando para rodar, em texto simples
     docs/TAP-*.md          abertura do projeto, escopo "Terá / Não terá"
     docs/EAP-*.md          estrutura analítica, pacotes e responsáveis
-    docs/DER-*.md          diagrama das 9 tabelas, derivado do código real
     docs/DESIGN.md         decisões de produto e as regras que firmaram
     docs/TESTES-MANUAIS.md roteiro de 23 cenários
     docs/MinhaRotina-PI.docx   relatório final (19 páginas, ABNT)
