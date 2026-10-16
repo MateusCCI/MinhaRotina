@@ -56,3 +56,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Notas de sessao e estado automatico nao vao ao repositorio
+tasks/
+docs/sessions/

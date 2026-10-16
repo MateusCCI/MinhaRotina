@@ -87,6 +87,6 @@ AVISOS IMPORTANTES
 - O aviso de sistema (notificação) só funciona no celular. No navegador o
   aviso de fim de bloco vale apenas com o app aberto.
 
-- Não abra o .docx do relatório para editar e salvar: o editor reescreve o
-  XML interno e pode perder um parágrafo. Para mudar texto no relatório,
-  use a ferramenta nota.
+- Não abra o relatório para editar e salvar direto: o editor reescreve a
+  estrutura interna do arquivo e pode perder um parágrafo. Salvar uma cópia,
+  conferir o texto, e só então substituir o original.

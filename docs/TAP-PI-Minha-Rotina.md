@@ -62,7 +62,7 @@ Fica registrado para o escopo não crescer durante o projeto:
 
 - Servidor, backend ou sincronização entre aparelhos.
 - Dependência de internet em qualquer etapa: o app não consulta rede.
-- Sugestão automática de tarefa por IA; a escolha é sempre da pessoa.
+- Sugestão automática de tarefa; a escolha é sempre da pessoa.
 - Gamificação, pontos, medalhas ou recompensas.
 - Geofencing ou aviso por localização.
 - Notificação de sistema no navegador: no web o aviso vale apenas com o app aberto.

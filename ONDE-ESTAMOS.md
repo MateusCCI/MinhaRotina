@@ -22,11 +22,11 @@ O QUE FAZER AGORA
    É a única pendência técnica: fecha o CA-PI07 e valida o aviso de fim de
    bloco com o app fechado. No navegador o aviso vale só com o app aberto.
 
-2. Trocar o nome da capa de docs/MinhaRotina-PI.docx. Ainda diz
+2. Trocar o nome da capa do relatório. Ainda diz
    "Sosthenes Carlos Ferreira do Nascimento".
-   CUIDADO: não abrir esse arquivo para salvar — o editor reescreve o XML e
-   já perdeu um parágrafo aqui. Para mudar texto, use a ferramenta `nota`
-   (ver FERRAMENTAS.md).
+   CUIDADO: não abrir esse arquivo para salvar — o editor de texto reescreve a
+   estrutura interna e já perdeu um parágrafo do relatório aqui. Salvar uma
+   cópia, conferir o texto, e só então substituir o original.
 
 
 ONDE ESTÁ CADA COISA
@@ -53,22 +53,19 @@ AS CINCO REGRAS QUE FIRMARAM
 
 Estas quebraram alguma coisa quando não foram respeitadas:
 
-1. TRABALHE EM CÓPIA, nunca no original — para o .docx e para o servidor.
-   O editor de texto reescreve o XML interno do Word e já perdeu um
-   parágrafo inteiro do relatório aqui.
+1. TRABALHE EM CÓPIA, nunca no original — para o relatório e para o servidor.
+   O editor de texto reescreve a estrutura interna do arquivo do Word e já
+   perdeu um parágrafo inteiro do relatório aqui.
 
-2. CONFIRA COM `nota confere` depois de toda edição de documento.
-   Backup restaura; diff denuncia. Um .docx pode abrir lindamente e ter
-   perdido um parágrafo sem dar erro nenhum.
+2. CONFIRA A CONTAGEM DE PALAVRAS depois de toda edição do relatório.
+   Backup restaura; comparação denuncia. Um arquivo pode abrir
+   lindamente e ter perdido um parágrafo sem dar erro nenhum.
 
 3. NÚMERO DE REGRA EM UM LUGAR SÓ — src/lib/limites.ts. Declarar o "3" no
    banco e na tela foi o que os fez discordarem sem teste nenhum acusar.
 
 4. AUDITORIA É VARREDURA, NÃO BUSCA. Procurar só o que já se suspects
    deixou passar cinco afirmações falsas no relatório. Varra o texto todo.
-
-5. PARA EDITAR O .docx, USE A FERRAMENTA `nota`. Ela tem backup, valida o
-   XML antes e depois, e confirma a conversão — o que o Word não faz.
 
 
 DETALHES QUE ESTÃO SÓ NO MACHINE
