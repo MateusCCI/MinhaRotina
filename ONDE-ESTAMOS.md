@@ -5,7 +5,6 @@ Este arquivo é o ponto de partida de qualquer sessão nova. Não depende de
 nada externo: está no repositório, então quem abrir o projeto já sabe o que
 fazer sem procurar nada.
 
-
 ESTADO EM 01/10/2026
 --------------------
 
@@ -13,7 +12,6 @@ App funcional e completo. 4 abas (Hoje, Saída, Timer, Revisão), banco
 SQLite local com 9 tabelas, 83 commits publicados em:
 
     https://github.com/MateusCCI/MinhaRotina
-
 
 O QUE FAZER AGORA
 -----------------
@@ -27,7 +25,6 @@ O QUE FAZER AGORA
    CUIDADO: não abrir esse arquivo para salvar — o editor de texto reescreve a
    estrutura interna e já perdeu um parágrafo do relatório aqui. Salvar uma
    cópia, conferir o texto, e só então substituir o original.
-
 
 ONDE ESTÁ CADA COISA
 --------------------
@@ -47,7 +44,6 @@ ONDE ESTÁ CADA COISA
 
     lixeira/               descartável, ignorado pelo GitHub
 
-
 AS CINCO REGRAS QUE FIRMARAM
 ----------------------------
 
@@ -66,7 +62,6 @@ Estas quebraram alguma coisa quando não foram respeitadas:
 
 4. AUDITORIA É VARREDURA, NÃO BUSCA. Procurar só o que já se suspects
    deixou passar cinco afirmações falsas no relatório. Varra o texto todo.
-
 
 DETALHES QUE ESTÃO SÓ NO MACHINE
 --------------------------------
