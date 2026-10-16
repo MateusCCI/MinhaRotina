@@ -70,6 +70,3 @@ docs/interno/ tem o STATUS e o HANDOFF completos, com o histórico de
 cada sessão e as armadilhas. Não está no GitHub de propósito: são notas de
 trabalho, não entregável. Se uma sessão nova precisar delas, estão no
 disco — em docs/interno/.
-
-A ferramenta `nota` fica em ~/Note2026/docx-llm (repo próprio, 2 commits),
-fora deste repositório de propósito.
